@@ -1,5 +1,5 @@
-#!/usr/bin/sh
+#!/bin/sh
 rm praca.pdf
-pdflatex Z:/mgr/praca.tex && clear
+pdflatex thesis.tex && clear
 rm *.log
 rm *.aux
