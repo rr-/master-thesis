@@ -1,4 +1,4 @@
-\documentclass[a4paper,twoside]{article}
+\documentclass[12pt,a4paper,twoside]{article}
 \usepackage{geometry}
 \geometry{a4paper}
 
@@ -6,12 +6,14 @@
 \usepackage[OT1]{fontenc}
 \usepackage{polski}
 \usepackage{graphicx}
+\usepackage{setspace}
+\usepackage{fancyhdr}
 
 %todo: sekcje
 
 \begin{document}
 \newgeometry{margin=3cm}
-\pagestyle{headings}
+\onehalfspacing
 
 \begin{titlepage}
 	\begin{center}
@@ -62,7 +64,13 @@ się nieprawdziwe, decyzja o wydaniu mi dyplomu zostanie cofnięta.
 
 
 \newpage
-%todo: spis treści
+\setcounter{tocdepth}{3}
+\tableofcontents
+
+\newpage
+\pagestyle{fancy}
+\fancyhead[L]{\fontsize{10}{0}\selectfont Ataki na kryptograficzne funkcje skrótu}
+\fancyhead[R]{\fontsize{10}{0}\selectfont Marcin Kurczewski}
 
 
 \section {Wstęp}
