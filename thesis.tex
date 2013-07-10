@@ -97,10 +97,15 @@ ataki teoretyczne, jakie powstały na przestrzeni ostatnich lat, pokazując luki
 w kryptograficznych funkcjach skrótu.
 
 \newpage
+
+
+
 \section{Wprowadzenie do tematyki}
+
 \subsection{Definicja kryptograficznej funkcji skrótu}
+
 Funkcja skrótu jest to funkcja, której dziedziną są ciągi bitów dowolnej
-długości, a przeciwdziedziną - ciągi bitów o ograniczonej długości. Rzutowanie
+długości, a przeciwdziedziną -- ciągi bitów o ograniczonej długości. Rzutowanie
 to odbywa się w sposób jednoznaczny, tj. każdemu wejściu funkcja skrótu
 przyporządkowuje dokładnie jedno wyjście; formalnie 2zatem jest to surjekcja:
 
@@ -111,36 +116,113 @@ $$ \forall{y \in Y} \; \exists{x \in X} \; f(x)=y$$
 Kryptograficzna funkcja skrótu to taka funkcja skrótu, która może być
 wykorzystywana w zastosowaniach kryptograficznych, a więc wymagających
 wysokiego poziomu bezpieczeństwa. Przykładem takiego zastosowania może być np.
-szyfrowanie danych.
+szyfrowanie danych. Dokładne cechy, jakie powinna spełniać funkcja skrótu, aby
+była kryptograficzna, omówione zostały w sekcji
+~\ref{sec:secure_hash_attributes}.
+
 
 \subsection{Terminologia użyta w pracy}
-Funkcje skrótu często nazywane są "funkcjami haszującymi" niezależnie od
-swojej przydatności w dziedzinie kryptologii. W myśl tej tradycji, w
-pozostałej części pracy pojęcie "funkcja haszująca" będzie tożsame z
-"kryptograficzną funkcją skrótu", gdyż tylko o takich funkcjach ta praca
-traktuje.
+
+Funkcje skrótu często nazywane są "funkcjami haszującymi" niezależnie od swojej
+przydatności w dziedzinie kryptologii. W myśl tej tradycji, w pozostałej części
+pracy pojęcie "funkcja haszująca" będzie tożsame z "kryptograficzną funkcją
+skrótu", gdyż tylko o takich funkcjach ta praca traktuje.
 
 Dodatkowo, zgodnie z terminologią używaną przez kryptologów, wartość wejściowa
 dla funkcji haszującej będzie nazywana "wiadomością", natomiast wartość
-wyjściowa funkcji haszującej będzie konsekwentnie nazywana "haszem".
+wyjściowa funkcji haszującej będzie konsekwentnie nazywana "haszem" lub
+wymiennie "skrótem".
+
+
+
+\subsection{Cechy bezpiecznych funkcji haszujących}
+\label{sec:secure_hash_attributes}
+
+
 
 \subsection{Zastosowania funkcji haszujących}
-\subsection{Cechy dobrych funkcji haszujących}
+
+Same funkcje skrótu mają bardzo szerokie zastosowania, my jednak w myśl sekcji
+~\ref{sec:secure_hash_attributes} skupimy się wyłącznie na zastosowaniach
+\emph{kryptograficznych} funkcji haszujących.
+
+\subsubsection{Weryfikacja integralności danych}
+
+Wyobraźmy sobie sytuację, w której użytkownik o imieniu Alicja zmuszony jest
+przetransportować jakieś dane przez niebezpieczny kanał informacji, który jest
+podatny na zakłócenia, do użytkownika imieniem Bob. Niech wiadomość wysłana
+przez Alicję będzie $M$, a wiadomość odebrana przez Boba będzie $M'$.
+
+%todo: rycina
+
+Jednym z problemów, które należałoby rozwiązać w celu zapewnienia
+bezpieczeństwa transmisji, jest weryfikacja, czy dane odebrane przez Boba są
+faktycznie tymi samymi danymi, które były wysłane do niego przez Alicję, a więc
+czy nie zostały zmienione w jakikolwiek sposób podczas transportu. Innymi
+słowy, należy w jakiś sposób zweryfikować, czy $M' = M$.
+
+Z pomocą w rozwiązaniu tego problemu przychodzą funkcje haszujące. Alicja może,
+obok samej wiadomości $M$, przesłać wyliczony u siebie skrót tej wiadomości,
+$H(M)$.  Bob może wówczas zweryfikować integralność odebranych danych $M'$
+poprzez obliczenie ich skrótu po swojej stronie $H(M')$, a w następnej
+kolejności porównanie samych skrótów (sprawdzenie, czy obliczony przez Alicję
+$H(M)$ jest równy obliczonemu przez niego $H(M')$).
+
+Wprowadzenie funkcji haszujących właśnie pozwoliło sprowadzić problem
+zabezpieczenia transmisji potencjalnie bardzo długich komunikatów do
+zabezpieczenia transmisji jedynie samych skrótów.
+
+Należy zauważyć, że nie rozwiązuje to samego problemu zabezpieczenia transmisji
+-- jeśli ktoś mógł wcześniej edytować $M$, teraz może również edytować wartość
+$H(M)$. Mimo to, rozwiązanie to ma pewne zalety, wymienione poniżej.
+
+\begin{itemize}
+\item Przede wszystkim ułatwia napisanie innych protokołów -- zależy nam na
+zabezpieczeniu przed modyfikacją nie całej wiadomości, a jedynie jej malutkiego
+kawałka zawierającego jej skrót. Przykładem protokołu, który pracuje na
+opisanej powyżej zasadzie, jest podpis elektroniczny -- \emph{de facto}
+weryfikuje się tam wyłącznie autentyczność skrótu wiadomości, a nie samą
+wiadomość.
+\item Dodatkowo, rozwiązanie to jest przydatne w sytuacjach, kiedy nie mamy do
+czynienia z rozmyślnymi atakami, a jedynie przypadkowymi zakłóceniami --
+prawdopodobieństwo, że skrót $H(M')$ będzie równy $H(M)$ w sytuacji, kiedy $M
+\neq M'$ będzie minimalne.
+\end{itemize}
+
+\subsubsection{Weryfikacja haseł}
+
+\subsubsection{Jednoznaczna identyfikacja danych}
+
+
+
+\newpage
+
 \subsection{Rys historyczny}
 
 \section{Konstrukcja funkcji haszujących}
+
 \subsection{Funkcja doskonała}
+
 \subsection{Funkcja jednokierunkowa}
+
 \subsection{Współczesne implementacje}
+
 \subsubsection{Konstrukcja Merkle-Damgarda}
+
 \subsubsection{MD5}
+
 \subsubsection{SHA-1}
 
 \section{Ataki uniwersalne}
+
 \subsection{Atak brutalny}
+
 \subsection{Atak słownikowy}
+
 \subsubsection{Odwrócony atak słownikowy}
+
 \subsection{Tęczowe tablice}
+
 \subsection{Ataki typu Denial of Service}
 
 \section{Ataki teoretyczne}
