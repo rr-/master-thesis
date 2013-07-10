@@ -1,5 +1,5 @@
 #!/bin/sh
-rm praca.pdf
+rm -f praca.pdf
 pdflatex thesis.tex && clear
-rm *.log
-rm *.aux
+rm -f *.log
+rm -f *.aux
