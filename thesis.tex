@@ -8,8 +8,8 @@
 \usepackage{graphicx}
 \usepackage{setspace}
 \usepackage{fancyhdr}
-
-%todo: sekcje
+\usepackage{amsmath}
+\usepackage{amssymb}
 
 \begin{document}
 \newgeometry{margin=3cm}
@@ -77,7 +77,74 @@ się nieprawdziwe, decyzja o wydaniu mi dyplomu zostanie cofnięta.
 	Marcin Kurczewski}
 
 
-\section {Wstęp}
-Yo
+\section{Wstęp}
+Celem tej pracy jest przedstawienie współczesnych metod łamania
+kryptograficznych funkcji skrótu, zarówno od strony praktycznej, jak i
+teoretycznej. Jako główny temat technologiczny zostały wybrane funkcje
+\texttt{MD5} oraz \texttt{SHA-1}.
+
+Praca złożona jest z trzech części. Pierwsza stanowi wprowadzenie do tematyki
+kryptograficznych funkcji skrótu, opisując krótko ich rys historyczny,
+zgłębiając szczegółowo budowę i przedstawiając ich zastosowania.
+
+Druga część opisuje szereg uniwersalnych technik, które można zastosować do
+atakowania większości współczesnych kryptograficznych funkcji skrótu w sposób
+niezależny od ich struktury. W części tej są także przedstawione podstawowe
+metody obrony przed tego typu atakami.
+
+Część trzecia prezentuje od strony technicznej wybrane wysoce wyspecjalizowane
+ataki teoretyczne, jakie powstały na przestrzeni ostatnich lat, pokazując luki
+w kryptograficznych funkcjach skrótu.
+
+\newpage
+\section{Wprowadzenie do tematyki}
+\subsection{Definicja kryptograficznej funkcji skrótu}
+Funkcja skrótu jest to funkcja, której dziedziną są ciągi bitów dowolnej
+długości, a przeciwdziedziną - ciągi bitów o ograniczonej długości. Rzutowanie
+to odbywa się w sposób jednoznaczny, tj. każdemu wejściu funkcja skrótu
+przyporządkowuje dokładnie jedno wyjście; formalnie 2zatem jest to surjekcja:
+
+$$ f \colon X \to Y $$
+$$ |Y| \leq c, c \in \mathbb{N} $$
+$$ \forall{y \in Y} \; \exists{x \in X} \; f(x)=y$$
+
+Kryptograficzna funkcja skrótu to taka funkcja skrótu, która może być
+wykorzystywana w zastosowaniach kryptograficznych, a więc wymagających
+wysokiego poziomu bezpieczeństwa. Przykładem takiego zastosowania może być np.
+szyfrowanie danych.
+
+\subsection{Terminologia użyta w pracy}
+Funkcje skrótu często nazywane są "funkcjami haszującymi" niezależnie od
+swojej przydatności w dziedzinie kryptologii. W myśl tej tradycji, w
+pozostałej części pracy pojęcie "funkcja haszująca" będzie tożsame z
+"kryptograficzną funkcją skrótu", gdyż tylko o takich funkcjach ta praca
+traktuje.
+
+Dodatkowo, zgodnie z terminologią używaną przez kryptologów, wartość wejściowa
+dla funkcji haszującej będzie nazywana "wiadomością", natomiast wartość
+wyjściowa funkcji haszującej będzie konsekwentnie nazywana "haszem".
+
+\subsection{Zastosowania funkcji haszujących}
+\subsection{Cechy dobrych funkcji haszujących}
+\subsection{Rys historyczny}
+
+\section{Konstrukcja funkcji haszujących}
+\subsection{Funkcja doskonała}
+\subsection{Funkcja jednokierunkowa}
+\subsection{Współczesne implementacje}
+\subsubsection{Konstrukcja Merkle-Damgarda}
+\subsubsection{MD5}
+\subsubsection{SHA-1}
+
+\section{Ataki uniwersalne}
+\subsection{Atak brutalny}
+\subsection{Atak słownikowy}
+\subsubsection{Odwrócony atak słownikowy}
+\subsection{Tęczowe tablice}
+\subsection{Ataki typu Denial of Service}
+
+\section{Ataki teoretyczne}
+
+\section{Podsumowanie}
 
 \end{document}
