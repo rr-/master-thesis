@@ -10,6 +10,7 @@
 \usepackage{fancyhdr}
 \usepackage{amsmath}
 \usepackage{amssymb}
+\usepackage{enumitem}
 
 \begin{document}
 \newgeometry{margin=3cm}
@@ -194,6 +195,59 @@ skrótu wiadomości, a nie samą wiadomość.
 \end{itemize}
 
 \subsubsection{Weryfikacja haseł}
+Funkcje haszujące przychodzą z pomocą także w weryfikacji haseł. Wyobraźmy
+sobie przeciętny mechanizm autentykacji...
+
+\begin{enumerate}
+\item Użytkownik Alicja przesyła swoje dane uwierzytelniające do serwera.
+\item Serwer odbiera dane.
+\item Serwer porównuje dane z wzorcem przechowywanym w bazie danych:
+\label{enu:server_pass_check}
+    \begin{enumerate}[label*=\arabic*.]
+    \item jeżeli dane uwierzytelniające się zgadzają, serwer udziela dostępu
+    Alicji,
+    \item w przeciwnym wypadku serwer odmawia dostępu Alicji.
+    \end{enumerate}
+\end{enumerate}
+
+Z takim podejściem wiąże się parę problemów. Po pierwsze, dane, która przesyła
+Alicja, mogą zostać przechwycone przez osobę trzecią, zatem wymagają
+zaszyfrowania (np. poprzez opakowanie transmisji protokołem \texttt{HTTPS}).
+Jednak nie ten problem okazuje się ważny z punktu widzenia funkcji haszujących.
+Nas zainteresuje problem wiążący się z punktem \ref{enu:server_pass_check} --
+co w wypadku, kiedy do bazy danych serwera, z jakichkolwiek przyczyn, uzyskuje
+dostęp ktoś niepożądany? Taka osoba może wówczas podejrzeć dane
+uwierzytelniające \emph{wszystkich} użytkowników, także Alicji, a następnie
+pomyślnie zalogować przy pomocy tak wykradzionych danych.
+
+Musimy zatem jakoś zabezpieczyć bazę danych. Można próbować ją szyfrować lub
+inaczej zabezpieczać dane w niej przechowywane, problem z takim podejściem jest
+jednak taki, że na pewnym poziomie tak czy inaczej jakaś osoba (administrator)
+zawsze będzie miał dostęp do fizycznych danych. Możemy także zahaszować dane
+uwierzytelniające i zmodyfikować nasz protokół w następujący sposób:
+
+\begin{enumerate}
+\item Użytkownik Alicja przesyła swoje dane uwierzytelniające do serwera.
+\item Serwer odbiera dane.
+\item Serwer wylicza na ich podstawie hasz $H$.
+\item Serwer porównuje hasz $H$ z wzorcowym haszem $H'$ przechowywanym w bazie
+danych:
+\label{enu:server_pass_check}
+    \begin{enumerate}[label*=\arabic*.]
+    \item jeżeli skróty się zgadzają, serwer udziela dostępu
+    Alicji,
+    \item w przeciwnym wypadku serwer odmawia dostępu Alicji.
+    \end{enumerate}
+\end{enumerate}
+
+Dzięki temu, że w bazie przechowywane są jedynie nieodwracalne skróty, nawet w
+przypadku kradzieży bazy danych na podstawie wykradzionych skrótów nie powinno
+być można odtworzyć oryginalnych danych. Teoretycznie zatem atakującemu taka
+baza w zasadzie do niczego się nie przyda.
+
+Należy jednak zwrócić uwagę, że protokół ten nie jest bezpieczny bez pewnych
+poprawek. Przyczyny i natura poprawek omówione są w części
+\ref{sec:universal_attacks}.
 
 \subsubsection{Jednoznaczna identyfikacja danych}
 
@@ -218,6 +272,7 @@ skrótu wiadomości, a nie samą wiadomość.
 \subsubsection{SHA-1}
 
 \section{Ataki uniwersalne}
+\label{sec:universal_attacks}
 
 \subsection{Atak brutalny}
 
