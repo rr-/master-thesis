@@ -16,6 +16,7 @@
 \begin{document}
 \newgeometry{margin=3cm}
 \onehalfspacing
+\newcommand{\myparagraph}[1]{\paragraph{#1}\mbox{}\\}
 
 \begin{titlepage}
 	\begin{center}
@@ -160,11 +161,74 @@ spełniać własności opisane w sekcji \ref{sec:common_hash_attributes}.
 
 \subsubsection{Cechy zwykłych funkcji haszujących}
 \label{sec:common_hash_attributes}
+Niezależnie od swojego zastosowania, każda funkcja haszująca musi spełniać
+pewne warunki, które zostały poniżej opisane.
 
+\myparagraph{Determinizm}
+Funkcje haszujące powinny być deterministyczne w takim sensie, że ich wyniki
+zależą wyłącznie od danych wejściowych, a nie żadnych czynników losowych.
+Innymi słowy, haszowanie wiadomości $M$ powinno dawać taki sam skrót
+niezależnie od okoliczności. Stąd wynika, że funkcje skrótu nie powinny się
+nigdy odwoływać do generatorów liczb pseudolosowych, metadanych o wiadomości
+(typu jej lokalizacja w pamięci komputera) itp., a jedynie do samej wiadomości.
 
+\myparagraph{Jednostajność}
+Niech $H : A \to B$ będzie funkcją haszującą. Funkcje haszujące powinny mapować
+wartości ze zbioru wejściowego $A$ na wartości ze zbioru wyjściowego $B$ w taki
+sposób, by:
+\[
+    \forall_{a \in A} \; \Pr(H(a) = b) \to \frac{1}{|B|}
+\]
+Innymi słowy dobra funkcja haszująca mapuje konkretną wartość $a$ w konkretną
+wartość $b$ z prawdopodobieństwem jak najbliższym prawdopodobieństwu losowego
+wybrania tego elementu ze zbioru $B$, lub też -- wszystkie wartości ze zbioru
+$B$ powinny mieć możliwie taką samą szansę na wybranie w momencie mapowania.
+Cecha ta ma na celu zapewnienie jak najmniejszego prawdopodobieństwa zajścia
+kolizji.
+
+Unikanie kolizji, obok determinizmu, jest jedną z najważniejszych cech funkcji
+skrótu, co staje się zrozumiałe, gdy pozna się ich zastosowania (przykładowe
+zastosowania bezpiecznych funkcji skrótu opisane są w sekcji
+\ref{sec:secure_hash_usages}.)
 
 \subsubsection{Cechy kryptograficznych funkcji haszujących}
 \label{sec:secure_hash_attributes}
+Aby lepiej zrozumieć naturę warunków nałożonych na cechy kryptograficznych, lub
+też \emph{bezpiecznych} funkcji skrótu, należy uświadomić sobie ich naturę: w
+sytuacji, kiedy kolizje są tylko niepożądane, sięgamy po zwykłe funkcje
+haszujące, funkcje kryptograficzne stają się natomiast potrzebne wówczas, gdy
+kolizje są \emph{niedopuszczalne}. Z tą też myślą formułowane są warunki
+opisane poniżej.
+
+\myparagraph{Podstawowa odporność na kolizje (\textit{collision resistance})}
+Powinno być praktycznie niewykonalne stworzenie dwóch dowolnych różnych
+wiadomości $m$ i $m'$, takich, że ich skróty są takie same:
+\[
+    \begin{aligned}
+    m &\neq m' \\
+    H(m) &= H(m')
+    \end{aligned}
+\]
+
+\myparagraph{Odporność na kolizje pierwszego rzędu (\textit{preimage
+resistance})}
+Mając jakiś skrót $h$, powinno być praktycznie niewykonalne odgadnięcie
+oryginalnej oryginalnej $m$:
+\[
+    H(m) = h
+\]
+Jest to warunek zapewniający jednostronność funkcji skrótu.
+
+\myparagraph{Odporność na kolizje drugiego rzędu (\textit{second preimage
+resistance})}
+Mając jakąś wiadomość $m$, powinno być praktycznie niewykonalne znalezienie
+drugiej wiadomości $m'$ takiej, że jej skrót jest taki sam:
+\[
+    H(m) = H(m')
+\]
+Własność ta różni się od podstawowej odporności na kolizje tym, że w tym
+przypadku mamy \emph{daną} jedną z dwóch wiadomości, dla których szukamy
+kolizji, a tam mogliśmy wziąć \emph{dowolne} dwie.
 
 
 
@@ -349,6 +413,14 @@ porównania trudniejszy do skutecznego przeprowadzenia.
 \subsection{Ataki typu Denial of Service}
 
 \section{Ataki teoretyczne}
+
+\subsection{Ataki na słabe funkcje haszujące}
+
+\subsubsection{\textit{Collision resistance}}
+
+\subsubsection{\textit{Preimage resistance}}
+
+\subsubsection{\textit{Second preimage resistance}}
 
 \section{Podsumowanie}
 
