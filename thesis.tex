@@ -11,6 +11,7 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{enumitem}
+\usepackage{microtype}
 
 \begin{document}
 \newgeometry{margin=3cm}
@@ -53,7 +54,7 @@
 Ja, niżej podpisany Marcin Kurczewski, student Wydziału Matematyki i
 Informatyki Uniwersytetu im. Adama Mickiewicza oświadczam, że przedkładaną
 pracę dyplomową pt.: "Ataki na kryptograficzne funkcje skrótu" napisałem
-samodzielnie.  Oznacza to, że przy pisaniu pracy, poza niezbędnymi
+samodzielnie. Oznacza to, że przy pisaniu pracy, poza niezbędnymi
 konsultacjami, nie korzystałem z pomocy innych osób, a w szczególności nie
 zlecałem opracowania rozprawy lub jej części innym osobom, ani nie odpisywałem
 tej rozprawy lub jej części od innych osób.
@@ -148,6 +149,7 @@ Same funkcje skrótu mają bardzo szerokie zastosowania, my jednak w myśl sekcj
 \emph{kryptograficznych} funkcji haszujących.
 
 \subsubsection{Weryfikacja integralności danych}
+\label{sec:usage_integrity_check}
 
 Wyobraźmy sobie sytuację, w której użytkownik o imieniu Alicja zmuszony jest
 przetransportować jakieś dane przez niebezpieczny kanał informacji, który jest
@@ -165,7 +167,7 @@ w jakiś sposób zweryfikować, czy $M' = M$.
 
 Z pomocą w rozwiązaniu tego problemu przychodzą funkcje haszujące. Alicja może,
 obok samej wiadomości $M$, przesłać wyliczony u siebie skrót tej wiadomości,
-$H(M)$.  Bob może wówczas zweryfikować integralność odebranych danych $M'$
+$H(M)$. Bob może wówczas zweryfikować integralność odebranych danych $M'$
 poprzez obliczenie ich skrótu po swojej stronie $H(M')$, a w następnej
 kolejności porównanie samych skrótów (sprawdzenie, czy obliczony przez Alicję
 $H(M)$ jest równy obliczonemu przez niego $H(M')$).
@@ -188,13 +190,14 @@ prawdopodobieństwo, że skrót $H(M')$ będzie równy $H(M)$ w sytuacji, kiedy 
 haszujących, w których odgrywają rolę trudnej do podrobienia sumy kontrolnej.
 \item Ponadto ułatwione jest napisanie innych protokołów -- dzięki funkcjom
 haszującym zależy nam na zabezpieczeniu przed modyfikacją nie całej wiadomości,
-a jedynie jej malutkiego kawałka zawierającego jej skrót.  Przykładem
-protokołu, który pracuje na opisanej powyżej zasadzie, jest podpis
-elektroniczny -- \emph{de facto} weryfikuje się tam wyłącznie autentyczność
-skrótu wiadomości, a nie samą wiadomość.
+a jedynie jej malutkiego kawałka zawierającego jej skrót. Przykładem protokołu,
+który pracuje na opisanej powyżej zasadzie, jest podpis elektroniczny --
+\emph{de facto} weryfikuje się tam wyłącznie autentyczność skrótu wiadomości, a
+nie samą wiadomość.
 \end{itemize}
 
 \subsubsection{Weryfikacja haseł}
+\label{sec:usage_password_check}
 Funkcje haszujące przychodzą z pomocą także w weryfikacji haseł. Wyobraźmy
 sobie przeciętny mechanizm autentykacji...
 
@@ -249,6 +252,40 @@ poprawek. Przyczyny i natura poprawek omówione są w części
 \ref{sec:universal_attacks}.
 
 \subsubsection{Jednoznaczna identyfikacja danych}
+
+Innym zastosowaniem funkcji haszujących jest identyfikacja ciągów bajtów, a w
+szerszym ujęciu -- plików, struktur/obiektów programistycznych itp. Poniżej
+znajdują się przykłady wykorzystania tego pomysłu w różnego rodzaju
+rozwiązaniach.
+\begin{itemize}
+\item Systemy kontroli wersji, w tym Mercurial oraz Git, wykorzystują funkcje
+skrótu w celu bezpiecznej identyfikacji konkretnych wersji pliku, numerowania
+kolejnych zmian i bezpiecznego przechowywania historycznej struktury
+repozytorium.
+\item Linki ed2k oraz magnet, używane w sieciach peer-to-peer, wykorzystują
+funkcje skrótu w celu lokalizacji źródeł, skąd dany plik może być pobrany, a
+także weryfikacji już ściągniętych danych (patrz punkt
+\ref{sec:usage_integrity_check}).
+\item Struktury danych takie jak tablice mieszające (tzn. tablice, których
+kluczami może być dowolny obiekt, w przeciwieństwie do klasycznych tablic o
+indeksach liczbowych), wykorzystują funkcje haszujące do serializacji dowolnych
+obiektów na taką postać, jaką ich algorytmy indeksowania są w stanie obsłużyć.
+Przykładowo, w języku Java każdy zdefiniowany przez użytkownika obiekt powinien
+zaimplementować metodę \texttt{hashCode()}, która w zamierzeniu ma pozwolić
+łatwo odróżniać (na~tyle, na~ile to możliwe) konkretne instancje obiektu w
+stosunku do pozostałych.
+\end{itemize}
+
+Biorąc pod uwagę fakt, że kryptograficzne funkcje skrótu są dużo bardziej
+kosztowne obliczeniowo niż zwykłe, nieodporne na ataki funkcje haszujące, w
+większości tego typu zastosowań korzystanie z kryptograficznych funkcje skrótu
+postrzegane jest jako przesada i stosowane są zwyczajne funkcje skrótu. Mimo
+to, czasem jednak bezpieczeństwo jest konieczne, szczególnie w sytuacjach
+opisanych powyżej, gdzie ryzyko ataku jest wysokie. Przykładowo, atakujący może
+stworzyć plik zawierający wirus, którego hasz byłby taki sam jak skrót całkiem
+niewinnego pliku, po czym umieścić taki plik w sieci peer-to-peer -- dzięki
+zastosowaniu kryptograficznych funkcji skrótu, taki scenariusz jest bez
+porównania trudniejszy do skutecznego przeprowadzenia.
 
 
 
