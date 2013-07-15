@@ -104,7 +104,29 @@ w kryptograficznych funkcjach skrótu.
 
 \section{Wprowadzenie do tematyki}
 
-\subsection{Definicja kryptograficznej funkcji skrótu}
+\subsection{Terminologia użyta w pracy}
+
+Zgodnie z terminologią używaną przez kryptologów, wprowadzone zostają
+następujące terminy, które będą konsekwentnie stosowane w całej pracy:
+
+\begin{itemize}
+\item \textbf{funkcja haszująca} -- alternatywne określenie na \textbf{funkcję
+skrótu},
+\item \textbf{bezpieczna funkcja haszująca} -- alternatywne określenie na
+\textbf{kryptograficzną funkcję skrótu},
+\item \textbf{wiadomość} -- wartość wejściowa dla \textbf{funkcji skrótu},
+\item \textbf{skrót} -- wartość wyjściowa z \textbf{funkcji skrótu},
+\item \textbf{hasz} -- alternatywne określenie na \textbf{skrót}.
+\end{itemize}
+
+Dodatkowo, od części \ref{sec:hash_construction} do końca pracy przez pojęcie
+funkcji haszujących będziemy się odnosić wyłącznie do bezpiecznych funkcji
+haszujących, gdyż tylko na takich funkcjach w tych częściach będziemy się
+skupiać.
+
+
+
+\subsection{Definicja funkcji skrótu oraz kryptograficznej funkcji skrótu}
 
 Funkcja skrótu jest to funkcja, której dziedziną są ciągi bitów dowolnej
 długości, a przeciwdziedziną -- ciągi bitów o ograniczonej długości. Rzutowanie
@@ -117,36 +139,30 @@ $$ \forall{y \in Y} \; \exists{x \in X} \; f(x)=y$$
 
 Kryptograficzna funkcja skrótu to taka funkcja skrótu, która może być
 wykorzystywana w zastosowaniach kryptograficznych, a więc wymagających
-wysokiego poziomu bezpieczeństwa. Przykładem takiego zastosowania może być np.
-szyfrowanie danych. Dokładne cechy, jakie powinna spełniać funkcja skrótu, aby
-była kryptograficzna, omówione zostały w sekcji
-~\ref{sec:secure_hash_attributes}.
-
-
-\subsection{Terminologia użyta w pracy}
-
-Funkcje skrótu często nazywane są "funkcjami haszującymi" niezależnie od swojej
-przydatności w dziedzinie kryptologii. W myśl tej tradycji, w pozostałej części
-pracy pojęcie "funkcja haszująca" będzie tożsame z "kryptograficzną funkcją
-skrótu", gdyż tylko o takich funkcjach ta praca traktuje.
-
-Dodatkowo, zgodnie z terminologią używaną przez kryptologów, wartość wejściowa
-dla funkcji haszującej będzie nazywana "wiadomością", natomiast wartość
-wyjściowa funkcji haszującej będzie konsekwentnie nazywana "haszem" lub
-wymiennie "skrótem".
+wysokiego poziomu bezpieczeństwa. Przykłady takich zastosowań można znaleźć w
+sekcji \ref{sec:secure_hash_usages}. Dokładne cechy, jakie powinna spełniać
+funkcja skrótu, aby była kryptograficzna, omówione zostały w sekcji
+~\ref{sec:secure_hash_attributes}. Ponadto wszystkie funkcje skrótu,
+niezależnie od swojego zastosowania w celach kryptograficznych, powinny
+spełniać własności opisane w sekcji \ref{sec:common_hash_attributes}.
 
 
 
-\subsection{Cechy bezpiecznych funkcji haszujących}
+\subsubsection{Cechy funkcji haszujących}
+\label{sec:common_hash_attributes}
+
+
+
+\subsubsection{Cechy kryptograficznych funkcji haszujących}
 \label{sec:secure_hash_attributes}
 
 
 
-\subsection{Zastosowania funkcji haszujących}
+\subsection{Zastosowania kryptograficznych funkcji skrótu}
+\label{sec:secure_hash_usages}
 
-Same funkcje skrótu mają bardzo szerokie zastosowania, my jednak w myśl sekcji
-~\ref{sec:secure_hash_attributes} skupimy się wyłącznie na zastosowaniach
-\emph{kryptograficznych} funkcji haszujących.
+Same funkcje skrótu mają bardzo szerokie zastosowania, my jednak skupimy się
+wyłącznie na zastosowaniach \emph{kryptograficznych} funkcji haszujących.
 
 \subsubsection{Weryfikacja integralności danych}
 \label{sec:usage_integrity_check}
@@ -294,6 +310,7 @@ porównania trudniejszy do skutecznego przeprowadzenia.
 \subsection{Rys historyczny}
 
 \section{Konstrukcja funkcji haszujących}
+\label{sec:hash_construction}
 
 \subsection{Funkcja doskonała}
 
