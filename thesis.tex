@@ -114,9 +114,19 @@ następujące terminy, które będą konsekwentnie stosowane w całej pracy:
 skrótu},
 \item \textbf{bezpieczna funkcja haszująca} -- alternatywne określenie na
 \textbf{kryptograficzną funkcję skrótu},
+\item \textbf{zwykła funkcja haszująca} -- funkcja skrótu, która może, ale nie
+musi być kryptograficzną funkcją skrótu,
 \item \textbf{wiadomość} -- wartość wejściowa dla \textbf{funkcji skrótu},
 \item \textbf{skrót} -- wartość wyjściowa z \textbf{funkcji skrótu},
 \item \textbf{hasz} -- alternatywne określenie na \textbf{skrót}.
+\item \textbf{kolizja} -- sytuacja, w której skróty dwóch wiadomości są takie
+same, tj.
+\[
+    \begin{aligned}
+    m &\neq m' \\
+    H(m) &= H(m')
+    \end{aligned}
+\]
 \end{itemize}
 
 Dodatkowo, od części \ref{sec:hash_construction} do końca pracy przez pojęcie
@@ -126,7 +136,7 @@ skupiać.
 
 
 
-\subsection{Definicja funkcji skrótu oraz kryptograficznej funkcji skrótu}
+\subsection{Definicja zwykłej oraz kryptograficznej funkcji skrótu}
 
 Funkcja skrótu jest to funkcja, której dziedziną są ciągi bitów dowolnej
 długości, a przeciwdziedziną -- ciągi bitów o ograniczonej długości. Rzutowanie
@@ -134,8 +144,8 @@ to odbywa się w sposób jednoznaczny, tj. każdemu wejściu funkcja skrótu
 przyporządkowuje dokładnie jedno wyjście; formalnie zatem jest to surjekcja:
 
 $$ f \colon X \to Y $$
-$$ |Y| \leq c, c \in \mathbb{N} $$
-$$ \forall{y \in Y} \; \exists{x \in X} \; f(x)=y$$
+$$ |Y| \leq n, n \in \mathbb{N} $$
+$$ \forall_{y \in Y} \; \exists_{x \in X} \; f(x)=y$$
 
 Kryptograficzna funkcja skrótu to taka funkcja skrótu, która może być
 wykorzystywana w zastosowaniach kryptograficznych, a więc wymagających
@@ -148,7 +158,7 @@ spełniać własności opisane w sekcji \ref{sec:common_hash_attributes}.
 
 
 
-\subsubsection{Cechy funkcji haszujących}
+\subsubsection{Cechy zwykłych funkcji haszujących}
 \label{sec:common_hash_attributes}
 
 
@@ -160,9 +170,10 @@ spełniać własności opisane w sekcji \ref{sec:common_hash_attributes}.
 
 \subsection{Zastosowania kryptograficznych funkcji skrótu}
 \label{sec:secure_hash_usages}
-
 Same funkcje skrótu mają bardzo szerokie zastosowania, my jednak skupimy się
-wyłącznie na zastosowaniach \emph{kryptograficznych} funkcji haszujących.
+wyłącznie na zastosowaniach \emph{kryptograficznych} funkcji haszujących. W
+każdym przypadku opisane zastosowanie utylizuje podstawową cechę
+kryptograficznych funkcji skrótu, jaką jest odporność na kolizje.
 
 \subsubsection{Weryfikacja integralności danych}
 \label{sec:usage_integrity_check}
@@ -212,7 +223,7 @@ który pracuje na opisanej powyżej zasadzie, jest podpis elektroniczny --
 nie samą wiadomość.
 \end{itemize}
 
-\subsubsection{Weryfikacja haseł}
+\subsubsection{Bezpieczne przechowywanie / weryfikacja haseł}
 \label{sec:usage_password_check}
 Funkcje haszujące przychodzą z pomocą także w weryfikacji haseł. Wyobraźmy
 sobie przeciętny mechanizm autentykacji...
