@@ -129,12 +129,17 @@ same, tj.
     H(m) &= H(m')
     \end{aligned}
 \]
+\item \textbf{\textit{random oracle}} -- teoretyczna funkcja działająca na
+zasadzie "czarnej skrzynki" (o której działaniu nie potrafimy nic powiedzieć),
+przypisująca wejściom w losowy, ale deterministyczny odpowiednie wyjścia z
+jednostajnym rozkładem prawdpodobieństwa.
 \end{itemize}
 
 Dodatkowo, od części \ref{sec:hash_construction} do końca pracy przez pojęcie
 funkcji haszujących będziemy rozumieć wyłącznie kryptograficzne funkcje
 haszujące, gdyż tylko na takich funkcjach w tych częściach będziemy się
 skupiać.
+\pagebreak
 
 
 
@@ -148,7 +153,7 @@ przyporządkowuje dokładnie jedno wyjście; formalnie zatem jest to surjekcja:
 $$ f \colon X \to Y $$
 $$ |Y| \leq n, n \in \mathbb{N} $$
 $$ \forall_{y \in Y} \; \exists_{x \in X} \; f(x)=y$$
-%todo: rycina takiego odzworowania
+%todo: rycina takiego odwzorowania
 
 Kryptograficzna funkcja skrótu to taka funkcja skrótu, która może być
 wykorzystywana w zastosowaniach kryptograficznych, a więc wymagających
@@ -236,6 +241,12 @@ drugiej wiadomości $m'$ takiej, że jej skrót jest taki sam:
 Własność ta różni się od podstawowej odporności na kolizje tym, że w tym
 przypadku mamy \emph{daną} jedną z dwóch wiadomości, dla których szukamy
 kolizji, a tam mogliśmy wziąć \emph{dowolne} dwie.
+
+\myparagraph{Nieodróżnialność od \textit{random oracles}}
+Każde wejście powinno mieć przypisane swoje wyjście w możliwie losowy sposób, z
+jednostajnym rozkładem prawdopodobieństwa (ale z zachowaniem własności
+determinizmu, tj. żeby dla tego samego wejścia zawsze dostawać takie samo
+wyjście). Własność ta niejako wynika ze spełnienia poprzednich warunków.
 
 \label{sec:avalance_effect}
 %todo: efekt lawinowy
@@ -389,9 +400,46 @@ porównania trudniejszy do skutecznego przeprowadzenia.
 
 
 
-\newpage
-
 \subsection{Rys historyczny}
+Historia funkcji haszujących sięga późnych lat 70--tych. W roku 1976 Diffie i
+Hellman w swojej pracy traktującej o kryptografii z kluczem publicznym, opisali
+zapotrzebowanie na funkcję mapującą ciągi bitów dowolnej długości na ciągi
+bitów ograniczonej długości w nieodwracalny sposób. W roku 1978 Rabin po raz
+pierwszy zaproponował funkcję skrótu opartą na 64--bitowym wariancie blokowego
+algorytmu szyfrującego DES. W 1979 roku Yuval opisał sposób, jak wykorzystując
+paradoks urodzinowy złamać $n$--bitową funkcję haszującą w czasie $2^{n/2}$.
+
+W tym samym roku zaczęły się pojawiać pierwsze próby zdefiniowania warunków,
+jakie powinny spełniać bezpieczne funkcje skrótu. W 1979 Merkle wprowadził
+pojęcie odporności na kolizje oraz odporności pierwszego i drugiego rzędu
+(patrz sekcja \ref{sec:secure_hash_attributes}). Definicje te zostały
+ostatecznie sformalizowane przez Damg\r{a}rda w roku 1987. W roku 2004 Rogaway
+i Shrimpton pokazali, że funkcje haszujące w miarę możliwości nie powinny być
+odróżnialne od \textit{random oracles}.
+
+Już od samego początku, czyli późnych lat 70--tych, funkcje haszujące
+przeżywały bardzo szybki rozwój. Zapotrzebowanie na bezpieczne i szybkie
+funkcje skrótu było szeroko rozumiane, nie zaskakuje zatem fakt, że do lat
+90--tych znane było już około 50 konstrukcji. Pierwsi kandydaci korzystali z
+dorobku blokowych funkcji szyfrujących; w późniejszym okresie rozwoju niektórzy
+poszli w kierunku teoretycznych konstrukcji opartych na algebrze liniowej. Z
+czasem jednak zaniechano adaptowania mechanizmów sprawdzonych w innych
+zastosowaniach na rzecz tworzenia dedykowanych funkcji.
+
+Dlaczego pojawiało się tyle propozycji, kiedy można wymyślić jedną uniwersalną
+funkcję, odporną na każdy rodzaj ataku? Problem leży w tym, że jak do tej pory
+nie udowodniono istnienia takiej funkcji w praktyce. W związku z tym od lat
+mamy do czynienia z ciągłym procesem wykazywania słabości istniejących
+rozwiązań i w odpowiedzi wymyślania kolejnych usprawnień bądź całkiem nowych
+konstrukcji. Proces ten zyskał nawet niedawno własne wydarzenie medialne w
+postaci konkursu ogłoszonego przez National Institute of Standards and
+Technology, mającego na celu wyłonienie następcy funkcji haszujących SHA-1 i
+SHA-2 spośród kilkudziesięciu kandydatów zgłoszonych przez kryptologów z całego
+świata. Cykl ten będzie prawdopodobnie trwał tak długo, aż zostanie odkryta
+uniwersalna nieodwracalna funkcja skrótu lub wykazana zostanie niemożność
+stworzenia takowej.
+
+
 
 \section{Konstrukcja funkcji haszujących}
 \label{sec:hash_construction}
