@@ -132,7 +132,7 @@ same, tj.
 \item \textbf{\textit{random oracle}} -- teoretyczna funkcja działająca na
 zasadzie "czarnej skrzynki" (o której działaniu nie potrafimy nic powiedzieć),
 przypisująca wejściom w losowy, ale deterministyczny odpowiednie wyjścia z
-jednostajnym rozkładem prawdpodobieństwa.
+jednostajnym rozkładem prawdopodobieństwa.
 \end{itemize}
 
 Dodatkowo, od części \ref{sec:hash_construction} do końca pracy przez pojęcie
@@ -242,7 +242,7 @@ Własność ta różni się od podstawowej odporności na kolizje tym, że w tym
 przypadku mamy \emph{daną} jedną z dwóch wiadomości, dla których szukamy
 kolizji, a tam mogliśmy wziąć \emph{dowolne} dwie.
 
-\myparagraph{Nieodróżnialność od \textit{random oracles}}
+\myparagraph{Niemożność odróżnienia od \textit{random oracles}}
 Każde wejście powinno mieć przypisane swoje wyjście w możliwie losowy sposób, z
 jednostajnym rozkładem prawdopodobieństwa (ale z zachowaniem własności
 determinizmu, tj. żeby dla tego samego wejścia zawsze dostawać takie samo
@@ -426,9 +426,11 @@ poszli w kierunku teoretycznych konstrukcji opartych na algebrze liniowej. Z
 czasem jednak zaniechano adaptowania mechanizmów sprawdzonych w innych
 zastosowaniach na rzecz tworzenia dedykowanych funkcji.
 
-Dlaczego pojawiało się tyle propozycji, kiedy można wymyślić jedną uniwersalną
-funkcję, odporną na każdy rodzaj ataku? Problem leży w tym, że jak do tej pory
-nie udowodniono istnienia takiej funkcji w praktyce. W związku z tym od lat
+%Dlaczego pojawiało się tyle propozycji, kiedy można wymyślić jedną uniwersalną
+%funkcję, odporną na każdy rodzaj ataku? Problem leży w tym, że jak do tej pory
+%nie udowodniono istnienia takiej funkcji w praktyce. W związku z tym od lat
+
+Tak naprawdę do dnia dzisiejszego niewiele się zmieniło: od lat
 mamy do czynienia z ciągłym procesem wykazywania słabości istniejących
 rozwiązań i w odpowiedzi wymyślania kolejnych usprawnień bądź całkiem nowych
 konstrukcji. Proces ten zyskał nawet niedawno własne wydarzenie medialne w
@@ -443,14 +445,162 @@ stworzenia takowej.
 
 \section{Konstrukcja funkcji haszujących}
 \label{sec:hash_construction}
+Wprawdzie konstrukcji funkcji haszujących jest wiele, większość z nich wygląda
+podobnie. Na początku skupię się na teoretycznych aspektach konstruowania
+funkcji haszujących, a w następnej kolejności opiszę praktyczne implementacje.
 
-\subsection{Funkcja doskonała}
+\subsection{Doskonała funkcja skrótu}
+W teorii mówi się o doskonałej funkcji skrótu, która każdy element $m$ z danego
+zbioru $M$ potrafi przekształcić w sposób bezkolizyjny w $h$ z tego samego
+zbioru. Innymi słowy, jest to iniekcja.
+%todo: rycina
+
+Znalezienie takiej funkcji w praktyce polega na użyciu algorytmu losowego,
+który dobiera każdemu $m$ przypadkowy element $h$ tak długo, aż $h$ będzie
+niewykorzystany przez żaden inny element (czyli zapewniony będzie brak
+kolizji):
+
+\begin{enumerate}
+\item Zainicjuj tablicę podstawień $T$
+\item Dla każdego $m \in M$:
+    \begin{enumerate}[label*=\arabic*.]
+        \item Wylosuj $h \in M$ takie, że $\not \exists_{m' \in M} : T_{m'} = h$
+        \item Przydziel $T_m = h$
+    \end{enumerate}
+\end{enumerate}
+
+Taka funkcja, mimo że na pierwszy rzut oka wydaje się przydatna w
+zastosowaniach kryptograficznych (jak by nie patrzeć, implementuje całkowicie
+losowe permutacje!), jest podejściem złym z prostych przyczyn:
+
+\begin{itemize}
+\item Algorytm przekształcania elementów $m \in M$ na $h$ polega na trywialnym
+podstawianiu elementów zgodnie z jakąś tablicą $T$. Zatem, aby uzyskać
+oryginalne $m$ na podstawie $h$ wystarczy zamienić odwrócić tablicę,
+zamieniając jej klucze z przypisanymi im wartościami (dla danego $h$ wyszukać
+$m$, dla którego $T_m = h$). Wykazaliśmy w ten sposób nieodporność na
+\textit{preimage resistance}.
+\item Gdy natomiast będziemy próbowali ukryć sposób w jaki dokonujemy
+podstawienia (innymi słowy utajnić tablicę $T$), mamy do czynienia z
+\textit{security through obscurity} (bezpieczeństwo poprzez niezrozumiałość),
+co jest bardzo negatywnym zjawiskiem w kryptografii. System kryptograficzny
+musi być bezpieczny nawet, gdy jego sposób działania wraz ze szczegółami
+implementacji jest jawny (za wyjątkiem klucza, który jest z definicji tajny, z
+tym że funkcje haszujące nie używają klucza).
+\item Nawet gdy zignorujemy powyższe przykazanie, nasz algorytm będzie
+nieodporny na proste ataki statystyczne: analizując rozkład prawdopodobieństwa
+pewnych wzorców wewnątrz kolejnych $h$ (który nie jest jednostajny, jako że w
+praktyce rzadko kiedy wejście ma rozkład jednostajny), możemy zyskać ogólne
+wyobrażenie o tym, jak wyglądają wzorce wewnątrz $m \in M$, co może nas
+doprowadzić do oryginalnych $m$.
+\item Wreszcie, funkcja taka jest bardzo niepraktyczna: po pierwsze, musimy
+znać z góry \emph{wszystkie} możliwe wiadomości, jakie możemy chcieć
+zahaszować; mało tego -- wiadomości te muszą mieć tę samą długość. Powoduje to,
+że funkcja ta nie nadaje się na kryptograficzną funkcję skrótu.
+\end{itemize}
 
 \subsection{Funkcja jednokierunkowa}
+Funkcja jednokierunkowa to funkcja, której wartości dla każdego wejścia da się
+łatwo obliczyć; powinno być trudne natomiast obliczenie wejścia na podstawie
+posiadanego konkretnego wyjścia.
 
+\noindent
+Nieformalnie, funkcja $f$ jest silnie jednokierunkowa, jeśli:
+\begin{itemize}
+\item da się obliczyć w czasie wielomianowym (czyli w taki sposób, że czas
+działania $f$ jest w sposób wielomianowy zależny od rozmiaru danych
+wejściowych),
+\item żaden probabilistyczny algorytm działający w czasie wielomianowym nie
+potrafi zgadnąć argumentu z zaniedbywalnie małym prawdopodobieństwem.
+\end{itemize}
+
+\noindent
+$f$ jest natomiast słabo jednokierunkowa, jeśli:
+\begin{itemize}
+\item da się obliczyć w czasie wielomianowym,
+\item każdy probabilistyczny algorytm działający w czasie wielomianowym zgaduje
+argumenty w sposób poprawny z zaniedbywalnie małym prawdopodobieństwem.
+\end{itemize}
+
+Łatwo zauważyć, że każda silnie jednokierunkowa funkcja spełnia jednocześnie
+warunki nałożone na funkcje słabo jednokierunkowe. Ponadto każda funkcja
+jednokierunkowa spełnia automatycznie podstawowy warunek nałożony na bezpieczne
+funkcje skrótu (mianowicie \textit{preimage collision resistance}). Funkcje te
+powinny zatem przyciągnąć nasze zainteresowanie.
+
+\subsubsection{$\textrm{P} \neq \textrm{NP}$?}
+Problem z funkcjami jednokierunkowymi jest niestety taki, że... nie udowodniono
+ich istnienia. Wykazano, że z istnienia słabo jednokierunkowych funkcji wynika
+istnienie silnie jednokierunkowych funkcji. Ponadto udowodniono, że istnienie
+funkcji jednokierunkowych implikowałoby jednocześnie, że $\textrm{P} \neq
+\textrm{NP}$, co dałoby odpowiedź na jeden z problemów milenijnych i
+oznaczałoby, że klasa problemów, które da się \emph{rozwiązać} w czasie
+wielomianowym ($\textrm{P}$) nie pokrywa się z klasą, dla którego rozwiązanie
+da się \emph{zweryfikować} w czasie wielomianowym ($\textrm{NP}$).
+Przykładowo: mając liczbę $x \in \mathbb{N}$ i dany zbiór liczb pierwszych
+$x_i$, możemy w banalny sposób \emph{zweryfikować}, czy $x_0 \cdot x_1 \cdot
+\ldots \cdot x_n = x$. Natomiast nie wiadomo, czy istnieje algorytm
+wielomianowy, który potrafi \emph{rozwiązać} ten problem, znajdując dla danego
+$x$ liczby pierwsze $x_0, x_1, \ldots, x_n$ takie, że $x_0 \cdot x_1 \cdot
+\ldots \cdot x_n = x$. Problem ten jest znany jako problem rozkładu liczby na
+czynniki pierwsze i stanowi pierwszy z kandydatów na funkcje jednokierunkowe.
+
+\subsubsection{Problem faktoryzacji}
+Jak już wyżej wspomniano, nie wiadomo, czy istnieje funkcja jednokierunkowa.
+Istnieje jednak zbiór kandydatów, o których wprawdzie nie wiadomo, czy
+faktycznie są funkcjami jednokierunkowymi, ale nie udowodniono też, że nimi nie
+są. Pierwszym kandydatem jest problem faktoryzacji, wstępnie przedstawiony w
+poprzedniej sekcji.
+
+Niech $f(S) = \prod_{s \in S} s$, gdzie $S$ jest dowolnym zbiorem liczb
+pierwszych oraz $x \in \mathbb{N}$. Obliczenie $f(S)$ jest trywialne. Natomiast
+obliczenie wartości odwróconej funkcji $f^{-1}(x)=S$, a więc znalezienie dla
+danej liczby $x$ jej czynników pierwszych, jest trudne, tzn. nieznany jest
+żaden algorytm, który by to potrafił realizować w czasie zależnym wielomianowo
+od rozmiaru $x$.
+
+\subsubsection{Problem logarytmu dyskretnego}
+Niech $f(x, p, g) = g^x \mod p$, gdzie $p$ jest liczbą pierwszą, $g < p$ oraz
+$x < p$. Wyliczenie tej wartości jest trywialne; nie znamy natomiast algorytmu
+wielomianowego pozwalającego na zgadnięcie wartości odwróconej funkcji
+\mbox{$f^{-1}(y, p, g) = x : g^x \mod p = y$} na podstawie danego $y$. Nazwa problemu
+wynika z charakteru $f$ (operacją odwrotną do potęgowania w ciele modulo $p$
+jest logarytm w ciele modulo $p$).
+
+\subsubsection{Funkcja Rabina}
+Niech $f(x,n) = x^2 \mod n$. Wykazano, że obliczenie $f^{-1}(y,n) = x : x^2
+\mod n = y$ na podstawie $y$ i $n$ jest tak samo trudne, jak rozkład $n$ na
+czynniki pierwsze; co sprowadza się do problemu faktoryzacji, opisanego
+wcześniej.
+
+\subsubsection{Wnioski}
+Zastosowania funkcji jednokierunkowe są niejako podzbiorem tego, do czego
+potrzebujemy bezpiecznych funkcji haszujących: łatwe obliczenie $f(x)$, łatwa
+weryfikacja $f(x)=f(x')$ i trudne odwrócenie $f^{-1}(y)=x$. Stąd też nie
+powinno dziwić, że ostatnim, niewspomnianym dotąd kandydatem na funkcje
+jednokierunkowe są... kryptograficzne funkcje skrótu.
+
+Zapotrzebowanie na funkcje jednokierunkowe jest duże, o czym świadczy ich
+wykorzystanie: trudność faktoryzacji jest zastosowana w kryptosystemie RSA,
+trudność obliczenia logarytmu dyskretnego w podpisach cyfrowych ElGamala, a
+trudność obliczenia pierwiastka dyskretnego (funkcja Rabina) - w kryptosystemie
+Rabina. Trudność złamania tych kryptosystemów opiera się właśnie na trudności
+odwrócenia wymienionych funkcji.
+
+Wracając na chwilę do zagadnienia $\textrm{P} \stackrel{?}{=} \textrm{NP}$ --
+wystarczy udowodnić, że którakolwiek z powyższych funkcji jest faktycznie
+jednokierunkowa lub pokazać, że może zostać złamana, by móc stwierdzić to samo
+o wszystkich pozostałych wymienionych funkcjach. Jest tak dlatego, ponieważ
+istnieją sposoby przekształcania jednego problemu w drugi tak, że rozwiązanie
+jednego gwarantuje rozwiązanie drugiego. Zatem tak naprawdę bezpieczeństwo
+powyższych kryptosystemów jest ekwiwalentne.
+
+\subsection{Formalnie bezpieczne funkcje skrótu}
+
+\newpage
 \subsection{Współczesne implementacje}
 
-\subsubsection{Konstrukcja Merkle-Damgarda}
+\subsubsection{Konstrukcja Merkle-Damg\r{a}rda}
 
 \subsubsection{MD5}
 
