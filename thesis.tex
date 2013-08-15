@@ -21,37 +21,36 @@
 \newcommand{\myparagraph}[1]{\paragraph{#1}\mbox{}\\}
 
 \begin{titlepage}
-	\begin{center}
-	{\LARGE Uniwersytet im. Adama Mickiewicza w Poznaniu \\
-	Wydział Matematyki i Informatyki }
-	\line(1,0){350}
+    \begin{center}
+    {\LARGE Uniwersytet im. Adama Mickiewicza w Poznaniu \\
+    Wydział Matematyki i Informatyki }
+    \line(1,0){350}
 
-	\vspace{1cm}
-	\includegraphics[width=2cm]{logo-uam/logo-uam.png}
-	\vspace{1cm}
+    \vspace{1cm}
+    \includegraphics[width=2cm]{logo-uam/logo-uam.png}
+    \vspace{1cm}
 
-	\vspace{1cm}
-	{\Huge Ataki na kryptograficzne \\ funkcje skrótu} \\[0.5cm]
-	{\Large Marcin Kurczewski}
-	\end{center}
+    \vspace{1cm}
+    {\Huge Ataki na kryptograficzne \\ funkcje skrótu} \\[0.5cm]
+    {\Large Marcin Kurczewski}
+    \end{center}
 
-	\vspace{3cm}
-	\hspace{8cm}\parbox[l]{6cm}{\Large Praca magisterska \\
-	napisana pod kierunkiem \\
-	dr Michała Rena}
+    \vspace{3cm}
+    \hspace{8cm}\parbox[l]{6cm}{\Large Praca magisterska \\
+    napisana pod kierunkiem \\
+    dr Michała Rena}
 
-	\begin{center}
-	\vspace{4cm}
-	Poznań, maj 2013
-	\end{center}
-
+    \begin{center}
+    \vspace{4cm}
+    Poznań, maj 2013
+    \end{center}
 \end{titlepage}
 
 
 \newpage
 \thispagestyle{empty}
 \begin{center}
-	OŚWIADCZENIE
+    OŚWIADCZENIE
 \end{center}
 
 Ja, niżej podpisany Marcin Kurczewski, student Wydziału Matematyki i
@@ -77,9 +76,9 @@ się nieprawdziwe, decyzja o wydaniu mi dyplomu zostanie cofnięta.
 \newpage
 \pagestyle{fancy}
 \fancyhead[L]{\fontsize{10}{0}\selectfont
-	Ataki na kryptograficzne funkcje skrótu}
+    Ataki na kryptograficzne funkcje skrótu}
 \fancyhead[R]{\fontsize{10}{0}\selectfont
-	Marcin Kurczewski}
+    Marcin Kurczewski}
 
 
 \section{Wstęp}
@@ -524,10 +523,10 @@ losowe permutacje!), jest podejściem złym z prostych przyczyn:
 \begin{itemize}
 \item Algorytm przekształcania elementów $m \in M$ na $h$ polega na trywialnym
 podstawianiu elementów zgodnie z jakąś tablicą $T$. Zatem, aby uzyskać
-oryginalne $m$ na podstawie $h$ wystarczy zamienić odwrócić tablicę,
-zamieniając jej klucze z przypisanymi im wartościami (dla danego $h$ wyszukać
-$m$, dla którego $T_m = h$). Wykazaliśmy w ten sposób nieodporność na
-\textit{preimage resistance}.
+oryginalne $m$ na podstawie $h$ wystarczy odwrócić tablicę, zamieniając jej
+klucze z przypisanymi im wartościami (dla danego $h$ wyszukać $m$, dla którego
+$T_m = h$). Wykazaliśmy w ten sposób nieodporność na \textit{preimage
+resistance}.
 \item Gdy natomiast będziemy próbowali ukryć sposób w jaki dokonujemy
 podstawienia (innymi słowy utajnić tablicę $T$), mamy do czynienia z
 \textit{security through obscurity} (bezpieczeństwo poprzez niezrozumiałość),
@@ -586,7 +585,7 @@ jednokierunkowych implikowałoby jednocześnie, że $\textrm{P} \neq \textrm{NP}
 co dałoby odpowiedź na jeden z problemów milenijnych i oznaczałoby, że klasa
 problemów, które da się \emph{rozwiązać} w czasie wielomianowym ($\textrm{P}$)
 nie pokrywa się z klasą, dla którego rozwiązanie da się \emph{zweryfikować} w
-czasie wielomianowym ($\textrm{NP}$).  Przykładowo: mając liczbę $x \in
+czasie wielomianowym ($\textrm{NP}$). Przykładowo: mając liczbę $x \in
 \mathbb{N}$ i dany zbiór liczb pierwszych $x_i$, możemy w banalny sposób
 \emph{zweryfikować}, czy $x_0 \cdot x_1 \cdot \ldots \cdot x_n = x$. Natomiast
 nie wiadomo, czy istnieje algorytm wielomianowy, który potrafi \emph{rozwiązać}
