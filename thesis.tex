@@ -2,6 +2,7 @@
 \usepackage{geometry}
 \geometry{a4paper}
 
+\usepackage{pgfplots} %wykresy
 \usepackage[utf8]{inputenc}
 \usepackage[OT1]{fontenc}
 \usepackage{polski}
@@ -13,7 +14,11 @@
 \usepackage{amssymb}
 \usepackage{enumitem}
 \usepackage{microtype}
+\usepackage{url}
 \usepackage{floatrow} %domyślnie wyśrodkowuj ryciny
+
+\pgfplotsset{compat=1.5} %wersja biblioteki do wykresów; usuwa problemy
+\newcounter{attcounter} %licznik załączników
 
 \begin{document}
 \newgeometry{margin=3cm}
@@ -139,7 +144,7 @@ dane zadanie, nie istnieje, albo jego koszt obliczeniowy lub pamięciowy jest
 tak wielki, że nie można go wykonać przy pomocy znanych obecnie technologii.
 \end{itemize}
 
-Dodatkowo, od części \ref{sec:hash_construction} do końca pracy przez pojęcie
+Dodatkowo, od części~\ref{sec:hash_construction} do końca pracy przez pojęcie
 funkcji haszujących będziemy rozumieć wyłącznie kryptograficzne funkcje
 haszujące, gdyż tylko na takich funkcjach w tych częściach będziemy się
 skupiać.
@@ -167,11 +172,11 @@ $$ \forall_{y \in Y} \; \exists_{x \in X} \; f(x)=y $$
 Kryptograficzna funkcja skrótu to taka funkcja skrótu, która może być
 wykorzystywana w zastosowaniach kryptograficznych, a więc wymagających
 wysokiego poziomu bezpieczeństwa. Przykłady takich zastosowań można znaleźć w
-sekcji \ref{sec:secure_hash_usages}. Dokładne cechy, jakie powinna spełniać
+sekcji~\ref{sec:secure_hash_usages}. Dokładne cechy, jakie powinna spełniać
 funkcja skrótu, aby była kryptograficzna, omówione zostały w sekcji
 ~\ref{sec:secure_hash_attributes}. Ponadto wszystkie funkcje skrótu,
 niezależnie od swojego zastosowania w celach kryptograficznych, powinny
-spełniać własności opisane w sekcji \ref{sec:common_hash_attributes}.
+spełniać własności opisane w sekcji~\ref{sec:common_hash_attributes}.
 
 
 
@@ -204,8 +209,8 @@ kolizji.
 
 Unikanie kolizji, obok determinizmu, jest jedną z najważniejszych cech funkcji
 skrótu, co staje się zrozumiałe, gdy pozna się ich zastosowania (przykładowe
-zastosowania bezpiecznych funkcji skrótu opisane są w sekcji
-\ref{sec:secure_hash_usages}).
+zastosowania bezpiecznych funkcji skrótu opisane są w
+sekcji~\ref{sec:secure_hash_usages}).
 
 \subsubsection{Cechy kryptograficznych funkcji haszujących}
 \label{sec:secure_hash_attributes}
@@ -216,7 +221,8 @@ haszujące, funkcje kryptograficzne stają się natomiast potrzebne wówczas, gd
 kolizje są \emph{niedopuszczalne}.
 
 Jednak z racji mniejszego rozmiaru przeciwdziedziny w stosunku do dziedziny
-(patrz rysunek \ref{fig:surjection}), kolizje \emph{będą} się zdarzać.
+(patrz rysunek~\ref{fig:surjection} na stronie \pageref{fig:surjection}),
+kolizje \emph{będą} się zdarzać.
 
 Poniższe warunki zostały sformułowane po to, aby sytuacje, w których dochodzi
 do kolizji, były jak najmniej prawdopodobne, a także żeby same kryptograficzne
@@ -276,7 +282,149 @@ oczekujemy, aby dla każdego wyjścia, po jego zrzutowaniu na postać binarną,
 prawdopodobieństwo dostania na konkretnym bicie "1" lub "0" było takie samo
 tak, aby nie dało się nic powiedzieć o tym bicie.
 
-%todo: rycina z dystrybucją
+\begin{figure}[hbt!]
+\pgfplotsset{width=14cm,height=7cm}
+\begin{tikzpicture}
+    \newcommand{\tmp}{$\Pr(H(a)_{(2,i)}=1)$}
+    \begin{axis}[xlabel=$i$-ty bit,ylabel=\tmp,/pgf/number
+    format/.cd,fixed,precision=3]
+    \addplot[color=blue,mark=*] coordinates {
+        (0, 0.501249577499)
+        (1, 0.50207665441)
+        (2, 0.500985834708)
+        (3, 0.500601743263)
+        (4, 0.498658240554)
+        (5, 0.499766984524)
+        (6, 0.50055309168)
+        (7, 0.498996241025)
+        (8, 0.50000256061)
+        (9, 0.500978152879)
+        (10, 0.499813075497)
+        (11, 0.500092181947)
+        (12, 0.500104984995)
+        (13, 0.500038409144)
+        (14, 0.499416181004)
+        (15, 0.500189485113)
+        (16, 0.500914137638)
+        (17, 0.499784908791)
+        (18, 0.49979515123)
+        (19, 0.499108907849)
+        (20, 0.499188286747)
+        (21, 0.501026804462)
+        (22, 0.49944690832)
+        (23, 0.501011440804)
+        (24, 0.500547970461)
+        (25, 0.49958262063)
+        (26, 0.49972345416)
+        (27, 0.500340561081)
+        (28, 0.500975592269)
+        (29, 0.498632634458)
+        (30, 0.500924380076)
+        (31, 0.500058894021)
+        (32, 0.499833560374)
+        (33, 0.500975592269)
+        (34, 0.499229256501)
+        (35, 0.500862925445)
+        (36, 0.499746499647)
+        (37, 0.500788667766)
+        (38, 0.499434105272)
+        (39, 0.500023045487)
+        (40, 0.500842440568)
+        (41, 0.498863089324)
+        (42, 0.4979259062)
+        (43, 0.500245818524)
+        (44, 0.499352165764)
+        (45, 0.500660637285)
+        (46, 0.49937521125)
+        (47, 0.499946227198)
+        (48, 0.499559575144)
+        (49, 0.500455788514)
+        (50, 0.500325197423)
+        (51, 0.499492999293)
+        (52, 0.499490438684)
+        (53, 0.499341923325)
+        (54, 0.500399455102)
+        (55, 0.50075794045)
+        (56, 0.499221574672)
+        (57, 0.500535167413)
+        (58, 0.500862925445)
+        (59, 0.499869408909)
+        (60, 0.501812911618)
+        (61, 0.501142031895)
+        (62, 0.500194606332)
+        (63, 0.501666956869)
+        (64, 0.501326395788)
+        (65, 0.499114029068)
+        (66, 0.498932225784)
+        (67, 0.49992830293)
+        (68, 0.499149877603)
+        (69, 0.499718332941)
+        (70, 0.500181803284)
+        (71, 0.49868384665)
+        (72, 0.498258785452)
+        (73, 0.501003758975)
+        (74, 0.499784908791)
+        (75, 0.499211332234)
+        (76, 0.499664560138)
+        (77, 0.501646471992)
+        (78, 0.49889381664)
+        (79, 0.500637591798)
+        (80, 0.499536529657)
+        (81, 0.499526287218)
+        (82, 0.499500681122)
+        (83, 0.5010370469)
+        (84, 0.500299591327)
+        (85, 0.4996543177)
+        (86, 0.499969272684)
+        (87, 0.498530210072)
+        (88, 0.499974393904)
+        (89, 0.499528847828)
+        (90, 0.500094742556)
+        (91, 0.500094742556)
+        (92, 0.499769545133)
+        (93, 0.500737455573)
+        (94, 0.500875728493)
+        (95, 0.500722091916)
+        (96, 0.500542849242)
+        (97, 0.499431544662)
+        (98, 0.500778425328)
+        (99, 0.499244620159)
+        (100, 0.499989757561)
+        (101, 0.498786271035)
+        (102, 0.500578697776)
+        (103, 0.500169000236)
+        (104, 0.499841242203)
+        (105, 0.50027398523)
+        (106, 0.500156197187)
+        (107, 0.500640152407)
+        (108, 0.499116589678)
+        (109, 0.500645273627)
+        (110, 0.500099863776)
+        (111, 0.49951348417)
+        (112, 0.499918060492)
+        (113, 0.500512121926)
+        (114, 0.49979515123)
+        (115, 0.499669681358)
+        (116, 0.500225333647)
+        (117, 0.501841078324)
+        (118, 0.499879651347)
+        (119, 0.498970634929)
+        (120, 0.500312394375)
+        (121, 0.50041481876)
+        (122, 0.499160120041)
+        (123, 0.499188286747)
+        (124, 0.49889381664)
+        (125, 0.500145954749)
+        (126, 0.499733696598)
+        (127, 0.500734894964)
+    };
+    \end{axis}
+\end{tikzpicture}
+\caption{Przykładowy rozkład prawdopodobieństwa występowania "1" na kolejnych
+bitach skrótów \texttt{MD5}, otrzymanych z zahaszowania 390532 wyrazów z
+załącznika~\ref{att:english_wordlist}.}
+\end{figure}
+\pagebreak
 
 
 
@@ -367,7 +515,7 @@ Z takim podejściem wiąże się parę problemów. Po pierwsze, dane, która prz
 Alicja, mogą zostać przechwycone przez osobę trzecią, zatem wymagają
 zaszyfrowania (np. poprzez opakowanie transmisji protokołem \texttt{HTTPS}).
 Jednak nie ten problem okazuje się ważny z punktu widzenia funkcji haszujących.
-Nas zainteresuje problem wiążący się z punktem \ref{enu:server_pass_check} --
+Nas zainteresuje problem wiążący się z punktem~\ref{enu:server_pass_check} --
 co w wypadku, kiedy do bazy danych serwera, z jakichkolwiek przyczyn, uzyskuje
 dostęp ktoś niepożądany? Taka osoba może wówczas podejrzeć dane
 uwierzytelniające \emph{wszystkich} użytkowników, także Alicji, a następnie
@@ -393,13 +541,13 @@ danych:
 
 Dzięki temu, że w bazie przechowywane są jedynie nieodwracalne skróty, nawet w
 przypadku kradzieży bazy danych na podstawie wykradzionych skrótów nie powinno
-być można odtworzyć oryginalnych danych (patrz punkt
-\ref{sec:preimage_resistance}). Teoretycznie zatem atakującemu taka baza w
-zasadzie do niczego się nie przyda.
+być można odtworzyć oryginalnych danych (patrz
+punkt~\ref{sec:preimage_resistance}). Teoretycznie zatem atakującemu taka baza
+w zasadzie do niczego się nie przyda.
 
 Należy jednak zwrócić uwagę, że protokół ten nie jest bezpieczny bez pewnych
-poprawek. Przyczyny i natura poprawek omówione są w części
-\ref{sec:universal_attacks}.
+poprawek. Przyczyny i natura poprawek omówione są w
+części~\ref{sec:universal_attacks}.
 
 \subsubsection{Jednoznaczna identyfikacja danych}
 
@@ -412,16 +560,11 @@ rozwiązaniach.
 skrótu w celu bezpiecznej identyfikacji konkretnych wersji pliku, numerowania
 kolejnych zmian i bezpiecznego przechowywania historycznej struktury
 repozytorium.
-\begin{figure}[htb!]
-\includegraphics[width=12cm]{img/usage3.eps}
-\caption{Gdy trzeba zweryfikować poprawność przesłania dużej struktury, łatwiej
-porównać małą liczbę}
-\end{figure}
 
 \item Linki ed2k oraz magnet, używane w sieciach peer-to-peer, wykorzystują
 funkcje skrótu w celu lokalizacji źródeł, skąd dany plik może być pobrany, a
-także weryfikacji już ściągniętych danych (patrz punkt
-\ref{sec:usage_integrity_check}).
+także weryfikacji już ściągniętych danych (patrz
+punkt~\ref{sec:usage_integrity_check}).
 \item Struktury danych takie jak tablice mieszające (tzn. tablice, których
 kluczami może być dowolny obiekt, w przeciwieństwie do klasycznych tablic o
 indeksach liczbowych), wykorzystują funkcje haszujące do serializacji dowolnych
@@ -431,6 +574,12 @@ zaimplementować metodę \texttt{hashCode()}, która w zamierzeniu ma pozwolić
 łatwo odróżniać (na~tyle, na~ile to możliwe) konkretne instancje obiektu w
 stosunku do pozostałych.
 \end{itemize}
+
+\begin{figure}[bht]
+\includegraphics[width=12cm]{img/usage3.eps}
+\caption{Gdy trzeba zweryfikować poprawność przesłania dużej struktury, łatwiej
+porównać małą liczbę}
+\end{figure}
 
 Biorąc pod uwagę fakt, że kryptograficzne funkcje skrótu są dużo bardziej
 kosztowne obliczeniowo niż zwykłe, nieodporne na ataki funkcje haszujące, w
@@ -457,7 +606,7 @@ paradoks urodzinowy złamać $n$--bitową funkcję haszującą w czasie $2^{n/2}
 W tym samym roku zaczęły się pojawiać pierwsze próby zdefiniowania warunków,
 jakie powinny spełniać bezpieczne funkcje skrótu. W 1979 Merkle wprowadził
 pojęcie odporności na kolizje oraz odporności pierwszego i drugiego rzędu
-(patrz sekcja \ref{sec:secure_hash_attributes}). Definicje te zostały
+(patrz sekcja~\ref{sec:secure_hash_attributes}). Definicje te zostały
 ostatecznie sformalizowane przez Damg\r{a}rda w roku 1987. W roku 2004 Rogaway
 i Shrimpton pokazali, że funkcje haszujące w miarę możliwości nie powinny być
 odróżnialne od \textit{random oracles}.
@@ -489,6 +638,8 @@ stworzenia takowej.
 Wprawdzie konstrukcji funkcji haszujących jest wiele, większość z nich wygląda
 podobnie. Na początku skupię się na teoretycznych aspektach konstruowania
 funkcji haszujących, a w następnej kolejności opiszę praktyczne implementacje.
+
+
 
 \subsection{Doskonała funkcja skrótu}
 W teorii mówi się o doskonałej funkcji skrótu, która każdy element $m$ z danego
@@ -545,6 +696,8 @@ znać z góry \emph{wszystkie} możliwe wiadomości, jakie możemy chcieć
 zahaszować; mało tego -- wiadomości te muszą mieć tę samą długość. Powoduje to,
 że funkcja ta nie nadaje się na kryptograficzną funkcję skrótu.
 \end{itemize}
+
+
 
 \subsection{Funkcja jednokierunkowa}
 Funkcja jednokierunkowa to funkcja, której wartości dla każdego wejścia da się
@@ -640,10 +793,56 @@ jednego gwarantuje rozwiązanie drugiego. Zatem tak naprawdę bezpieczeństwo
 powyższych kryptosystemów jest do pewnego stopnia ekwiwalentne (na tyle, na ile
 kosztowne są przekształcenia problemów).
 
-\subsection{Formalnie bezpieczne funkcje skrótu}
 
-\newpage
+
+\subsection{Formalnie bezpieczne funkcje skrótu}
+Implementacje funkcji skrótu dzielą się na dwie kategorie. Pierwsza z nich,
+omówiona tutaj, wywodzi się z formalnego spojrzenia na problem haszowania. Tak
+naprawdę metoda ta sprowadza się do wykorzystania opisanych wcześniej
+kandydatów na funkcje jednokierunkowe i dostarczeniu dowodu, że złamanie
+konstrukcji opartej na danym problemie jest tak samo trudne, jak trudne jest
+rozwiązanie tego problemu. Z charakteru tego podejścia wywodzi się nazwa tej
+rodziny kryptograficznych funkcji haszujących: \textit{provably secure
+cryptographic hash functions}.
+
+W praktyce dowody trudności złamania funkcji z tej rodziny polegają na
+pokazaniu istnienia algorytmu, który przekształca w czasie wielomianowym
+problem znajdowania kolizji dla takiej funkcji w problem rozwiązania źródłowego
+problemu. W ten sposób, kiedy zostanie znaleziony algorytm wielomianowy
+potrafiący złamać formalną funkcję haszującą, będzie od razu znany sposób
+szybkiego rozwiązywania problemu leżącego pod tą funkcją -- a na chwilę obecną
+zakłada się, że problemy te (faktoryzacja, znajdywanie logarytmu dyskretnego
+itp.) są nierozwiązywalne w czasie wielomianowym, tak więc oznacza to
+(najprawdopodobniej) sprzeczność. Możemy zatem powiedzieć, że trudność złamania
+formalnych funkcji skrótu jest nie mniejsza niż trudność rozwiązania dowolnego
+problemu, o którym podejrzewamy, że jest trudny do rozwiązania. Innymi słowy,
+problem złamania takich funkcji jest redukowalny do problemu milenijnego, stąd
+funkcje te są postrzegane jako najbezpieczniejsze dostępne warianty.
+
+
+
 \subsection{Współczesne implementacje}
+Wprawdzie formalnie bezpieczne funkcje skrótu są bardzo bezpieczne, nie
+przychodzi to bez kosztów. Praktyka pokazuje, że funkcje te prawie w ogóle się
+nie nadają do zastosowań praktycznych lub przemysłowych z racji swojego wolnego
+działania lub wysokich kosztów pamięciowych; niestety, skutecznie eliminuje to
+ich przydatność wszędzie tam, gdzie mamy do czynienia z ograniczonymi zasobami
+(przykładami mogą być: systemy wbudowane, transmisje danych w czasie
+rzeczywistym czy też systemy uwierzytelniania o dużej przepustowości).
+
+W związku z tym została stworzona druga rodzina kryptograficznych funkcji
+skrótu. Działanie funkcji z tej rodziny polega ogólnie rzecz biorąc na
+dokonywaniu ogromnych ilości różnorodnych operacji na konkretnych bitach
+wiadomości $m$ (takich, jak przestawianie, dodawanie, odejmowanie i inne).
+Komputery są przystosowane do tego typu obliczeń, dzięki czemu w porównaniu do
+formalnie bezpiecznych funkcji skrótu haszowanie takimi funkcjami odbywa się
+bardzo szybko. Oznacza to jednak, że autorzy funkcji zazwyczaj ograniczają się
+jedynie do wstępnej analizy jej słabości, \textit{de facto} nie przedstawiając
+formalnego dowodu trudności jej złamania. Badania mające na celu znalezienie
+słabości przypominają w swojej naturze szukanie igły w stogu siana:
+nieznalezienie igły na daną chwilę nie oznacza jeszcze nieistnienia igły. Daje
+to pole do popisu kryptologom, którzy znajdują luki na długo po tym, jak dana
+funkcja została opisana po raz pierwszy.
 
 \subsubsection{Konstrukcja Merkle-Damg\r{a}rda}
 
@@ -675,5 +874,16 @@ kosztowne są przekształcenia problemów).
 \subsubsection{\textit{Second preimage resistance}}
 
 \section{Podsumowanie}
+
+\section{Bibliografia}
+
+\section{Załączniki}
+
+\begin{enumerate}
+\item \refstepcounter{attcounter}\label{att:english_wordlist}Lista
+przypadkowych, niepowtarzających się angielskich wyrazów używana do
+przeprowadzania testów statystycznych.
+\url{http://download.openwall.net/pub/wordlists/languages/English/3-large/lower.gz}
+\end{enumerate}
 
 \end{document}
