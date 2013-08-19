@@ -135,10 +135,6 @@ takie same, tj.
     H(m) &= H(m')
     \end{aligned}
 \]
-\item \textbf{\textit{random oracle}} -- teoretyczna funkcja działająca na
-zasadzie czarnej skrzynki (o której działaniu nie potrafimy nic powiedzieć),
-przypisująca wejściom w losowy, ale deterministyczny odpowiednie wyjścia z
-jednostajnym rozkładem prawdopodobieństwa.
 \item \textbf{zadanie praktycznie niewykonalne} -- algorytm, który realizuje
 dane zadanie, nie istnieje, albo jego koszt obliczeniowy lub pamięciowy jest
 tak wielki, że nie można go wykonać przy pomocy znanych obecnie technologii.
@@ -203,11 +199,10 @@ wyjściowego $B$ w taki sposób, by:
 \]
 Innymi słowy dobra funkcja haszująca przekształca konkretną wartość $a$ w
 konkretną wartość $b$ z prawdopodobieństwem jak najbliższym prawdopodobieństwu
-losowego wybrania tego elementu ze zbioru $B$, lub też -- wszystkie wartości ze
-zbioru $B$ powinny mieć możliwie taką samą szansę na wybranie.
-%todo: ściślej
-Cecha ta ma na celu zapewnienie jak najmniejszego prawdopodobieństwa zajścia
-kolizji.
+losowego wybrania tego elementu ze zbioru $B$, lub też -- dla danej wiadomości
+$m$ wszystkie wartości ze zbioru $B$ powinny mieć możliwie taką samą szansę na
+wybranie (z zachowaniem własności determinizmu). Cecha ta ma na celu
+zapewnienie jak najmniejszego prawdopodobieństwa zajścia kolizji.
 
 Unikanie kolizji, obok determinizmu, jest jedną z najważniejszych cech funkcji
 skrótu, co staje się zrozumiałe, gdy pozna się ich zastosowania (przykładowe
@@ -254,11 +249,14 @@ Spełnienie tej własności implikuje odporność na kolizje drugiego rzędu, co
 jednak nie implikuje odporności na kolizje pierwszego rzędu.
 
 \myparagraph{Niemożność odróżnienia od \textit{random oracles}}
-Każde wejście powinno mieć przypisane swoje wyjście w możliwie losowy sposób, z
-jednostajnym rozkładem prawdopodobieństwa (ale z zachowaniem własności
-determinizmu, tj. żeby dla tego samego wejścia zawsze dostawać takie samo
-wyjście). Własność ta niejako wynika ze spełnienia poprzednich warunków.
-%todo: nic z tego nie wynika
+\textit{Random oracle} to teoretyczna czarna skrzynka przypisująca każdemu
+argumentowi losową (z jednostajnym rozkładem prawdopodobieństwa) wartość z
+określonej przeciwdziedziny w taki sposób, że dla konkretnego argumentu zawsze
+wybiera taką samą wartość. Jest to abstrakcyjna funkcja matematyczna, o której
+udowodniono~\cite{randomoracle}, że nie może posiadać żadnej implementacji.
+Pożądane jest to, by kryptograficzna funkcja skrótu była trudna do odróżnienia
+od \textit{random oracle}, choć jest to zadanie znacznie trudniejsze od
+spełnienia poprzednich własności.
 
 \myparagraph{Własność efektu lawinowego}
 \label{sec:avalance_effect}
@@ -685,11 +683,12 @@ resistance}.
 \item Gdy natomiast będziemy próbowali ukryć sposób w jaki dokonujemy
 podstawienia (innymi słowy utajnić tablicę $T$), mamy do czynienia z
 \textit{security through obscurity} (bezpieczeństwo poprzez niezrozumiałość),
-co jest bardzo negatywnym zjawiskiem w kryptografii. System kryptograficzny
-musi być bezpieczny nawet, gdy jego sposób działania wraz ze szczegółami
-implementacji jest jawny (za wyjątkiem klucza, który jest z definicji tajny, z
-tym że funkcje haszujące nie używają klucza).
-%todo: coś o zasadzie Kerchoffsa
+co jest bardzo negatywnym zjawiskiem w kryptografii i łamie tzw. zasadę
+Kerckhoffsa. Zasada ta jest jedną z kilku reguł sformułowanych w XIX w. przez
+Kerckhoffsa, traktujących na temat bezpieczeństwa kryptosystemów. Mówi ona, że
+każdy system kryptograficzny musi być bezpieczny nawet, gdy jego sposób
+działania wraz ze szczegółami implementacji jest jawny (za wyjątkiem klucza,
+który jest z definicji tajny, z tym że funkcje haszujące nie używają klucza).
 \item Nawet gdy zignorujemy powyższe przykazanie, nasz algorytm będzie
 nieodporny na proste ataki statystyczne: analizując rozkład prawdopodobieństwa
 pewnych wzorców wewnątrz kolejnych $h$ (który nie jest jednostajny, jako że w
@@ -722,11 +721,10 @@ potrafi zgadnąć argumentu z zaniedbywalnie małym prawdopodobieństwem.
 \noindent
 $f$ jest natomiast słabo jednokierunkowa, jeśli:
 \begin{itemize}
-%todo: coś tu jest nie tak, nawet nieformalnie
-%podkreślone: "każdy"
 \item da się obliczyć w czasie wielomianowym,
-\item każdy probabilistyczny algorytm działający w czasie wielomianowym zgaduje
-argumenty w sposób poprawny z zaniedbywalnie małym prawdopodobieństwem.
+\item każdy probabilistyczny algorytm działający w czasie wielomianowym, który
+ją potrafi odwrócić, zgaduje argumenty w sposób niepoprawny z niezaniedbywalnie
+dużym prawdopodobieństwem.
 \end{itemize}
 
 Łatwo zauważyć, że każda silnie jednokierunkowa funkcja spełnia jednocześnie
