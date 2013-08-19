@@ -127,8 +127,8 @@ musi być \emph{kryptograficzną funkcją skrótu},
 \item \textbf{skrót} -- wartość wyjściowa z \emph{funkcji skrótu},
 \item \textbf{hasz} -- alternatywne określenie na wartość wyjściową
 \emph{funkcji skrótu},
-\item \textbf{kolizja} -- sytuacja, w której skróty dwóch wiadomości są takie
-same, tj.
+\item \textbf{kolizja} -- sytuacja, w której skróty dwóch różnych wiadomości są
+takie same, tj.
 \[
     \begin{aligned}
     m &\neq m' \\
@@ -136,7 +136,7 @@ same, tj.
     \end{aligned}
 \]
 \item \textbf{\textit{random oracle}} -- teoretyczna funkcja działająca na
-zasadzie "czarnej skrzynki" (o której działaniu nie potrafimy nic powiedzieć),
+zasadzie czarnej skrzynki (o której działaniu nie potrafimy nic powiedzieć),
 przypisująca wejściom w losowy, ale deterministyczny odpowiednie wyjścia z
 jednostajnym rozkładem prawdopodobieństwa.
 \item \textbf{zadanie praktycznie niewykonalne} -- algorytm, który realizuje
@@ -155,9 +155,10 @@ skupiać.
 \subsection{Definicja zwykłej oraz kryptograficznej funkcji skrótu}
 
 Funkcja skrótu jest to funkcja, której dziedziną są ciągi bitów dowolnej
-długości, a przeciwdziedziną -- ciągi bitów o ograniczonej długości. Rzutowanie
-to odbywa się w sposób jednoznaczny, tj. każdemu wejściu funkcja skrótu
-przyporządkowuje dokładnie jedno wyjście; formalnie zatem jest to surjekcja:
+długości, a przeciwdziedziną -- ciągi bitów o stałej, ograniczonej długości.
+Rzutowanie to odbywa się w sposób jednoznaczny, tj. każdemu wejściu funkcja
+skrótu przyporządkowuje dokładnie jedno wyjście; formalnie zatem jest to
+surjekcja:
 
 $$ f \colon X \to Y $$
 $$ |Y| \leq n, n \in \mathbb{N} $$
@@ -194,16 +195,17 @@ nigdy odwoływać do generatorów liczb pseudolosowych, metadanych o wiadomości
 (typu jej lokalizacja w pamięci komputera) itp., a jedynie do samej wiadomości.
 
 \myparagraph{Jednostajność}
-Niech $H : A \to B$ będzie funkcją haszującą. Funkcje haszujące powinny mapować
-wartości ze zbioru wejściowego $A$ na wartości ze zbioru wyjściowego $B$ w taki
-sposób, by:
+Niech $H : A \to B$ będzie funkcją haszującą. Funkcje haszujące powinny
+przekształcać wartości ze zbioru wejściowego $A$ na wartości ze zbioru
+wyjściowego $B$ w taki sposób, by:
 \[
     \forall_{a \in A} \; \Pr(H(a) = b) \to \frac{1}{|B|}
 \]
-Innymi słowy dobra funkcja haszująca mapuje konkretną wartość $a$ w konkretną
-wartość $b$ z prawdopodobieństwem jak najbliższym prawdopodobieństwu losowego
-wybrania tego elementu ze zbioru $B$, lub też -- wszystkie wartości ze zbioru
-$B$ powinny mieć możliwie taką samą szansę na wybranie w momencie mapowania.
+Innymi słowy dobra funkcja haszująca przekształca konkretną wartość $a$ w
+konkretną wartość $b$ z prawdopodobieństwem jak najbliższym prawdopodobieństwu
+losowego wybrania tego elementu ze zbioru $B$, lub też -- wszystkie wartości ze
+zbioru $B$ powinny mieć możliwie taką samą szansę na wybranie.
+%todo: ściślej
 Cecha ta ma na celu zapewnienie jak najmniejszego prawdopodobieństwa zajścia
 kolizji.
 
@@ -225,23 +227,23 @@ Jednak z racji mniejszego rozmiaru przeciwdziedziny w stosunku do dziedziny
 kolizje \emph{będą} się zdarzać.
 
 Poniższe warunki zostały sformułowane po to, aby sytuacje, w których dochodzi
-do kolizji, były jak najmniej prawdopodobne, a także żeby same kryptograficzne
-funkcje skrótu stanowiły godne użycia narzędzie we wszystkich sytuacjach, które
-wymagają wysokiego bezpieczeństwa.
+do kolizji, były jak najmniej prawdopodobne i żeby było trudno je celowo
+wywołać, a także żeby same kryptograficzne funkcje skrótu stanowiły godne
+użycia narzędzie we wszystkich sytuacjach, które wymagają wysokiego
+bezpieczeństwa.
 
 \myparagraph{Odporność na kolizje pierwszego rzędu (\textit{preimage
 resistance})}
 \label{sec:preimage_resistance}
-Mając jakiś skrót $h$, znalezienie wiadomości $m$ takiej, że $H(m) = h$ powinno
+Mając dany skrót $h$, znalezienie wiadomości $m$ takiej, że $H(m) = h$ powinno
 być w praktyce niewykonalne. Jest to warunek zapewniający jednostronność
-funkcji skrótu.
-Należy zauważyć, że zależy nam na \emph{dowolnej} wiadomości, a nie oryginalnej
-wiadomości z której zostało utworzone $h$.
+funkcji skrótu. Należy zauważyć, że zależy nam na \emph{dowolnej} wiadomości,
+a nie oryginalnej wiadomości z której zostało utworzone $h$.
 
 \myparagraph{Odporność na kolizje drugiego rzędu (\textit{second preimage
 resistance})}
 \label{sec:second_preimage_resistance}
-Mając jakąś wiadomość $m$, znalezienie wiadomości $m' \neq m$ takiej, że $H(m)
+Mając daną wiadomość $m$, znalezienie wiadomości $m' \neq m$ takiej, że $H(m)
 = H(m')$ powinno być praktycznie niewykonalne.
 
 \myparagraph{Odporność na kolizje (\textit{collision resistance})}
@@ -256,10 +258,10 @@ Każde wejście powinno mieć przypisane swoje wyjście w możliwie losowy spos�
 jednostajnym rozkładem prawdopodobieństwa (ale z zachowaniem własności
 determinizmu, tj. żeby dla tego samego wejścia zawsze dostawać takie samo
 wyjście). Własność ta niejako wynika ze spełnienia poprzednich warunków.
-
-\label{sec:avalance_effect}
+%todo: nic z tego nie wynika
 
 \myparagraph{Własność efektu lawinowego}
+\label{sec:avalance_effect}
 W dobrych funkcjach haszujących powinien zachodzić tzw. efekt lawinowy. Jest to
 własność zapewniająca, że nawet mała zmiana wiadomości $m'$ w stosunku do $m$
 powoduje duże zmiany w wartości $H(m')$ w porównaniu do $H(m)$.
@@ -276,10 +278,12 @@ $$
     \to& \frac{1}{2}
     \end{aligned}
 $$
-gdzie $H(a)_{(2,i)}$ to $i$-ty bit reprezentacji dwójkowej $H(a)$, a $n$ to ilość
-bitów zwracanych przez $H$. Innymi słowy, od dobrej funkcji haszującej
-oczekujemy, aby dla każdego wyjścia, po jego zrzutowaniu na postać binarną,
-prawdopodobieństwo dostania na konkretnym bicie "1" lub "0" było takie samo
+%todo: wzorki wprowadzają prawdopodobieństwo w zły sposób (sugerują, że hasze
+%są niedeterministyczne)
+gdzie $H(a)_{(2,i)}$ to $i$-ty bit reprezentacji dwójkowej $H(a)$, a $n$ to
+ilość bitów zwracanych przez $H$. Innymi słowy, od dobrej funkcji haszującej
+oczekujemy, aby dla każdego wyjścia, po jego przekształceniu na postać binarną,
+prawdopodobieństwo otrzymania na konkretnym bicie "1" lub "0" było takie samo
 tak, aby nie dało się nic powiedzieć o tym bicie.
 
 \begin{figure}[hbt!]
@@ -441,7 +445,7 @@ kryptograficznych funkcji skrótu, jaką jest odporność na kolizje.
 Wyobraźmy sobie sytuację, w której użytkownik o imieniu Alicja zmuszony jest
 przetransportować jakieś dane przez niebezpieczny kanał informacji, który jest
 podatny na zakłócenia, do użytkownika imieniem Bob. Niech wiadomość wysłana
-przez Alicję będzie $m$, a wiadomość odebrana przez Boba będzie $m'$.
+przez Alicję oznaczona będzie $m$, a wiadomość odebrana przez Boba będzie $m'$.
 
 \begin{figure}[htb!]
 \includegraphics[width=10cm]{img/usage1.eps}
@@ -476,10 +480,10 @@ zabezpieczenia transmisji potencjalnie bardzo długich komunikatów do
 zabezpieczenia transmisji jedynie samych skrótów.
 
 Należy zdawać sobie sprawę, że nie rozwiązuje to problemu zabezpieczenia
-transmisji przed rozmyślnymi atakami -- jeśli ktoś mógł wcześniej edytować $m$,
-teraz może również edytować wartość $h$ zawierającą $H(m)$. Ponadto funkcje
-haszujące nie zapewniają żadnej poufności danych. Mimo to z ich zastosowania
-płyną pewne wymienione niżej korzyści.
+transmisji przed rozmyślnymi atakami -- jeśli ktoś mógł wcześniej zmieniać
+zawartość $m$, teraz może również zmienić wartość $h$ zawierającą $H(m)$.
+Ponadto funkcje haszujące nie zapewniają żadnej poufności danych. Mimo to z ich
+zastosowania płyną pewne wymienione niżej korzyści.
 
 \begin{itemize}
 \item Rozwiązanie to jest przydatne w sytuacjach, kiedy nie mamy do czynienia z
@@ -487,9 +491,9 @@ rozmyślnymi atakami, a jedynie przypadkowymi zakłóceniami --
 prawdopodobieństwo, że skrót $H(m')$ będzie równy $H(m)$ w sytuacji, kiedy $m
 \neq m'$ będzie minimalne. Jest to jedno z naturalnych zastosowań funkcji
 haszujących, w których odgrywają rolę trudnej do podrobienia sumy kontrolnej.
-\item Ponadto ułatwione jest napisanie innych protokołów -- dzięki funkcjom
+\item Ponadto ułatwione jest tworzenie innych protokołów -- dzięki funkcjom
 haszującym zależy nam na zabezpieczeniu przed modyfikacją nie całej wiadomości,
-a jedynie jej malutkiego kawałka zawierającego jej skrót. Przykładem protokołu,
+a jedynie jej malutkiego kawałka zawierającego skrót. Przykładem protokołu,
 który pracuje na opisanej powyżej zasadzie, jest podpis elektroniczny --
 \emph{de facto} weryfikuje się tam wyłącznie autentyczność skrótu wiadomości, a
 nie samą wiadomość.
@@ -498,7 +502,7 @@ nie samą wiadomość.
 \subsubsection{Bezpieczne przechowywanie / weryfikacja haseł}
 \label{sec:usage_password_check}
 Funkcje haszujące przychodzą z pomocą także w technikach przechowywania haseł.
-Wyobraźmy sobie przeciętny mechanizm autentykacji...
+Wyobraźmy sobie przeciętny mechanizm autentykacji.
 
 \begin{enumerate}
 \item Użytkownik Alicja przesyła swoje dane uwierzytelniające do serwera.
@@ -511,15 +515,15 @@ Wyobraźmy sobie przeciętny mechanizm autentykacji...
     \end{enumerate}
 \end{enumerate}
 
-Z takim podejściem wiąże się parę problemów. Po pierwsze, dane, która przesyła
+Z takim podejściem wiążą się pewne problemy. Po pierwsze, dane, która przesyła
 Alicja, mogą zostać przechwycone przez osobę trzecią, zatem wymagają
-zaszyfrowania (np. poprzez opakowanie transmisji protokołem \texttt{HTTPS}).
+zaszyfrowania (np. poprzez zaszyfrowanie transmisji protokołem \texttt{HTTPS}).
 Jednak nie ten problem okazuje się ważny z punktu widzenia funkcji haszujących.
 Nas zainteresuje problem wiążący się z punktem~\ref{enu:server_pass_check} --
 co w wypadku, kiedy do bazy danych serwera, z jakichkolwiek przyczyn, uzyskuje
 dostęp ktoś niepożądany? Taka osoba może wówczas podejrzeć dane
 uwierzytelniające \emph{wszystkich} użytkowników, także Alicji, a następnie
-pomyślnie zalogować przy pomocy tak wykradzionych danych.
+pomyślnie zalogować się przy pomocy tak wykradzionych danych.
 
 Musimy zatem jakoś zabezpieczyć bazę danych. Można próbować ją szyfrować lub
 inaczej zabezpieczać dane w niej przechowywane, problem z takim podejściem jest
@@ -578,7 +582,7 @@ stosunku do pozostałych.
 \begin{figure}[bht]
 \includegraphics[width=12cm]{img/usage3.eps}
 \caption{Gdy trzeba zweryfikować poprawność przesłania dużej struktury, łatwiej
-porównać małą liczbę}
+porównać krótki skrót}
 \end{figure}
 
 Biorąc pod uwagę fakt, że kryptograficzne funkcje skrótu są dużo bardziej
@@ -676,7 +680,7 @@ losowe permutacje!), jest podejściem złym z prostych przyczyn:
 podstawianiu elementów zgodnie z jakąś tablicą $T$. Zatem, aby uzyskać
 oryginalne $m$ na podstawie $h$ wystarczy odwrócić tablicę, zamieniając jej
 klucze z przypisanymi im wartościami (dla danego $h$ wyszukać $m$, dla którego
-$T_m = h$). Wykazaliśmy w ten sposób nieodporność na \textit{preimage
+$T_m = h$). Wykazaliśmy w ten sposób brak własności \textit{preimage
 resistance}.
 \item Gdy natomiast będziemy próbowali ukryć sposób w jaki dokonujemy
 podstawienia (innymi słowy utajnić tablicę $T$), mamy do czynienia z
@@ -685,6 +689,7 @@ co jest bardzo negatywnym zjawiskiem w kryptografii. System kryptograficzny
 musi być bezpieczny nawet, gdy jego sposób działania wraz ze szczegółami
 implementacji jest jawny (za wyjątkiem klucza, który jest z definicji tajny, z
 tym że funkcje haszujące nie używają klucza).
+%todo: coś o zasadzie Kerchoffsa
 \item Nawet gdy zignorujemy powyższe przykazanie, nasz algorytm będzie
 nieodporny na proste ataki statystyczne: analizując rozkład prawdopodobieństwa
 pewnych wzorców wewnątrz kolejnych $h$ (który nie jest jednostajny, jako że w
@@ -717,6 +722,8 @@ potrafi zgadnąć argumentu z zaniedbywalnie małym prawdopodobieństwem.
 \noindent
 $f$ jest natomiast słabo jednokierunkowa, jeśli:
 \begin{itemize}
+%todo: coś tu jest nie tak, nawet nieformalnie
+%podkreślone: "każdy"
 \item da się obliczyć w czasie wielomianowym,
 \item każdy probabilistyczny algorytm działający w czasie wielomianowym zgaduje
 argumenty w sposób poprawny z zaniedbywalnie małym prawdopodobieństwem.
@@ -790,7 +797,7 @@ jednokierunkowa lub pokazać, że może zostać złamana, by móc stwierdzić to
 o wszystkich pozostałych wymienionych funkcjach. Jest tak dlatego, ponieważ
 istnieją sposoby przekształcania jednego problemu w drugi tak, że rozwiązanie
 jednego gwarantuje rozwiązanie drugiego. Zatem tak naprawdę bezpieczeństwo
-powyższych kryptosystemów jest do pewnego stopnia ekwiwalentne (na tyle, na ile
+powyższych kryptosystemów jest do pewnego stopnia równoważne (na tyle, na ile
 kosztowne są przekształcenia problemów).
 
 
@@ -810,14 +817,15 @@ pokazaniu istnienia algorytmu, który przekształca w czasie wielomianowym
 problem znajdowania kolizji dla takiej funkcji w problem rozwiązania źródłowego
 problemu. W ten sposób, kiedy zostanie znaleziony algorytm wielomianowy
 potrafiący złamać formalną funkcję haszującą, będzie od razu znany sposób
-szybkiego rozwiązywania problemu leżącego pod tą funkcją -- a na chwilę obecną
-zakłada się, że problemy te (faktoryzacja, znajdywanie logarytmu dyskretnego
-itp.) są nierozwiązywalne w czasie wielomianowym, tak więc oznacza to
-(najprawdopodobniej) sprzeczność. Możemy zatem powiedzieć, że trudność złamania
-formalnych funkcji skrótu jest nie mniejsza niż trudność rozwiązania dowolnego
-problemu, o którym podejrzewamy, że jest trudny do rozwiązania. Innymi słowy,
-problem złamania takich funkcji jest redukowalny do problemu milenijnego, stąd
-funkcje te są postrzegane jako najbezpieczniejsze dostępne warianty.
+szybkiego rozwiązywania problemu, na którym ta funkcja się opiera -- a na
+chwilę obecną zakłada się, że problemy te (faktoryzacja, znajdywanie logarytmu
+dyskretnego itp.) są nierozwiązywalne w czasie wielomianowym, tak więc oznacza
+to (najprawdopodobniej) sprzeczność. Możemy zatem powiedzieć, że trudność
+złamania formalnych funkcji skrótu jest nie mniejsza niż trudność rozwiązania
+dowolnego problemu, o którym podejrzewamy, że jest trudny do rozwiązania.
+Innymi słowy, problem złamania takich funkcji jest redukowalny do problemu
+milenijnego, stąd funkcje te są postrzegane jako najbezpieczniejsze dostępne
+warianty.
 
 
 
