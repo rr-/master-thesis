@@ -7,6 +7,4 @@ bibtex thesis.aux && \
 pdflatex thesis.tex && \
 clear
 
-rm -f *.log
-rm -f *.aux
-rm -f *.toc
+rm -f *.log *.aux *.toc *.bbl *.blg
