@@ -24,6 +24,7 @@
 \newgeometry{margin=3cm}
 \onehalfspacing
 \newcommand{\myparagraph}[1]{\paragraph{#1}\mbox{}\\}
+\newenvironment{myenumerate}{\begin{enumerate}[label*=\arabic*.]}{\end{enumerate}}
 
 \begin{titlepage}
     \begin{center}
@@ -502,16 +503,16 @@ nie samą wiadomość.
 Funkcje haszujące przychodzą z pomocą także w technikach przechowywania haseł.
 Wyobraźmy sobie przeciętny mechanizm autentykacji.
 
-\begin{enumerate}
+\begin{myenumerate}
 \item Użytkownik Alicja przesyła swoje dane uwierzytelniające do serwera.
 \item Serwer odbiera dane $m$.
 \item Serwer porównuje dane $m$ z wzorcem $m'$ przechowywanym w bazie danych:
 \label{enu:server_pass_check}
-    \begin{enumerate}[label*=\arabic*.]
+    \begin{myenumerate}
     \item jeżeli dane się zgadzają ($m = m'$), serwer udziela Alicji dostępu,
     \item w przeciwnym wypadku odmawia dostępu.
-    \end{enumerate}
-\end{enumerate}
+    \end{myenumerate}
+\end{myenumerate}
 
 Z takim podejściem wiążą się pewne problemy. Po pierwsze, dane, która przesyła
 Alicja, mogą zostać przechwycone przez osobę trzecią, zatem wymagają
@@ -527,19 +528,19 @@ Musimy zatem jakoś zabezpieczyć bazę danych. Można próbować ją szyfrować
 inaczej zabezpieczać dane w niej przechowywane, problem z takim podejściem jest
 jednak taki, że na pewnym poziomie tak czy inaczej jakaś osoba (administrator)
 zawsze będzie miał dostęp do fizycznych danych. Możemy także zahaszować dane
-uwierzytelniające i zmodyfikować nasz protokół w następujący sposób:
+uwierzytelniające i zmodyfikować nasz protokół w sposób opisany poniżej.
 
-\begin{enumerate}
+\begin{myenumerate}
 \item Użytkownik Alicja przesyła swoje dane uwierzytelniające do serwera.
 \item Serwer odbiera dane $m$.
 \item Serwer wylicza na ich podstawie hasz $h = H(m)$.
 \item Serwer porównuje hasz $h$ z wzorcowym haszem $h'$ przechowywanym w bazie
 danych:
-    \begin{enumerate}[label*=\arabic*.]
+    \begin{myenumerate}
     \item jeżeli skróty się zgadzają ($h = h'$), serwer udziela Alicji dostępu,
     \item w przeciwnym wypadku odmawia dostępu.
-    \end{enumerate}
-\end{enumerate}
+    \end{myenumerate}
+\end{myenumerate}
 
 Dzięki temu, że w bazie przechowywane są jedynie nieodwracalne skróty, nawet w
 przypadku kradzieży bazy danych na podstawie wykradzionych skrótów nie powinno
@@ -660,14 +661,14 @@ który dobiera każdemu $m$ przypadkowy element $h$ tak długo, aż $h$ będzie
 niewykorzystany przez żaden inny element (czyli zapewniony będzie brak
 kolizji):
 
-\begin{enumerate}
+\begin{myenumerate}
 \item Zainicjuj tablicę podstawień $T$
 \item Dla każdego $m \in M$:
-    \begin{enumerate}[label*=\arabic*.]
+    \begin{myenumerate}
         \item Wylosuj $h \in M$ takie, że $\not \exists_{m' \in M} : T_{m'} = h$
         \item Przydziel $T_m = h$
-    \end{enumerate}
-\end{enumerate}
+    \end{myenumerate}
+\end{myenumerate}
 
 Taka funkcja, mimo że na pierwszy rzut oka wydaje się przydatna w
 zastosowaniach kryptograficznych (jak by nie patrzeć, implementuje całkowicie
@@ -851,6 +852,53 @@ to pole do popisu kryptologom, którzy znajdują luki na długo po tym, jak dana
 funkcja została opisana po raz pierwszy.
 
 \subsubsection{Konstrukcja Merkle-Damg\r{a}rda}
+W roku 1979 Merkle w swojej pracy doktorskiej po raz pierwszy opisał
+konstrukcję będącą sposobem budowania funkcji haszujących, która została
+później nazwana konstrukcją Merkle-Damg\r{a}rda. Konstrukcja ta nie podaje
+konkretnej implementacji -- wyszczególnione są w niej natomiast wymienialne
+elementy, które muszą być zapewnione przez każdą konkretną implementację; z
+czego na szczególną uwagę zasługuje funkcja dopełnienia bitowego oraz funkcja
+kompresji.
+
+Nazwa wywodzi się stąd, że Merkle oraz Damg\r{a}rd, niezależnie od siebie,
+udowodnili~\cite{merkledamgardsecurity1,merkledamgardsecurity2} w tym samym
+okresie czasu ważną własność tej konstrukcji -- jeżeli użyty zostanie
+odpowiedni schemat dopełnienia bitowego oraz zastosowana funkcja kompresji
+będzie odporna na kolizje, to funkcja haszująca zbudowana za pomocą takiej
+konstrukcji także będzie odporna na kolizje.
+
+Sama konstrukcja składa się z paru kroków, opisanych poniżej.
+
+\begin{myenumerate}
+\item Niech $M = \mathtt{Pad}(m)$, gdzie $m$ to wiadomość, a $\mathtt{Pad}$ to
+funkcja dopełnienia bitowego. Zadaniem tej funkcji jest przekształcenie
+wiadomości $m$ o dowolnej liczbie bitów na wiadomość $M$ o liczbie bitów
+podzielnej przez z góry określoną wartość $c$. Trywialnym przykładem funkcji
+dopełnienia bitowego może być funkcja, która dopisuje zera z prawej strony
+wiadomości $m$.
+
+\item Podziel $M$ na $n$ bloków, każdy o stałej długości $c$, niezależnej od
+$m$. Robimy to, ponieważ funkcja kompresji, opisana w następnych krokach, z
+definicji może działać jedynie na blokach o stałej długości $c$.
+
+\item Niech $h = \mathtt{IV}$, gdzie $\mathtt{IV}$ jest z góry określonym
+wektorem początkowym (\textit{initialization vector}), zawierającą jakaś stałą
+wartość. $h$ będzie się zmieniało wraz z działaniem konstrukcji i oznaczać
+będzie aktualnie obliczoną wartość skrótu. Długość $h$ jest przez cały czas
+stała.
+
+\item Dla $i = 0, 1, \ldots, n$:
+
+\begin{myenumerate}
+\item Niech $h=\mathtt{Comp}(h,M_i)$, gdzie
+$\mathtt{Comp}$ jest funkcją kompresji, $h$ aktualnie obliczoną wartość skrótu
+a $M_i$ stanowi $i$-ty blok wiadomości $M$.
+\end{myenumerate}
+
+\item Niech $h=\mathtt{Fin}(h)$ gdzie $\mathtt{Fin}$ jest funkcją finalizującą.
+Jest to opcjonalny krok, który ma zagwarantować dodatkowe bezpieczeństwo
+poprzez np. zapewnienie lepszego efektu lawinowego.
+\end{myenumerate}
 
 \subsubsection{MD5}
 
@@ -887,11 +935,11 @@ funkcja została opisana po raz pierwszy.
 
 \section{Załączniki}
 
-\begin{enumerate}
+\begin{myenumerate}
 \item \refstepcounter{attcounter}\label{att:english_wordlist}Lista
 przypadkowych, niepowtarzających się angielskich wyrazów używana do
 przeprowadzania testów statystycznych.
 \url{http://download.openwall.net/pub/wordlists/languages/English/3-large/lower.gz}
-\end{enumerate}
+\end{myenumerate}
 
 \end{document}

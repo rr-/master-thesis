@@ -5,6 +5,7 @@ rm -f praca.pdf
 pdflatex thesis.tex && \
 bibtex thesis.aux && \
 pdflatex thesis.tex && \
+pdflatex thesis.tex && \
 clear
 
 rm -f *.log *.aux *.toc *.bbl *.blg
