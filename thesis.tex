@@ -263,27 +263,25 @@ spełnienia poprzednich własności.
 \label{sec:avalance_effect}
 W dobrych funkcjach haszujących powinien zachodzić tzw. efekt lawinowy. Jest to
 własność zapewniająca, że nawet mała zmiana wiadomości $m'$ w stosunku do $m$
-powoduje duże zmiany w wartości $H(m')$ w porównaniu do $H(m)$.
+powoduje duże zmiany w wartości $H(m')$ w porównaniu do $H(m)$. Jej celem jest
+zapewnienie jednej z dwóch fundamentalnych własności dobrego systemu
+kryptograficznego, sformułowanych przez Shannona w
+1949~\cite{confusion_diffusion} -- kryteriów \textit{confusion and diffusion}
+(zamieszanie i rozpraszanie). Warunki te mówią o tym, że zależności pomiędzy
+wiadomością a jej szyfrogramem oraz między szyfrogramem a kluczem użytym do
+szyfrowania powinny być jak najbardziej skomplikowane i nieprzewidywalne tak,
+by utrudnić potencjalne ataki.
 
-Można to sformułować w ten sposób, że pożądany charakter elementów należących
-do przeciwdziedziny funkcji haszującej powinien być praktycznie nieodróżnialny
-od losowego, co można z kolei wyrazić poniższym wzorem:
-$$
-    \begin{aligned}
-    \forall_{a \in A} \;
-    \forall_{0 \leq i \leq n-1} \;
-    &\Pr(H(a)_{(2,i)} = 1) \\
-    =& \Pr(H(a)_{(2,i)} = 0) \\
-    \to& \frac{1}{2}
-    \end{aligned}
-$$
-%todo: wzorki wprowadzają prawdopodobieństwo w zły sposób (sugerują, że hasze
-%są niedeterministyczne)
-gdzie $H(a)_{(2,i)}$ to $i$-ty bit reprezentacji dwójkowej $H(a)$, a $n$ to
-ilość bitów zwracanych przez $H$. Innymi słowy, od dobrej funkcji haszującej
-oczekujemy, aby dla każdego wyjścia, po jego przekształceniu na postać binarną,
-prawdopodobieństwo otrzymania na konkretnym bicie "1" lub "0" było takie samo
-tak, aby nie dało się nic powiedzieć o tym bicie.
+Formalnie mówi się o dwóch, wymienionych poniżej, kryteriach efektu lawinowego.
+
+\begin{myenumerate}
+\item Ścisłe kryterium lawinowe (\textit{strict avalanche criterion},
+\textit{SAC}): po zmianie dowolnego bitu wejścia, każdy bit wyjścia powinien
+się zmienić z prawdopodobieństwem równym $\frac{1}{2}$.
+\item Kryterium niezależności bitowej (\textit{bit independence criterion},
+\textit{BIC}): po zmianie dowolnego bitu wejścia, każde dwa bity wyjścia
+powinny zmieniać się w sposób niezależny od siebie.
+\end{myenumerate}
 
 \begin{figure}[hbt!]
 \pgfplotsset{width=14cm,height=7cm}
@@ -930,8 +928,11 @@ poprzez np. zapewnienie lepszego efektu lawinowego.
 \section{Podsumowanie}
 
 \section{Bibliografia}
+\begingroup
+\renewcommand{\section}[2]{}
 \bibliographystyle{plain}
 \bibliography{bibliography}
+\endgroup
 
 \section{Załączniki}
 
