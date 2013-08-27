@@ -16,6 +16,7 @@
 \usepackage{microtype}
 \usepackage{url}
 \usepackage{floatrow} %domyślnie wyśrodkowuj ryciny
+\usepackage[polish,english]{babel}
 
 \pgfplotsset{compat=1.5} %wersja biblioteki do wykresów; usuwa problemy
 \newcounter{attcounter} %licznik załączników
@@ -24,12 +25,17 @@
 \newgeometry{margin=3cm}
 \onehalfspacing
 \newcommand{\myparagraph}[1]{\paragraph{#1}\mbox{}\\}
-\newenvironment{myenumerate}{\begin{enumerate}[label*=\arabic*.]}{\end{enumerate}}
+\newcommand{\latin}[1]{\foreignlanguage{latin}{\textit{#1}}}
+\newcommand{\en}[1]{\foreignlanguage{english}{\textit{#1}}}
+\newcommand{\abbr}[1]{\textit{#1}}
+\newenvironment{myenumerate}
+    {\begin{enumerate}[label*=\arabic*.]}
+    {\end{enumerate}}
 
 \begin{titlepage}
     \begin{center}
     {\LARGE Uniwersytet im. Adama Mickiewicza w~Poznaniu \\
-    Wydział Matematyki i~Informatyki }
+    Wydział Matematyki i~Informatyki}
     \line(1,0){350}
 
     \vspace{1cm}
@@ -240,36 +246,35 @@ wywołać, a~także żeby same kryptograficzne funkcje skrótu stanowiły godne
 użycia narzędzie we wszystkich sytuacjach, które wymagają wysokiego
 bezpieczeństwa.
 
-\myparagraph{Odporność na kolizje pierwszego rzędu (\textit{preimage
-resistance})}
+\myparagraph{Odporność na kolizje pierwszego rzędu (\en{preimage resistance})}
 \label{sec:preimage_resistance}
 Mając dany skrót $h$, znalezienie wiadomości $m$ takiej, że $H(m) = h$ powinno
 być w~praktyce niewykonalne. Jest to warunek zapewniający jednostronność
 funkcji skrótu. Należy zauważyć, że zależy nam na \emph{dowolnej} wiadomości,
 a~nie oryginalnej wiadomości z~której zostało utworzone $h$.
 
-\myparagraph{Odporność na kolizje drugiego rzędu (\textit{second preimage
+\myparagraph{Odporność na kolizje drugiego rzędu (\en{second preimage
 resistance})}
 \label{sec:second_preimage_resistance}
 Mając daną wiadomość $m$, znalezienie wiadomości $m' \neq m$ takiej, że $H(m) =
 H(m')$ powinno być praktycznie niewykonalne.
 
-\myparagraph{Odporność na kolizje (\textit{collision resistance})}
+\myparagraph{Odporność na kolizje (\en{collision resistance})}
 \label{sec:collision_resistance}
 Znalezienie dwóch dowolnych różnych wiadomości $m \neq m'$ takich, że $H(m) =
 H(m')$ powinno być praktycznie niewykonalne. Spełnienie tej własności implikuje
 odporność na kolizje drugiego rzędu, co jednak nie implikuje odporności na
 kolizje pierwszego rzędu.
 
-\myparagraph{Niemożność odróżnienia od \textit{random oracles}}
-\textit{Random oracle} to teoretyczna czarna skrzynka przypisująca każdemu
+\myparagraph{Niemożność odróżnienia od \en{random oracles}}
+\en{Random oracle} to teoretyczna czarna skrzynka przypisująca każdemu
 argumentowi losową (z jednostajnym rozkładem prawdopodobieństwa) wartość
 z~określonej przeciwdziedziny w~taki sposób, że dla konkretnego argumentu
 zawsze wybiera taką samą wartość. Jest to abstrakcyjna funkcja matematyczna,
-o~której udowodniono~\cite{randomoracle}, że nie może posiadać żadnej
+o~której udowodniono~\cite{random_oracle}, że nie może posiadać żadnej
 implementacji. Pożądane jest to, by kryptograficzna funkcja skrótu była trudna
-do odróżnienia od \textit{random oracle}, choć jest to zadanie znacznie
-trudniejsze od spełnienia poprzednich własności.
+do odróżnienia od \en{random oracle}, choć jest to zadanie znacznie trudniejsze
+od spełnienia poprzednich własności.
 
 \myparagraph{Własność efektu lawinowego}
 \label{sec:avalance_effect}
@@ -278,7 +283,7 @@ własność zapewniająca, że nawet mała zmiana wiadomości $m'$ w~stosunku do
 powoduje duże zmiany w~wartości $H(m')$ w~porównaniu do $H(m)$. Jej celem jest
 zapewnienie jednej z~dwóch fundamentalnych własności dobrego systemu
 kryptograficznego, sformułowanych przez Shannona
-w~1949~\cite{confusion_diffusion}~-- kryteriów \textit{confusion and diffusion}
+w~1949~\cite{confusion_diffusion}~-- kryteriów \en{confusion and diffusion}
 (zamieszanie i~rozpraszanie). Warunki te mówią o~tym, że zależności pomiędzy
 wiadomością a~jej szyfrogramem oraz między szyfrogramem a~kluczem użytym do
 szyfrowania powinny być jak najbardziej skomplikowane i~nieprzewidywalne tak,
@@ -289,12 +294,12 @@ lawinowego.
 
 \begin{myenumerate}
 
-    \item Ścisłe kryterium lawinowe (\textit{strict avalanche criterion},
-    \textit{SAC}): po zmianie dowolnego bitu wejścia, każdy bit wyjścia
-    powinien się zmienić z~prawdopodobieństwem równym $\frac{1}{2}$.
+    \item Ścisłe kryterium lawinowe (\en{strict avalanche criterion},
+    \abbr{SAC}): po zmianie dowolnego bitu wejścia, każdy bit wyjścia powinien
+    się zmienić z~prawdopodobieństwem równym $\frac{1}{2}$.
 
-    \item Kryterium niezależności bitowej (\textit{bit independence criterion},
-    \textit{BIC}): po zmianie dowolnego bitu wejścia, każde dwa bity wyjścia
+    \item Kryterium niezależności bitowej (\en{bit independence criterion},
+    \abbr{BIC}): po zmianie dowolnego bitu wejścia, każde dwa bity wyjścia
     powinny zmieniać się w~sposób niezależny od siebie.
 
 \end{myenumerate}
@@ -512,7 +517,7 @@ zastosowania płyną pewne wymienione niżej korzyści.
     haszującym zależy nam na zabezpieczeniu przed modyfikacją nie całej
     wiadomości, a~jedynie jej malutkiego kawałka zawierającego skrót.
     Przykładem protokołu, który pracuje na opisanej powyżej zasadzie, jest
-    podpis elektroniczny~-- \emph{de~facto} weryfikuje się tam wyłącznie
+    podpis elektroniczny~-- \latin{de~facto} weryfikuje się tam wyłącznie
     autentyczność skrótu wiadomości, a~nie samą wiadomość.
 
 \end{itemize}
@@ -658,7 +663,7 @@ pojęcie odporności na kolizje oraz odporności pierwszego i~drugiego rzędu
 (patrz sekcja~\ref{sec:secure_hash_attributes}). Definicje te zostały
 ostatecznie sformalizowane przez Damg\r{a}rda w~roku 1987. W~roku 2004 Rogaway
 i~Shrimpton pokazali, że funkcje haszujące w~miarę możliwości nie powinny być
-odróżnialne od \textit{random oracles}.
+odróżnialne od \en{random oracles}.
 
 Już od samego początku, czyli późnych lat 70--tych, funkcje haszujące
 przeżywały bardzo szybki rozwój. Zapotrzebowanie na bezpieczne i~szybkie
@@ -735,18 +740,18 @@ losowe permutacje!), jest podejściem złym z~prostych przyczyn:
     uzyskać oryginalne $m$ na podstawie $h$ wystarczy odwrócić tablicę,
     zamieniając jej klucze z~przypisanymi im wartościami (dla danego $h$
     wyszukać $m$, dla którego $T_m = h$). Wykazaliśmy w~ten sposób brak
-    własności \textit{preimage resistance}.
+    własności \en{preimage resistance}.
 
     \item Gdy natomiast będziemy próbowali ukryć sposób w~jaki dokonujemy
     podstawienia (innymi słowy utajnić tablicę $T$), mamy do czynienia
-    z~\textit{security through obscurity} (bezpieczeństwo poprzez
-    niezrozumiałość), co jest bardzo negatywnym zjawiskiem w~kryptografii
-    i~łamie tzw. zasadę Kerckhoffsa. Zasada ta jest jedną z~kilku reguł
-    sformułowanych w~XIX w. przez Kerckhoffsa, traktujących na temat
-    bezpieczeństwa kryptosystemów. Mówi ona, że każdy system kryptograficzny
-    musi być bezpieczny nawet, gdy jego sposób działania wraz ze szczegółami
-    implementacji jest jawny (za wyjątkiem klucza, który jest z~definicji
-    tajny, z~tym że funkcje haszujące nie używają klucza).
+    z~\en{security through obscurity} (bezpieczeństwo poprzez niezrozumiałość),
+    co jest bardzo negatywnym zjawiskiem w~kryptografii i~łamie tzw. zasadę
+    Kerckhoffsa. Zasada ta jest jedną z~kilku reguł sformułowanych w~XIX w.
+    przez Kerckhoffsa, traktujących na temat bezpieczeństwa kryptosystemów.
+    Mówi ona, że każdy system kryptograficzny musi być bezpieczny nawet, gdy
+    jego sposób działania wraz ze szczegółami implementacji jest jawny (za
+    wyjątkiem klucza, który jest z~definicji tajny, z~tym że funkcje haszujące
+    nie używają klucza).
 
     \item Nawet gdy zignorujemy powyższe przykazanie, nasz algorytm będzie
     nieodporny na proste ataki statystyczne: analizując rozkład
@@ -797,7 +802,7 @@ posiadanego konkretnego wyjścia.
 Łatwo zauważyć, że każda silnie jednokierunkowa funkcja spełnia jednocześnie
 warunki nałożone na funkcje słabo jednokierunkowe. Ponadto każda funkcja
 jednokierunkowa spełnia automatycznie podstawowy warunek nałożony na bezpieczne
-funkcje skrótu (mianowicie \textit{preimage collision resistance}). Funkcje te
+funkcje skrótu (mianowicie \en{preimage collision resistance}). Funkcje te
 powinny zatem przyciągnąć nasze zainteresowanie.
 
 
@@ -884,7 +889,7 @@ naprawdę metoda ta sprowadza się do wykorzystania opisanych wcześniej
 kandydatów na funkcje jednokierunkowe i~dostarczeniu dowodu, że złamanie
 konstrukcji opartej na danym problemie jest tak samo trudne, jak trudne jest
 rozwiązanie tego problemu. Z~charakteru tego podejścia wywodzi się nazwa tej
-rodziny kryptograficznych funkcji haszujących: \textit{provably secure
+rodziny kryptograficznych funkcji haszujących: \en{provably secure
 cryptographic hash functions}.
 
 W~praktyce dowody trudności złamania funkcji z~tej rodziny polegają na
@@ -920,7 +925,7 @@ wiadomości $m$ (takich, jak przestawianie, dodawanie, odejmowanie i~inne).
 Komputery są przystosowane do tego typu obliczeń, dzięki czemu w~porównaniu do
 formalnie bezpiecznych funkcji skrótu haszowanie takimi funkcjami odbywa się
 bardzo szybko. Oznacza to jednak, że autorzy funkcji zazwyczaj ograniczają się
-jedynie do wstępnej analizy jej słabości, \textit{de~facto} nie przedstawiając
+jedynie do wstępnej analizy jej słabości, \latin{de~facto} nie przedstawiając
 formalnego dowodu trudności jej złamania. Badania mające na celu znalezienie
 słabości przypominają w~swojej naturze szukanie igły w~stogu siana:
 nieznalezienie igły na daną chwilę nie oznacza jeszcze nieistnienia igły. Daje
@@ -964,10 +969,10 @@ Sama konstrukcja składa się z~paru kroków, opisanych poniżej.
     krokach, z~definicji może działać jedynie na blokach o~stałej długości $c$.
 
     \item Niech $h = \mathtt{IV}$, gdzie $\mathtt{IV}$ jest z~góry określonym
-    wektorem początkowym (\textit{initialization vector}), zawierającą jakaś
-    stałą wartość. $h$ będzie się zmieniało wraz z~działaniem konstrukcji
-    i~oznaczać będzie aktualnie obliczoną wartość skrótu. Długość $h$ jest
-    przez cały czas stała.
+    wektorem początkowym (\en{initialization vector}), zawierającą jakaś stałą
+    wartość. $h$ będzie się zmieniało wraz z~działaniem konstrukcji i~oznaczać
+    będzie aktualnie obliczoną wartość skrótu. Długość $h$ jest przez cały czas
+    stała.
 
     \item Dla $i = 0, 1, \ldots, n$:
 
@@ -1023,11 +1028,11 @@ Sama konstrukcja składa się z~paru kroków, opisanych poniżej.
 
 \subsection{Ataki na słabe funkcje haszujące}
 
-\subsubsection{\textit{Collision resistance}}
+\subsubsection{\en{Collision resistance}}
 
-\subsubsection{\textit{Preimage resistance}}
+\subsubsection{\en{Preimage resistance}}
 
-\subsubsection{\textit{Second preimage resistance}}
+\subsubsection{\en{Second preimage resistance}}
 
 \section{Podsumowanie}
 
