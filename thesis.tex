@@ -650,7 +650,7 @@ zbioru. Innymi słowy, jest to bijekcja na samą siebie, lub permutacja.
 \begin{figure}[htb!]
 \includegraphics[width=6cm]{img/injection_self.eps}
 \caption{Każdemu wyjściu przyporządkowywane jest dokładnie jedno wejście}
-\label{fig:surjection}
+\label{fig:bijection}
 \end{figure}
 
 
@@ -898,10 +898,21 @@ Jest to opcjonalny krok, który ma zagwarantować dodatkowe bezpieczeństwo
 poprzez np. zapewnienie lepszego efektu lawinowego.
 \end{myenumerate}
 
-\subsubsection{MD5}
+\begin{figure}
+\includegraphics[width=12cm]{img/merkle_damgard.eps}
+\caption{Schemat działania konstrukcji Merkle-Damg\r{a}rda. Oznaczenia: $m$ --
+wiadomość wejściowa, $\mathtt{Pad}$ -- funkcja dopełnienia bitowego, $M_0, M_1,
+M_2, \ldots, M_n$ -- kolejne bloki wiadomości długości $c$, $\mathtt{IV}$ --
+wektor początkowy, $\mathtt{Comp}$ -- funkcja kompresji,  $\mathtt{Fin}$ --
+funkcja finalizująca.}
+\label{fig:merkle_damgard}
+\end{figure}
 
-\subsubsection{SHA-1}
+\subsubsection{\texttt{MD5}}
 
+\subsubsection{\texttt{SHA-1}}
+
+\newpage
 \section{Ataki uniwersalne}
 \label{sec:universal_attacks}
 
