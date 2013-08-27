@@ -850,16 +850,19 @@ to pole do popisu kryptologom, którzy znajdują luki na długo po tym, jak dana
 funkcja została opisana po raz pierwszy.
 
 \subsubsection{Konstrukcja Merkle-Damg\r{a}rda}
-W roku 1979 Merkle w swojej pracy doktorskiej po raz pierwszy opisał
-konstrukcję będącą sposobem budowania funkcji haszujących, która została
-później nazwana konstrukcją Merkle-Damg\r{a}rda. Konstrukcja ta nie podaje
-konkretnej implementacji -- wyszczególnione są w niej natomiast wymienialne
-elementy, które muszą być zapewnione przez każdą konkretną implementację; z
-czego na szczególną uwagę zasługuje funkcja dopełnienia bitowego oraz funkcja
-kompresji.
+Przykładem sposobu, w jaki działają nowoczesne kryptograficzne funkcje skrótu
+oparte o operacje bitowe, może być konstrukcja Merkle-Damg\r{a}rda. Opisana po
+raz pierwszy przez Merkle w roku 1979 w jego pracy
+doktorskiej~\cite{merkle_damgard_construction}, stanowi rdzeń używanych po dziś
+dzień funkcji skrótu takich jak \texttt{SHA-1} czy \texttt{MD5} i jest jedną z
+najpopularniejszych metod konstrukcji funkcji haszujących. Konstrukcja ta
+nie specyfikuje kompletnego działania -- wyszczególnione są w niej natomiast
+wymienialne elementy, które muszą być zapewnione przez każdą konkretną
+implementację; spośród nich na szczególną uwagę zasługuje funkcja dopełnienia
+bitowego oraz funkcja kompresji.
 
 Nazwa wywodzi się stąd, że Merkle oraz Damg\r{a}rd, niezależnie od siebie,
-udowodnili~\cite{merkledamgardsecurity1,merkledamgardsecurity2} w tym samym
+udowodnili~\cite{merkle_damgard_security1,merkle_damgard_security2} w tym samym
 okresie czasu ważną własność tej konstrukcji -- jeżeli użyty zostanie
 odpowiedni schemat dopełnienia bitowego oraz zastosowana funkcja kompresji
 będzie odporna na kolizje, to funkcja haszująca zbudowana za pomocą takiej
