@@ -2,10 +2,10 @@
 cd "$( dirname "${BASH_SOURCE[0]}" )"
 rm -f praca.pdf
 
-pdflatex thesis.tex && \
+pdflatex -interaction=batchmode -file-line-error thesis.tex && \
 bibtex thesis.aux && \
-pdflatex thesis.tex && \
-pdflatex thesis.tex && \
+pdflatex -interaction=batchmode -file-line-error thesis.tex && \
+pdflatex -interaction=batchmode -file-line-error thesis.tex && \
 clear
 
-rm -f *.log *.aux *.toc *.bbl *.blg
+rm -f *.aux *.toc *.bbl *.blg
