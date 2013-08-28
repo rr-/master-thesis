@@ -17,6 +17,7 @@
 \usepackage{url}
 \usepackage{floatrow} %domyślnie wyśrodkowuj ryciny
 \usepackage[polish,english]{babel}
+\usepackage{mathtools} %\ceil, \floor
 
 \pgfplotsset{compat=1.5} %wersja biblioteki do wykresów; usuwa problemy
 \newcounter{attcounter} %licznik załączników
@@ -31,6 +32,8 @@
 \newenvironment{myenumerate}
     {\begin{enumerate}[label*=\arabic*.]}
     {\end{enumerate}}
+\DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
+\DeclarePairedDelimiter{\floor}{\lfloor}{\rfloor}
 
 \begin{titlepage}
     \begin{center}
@@ -921,7 +924,7 @@ rzeczywistym czy też systemy uwierzytelniania o~dużej przepustowości).
 W~związku z~tym została stworzona druga rodzina kryptograficznych funkcji
 skrótu. Działanie funkcji z~tej rodziny polega ogólnie rzecz biorąc na
 dokonywaniu ogromnych ilości różnorodnych operacji na konkretnych bitach
-wiadomości $m$ (takich, jak przestawianie, dodawanie, odejmowanie i~inne).
+wiadomości $m$ (takich jak przestawianie, dodawanie, odejmowanie i~inne).
 Komputery są przystosowane do tego typu obliczeń, dzięki czemu w~porównaniu do
 formalnie bezpiecznych funkcji skrótu haszowanie takimi funkcjami odbywa się
 bardzo szybko. Oznacza to jednak, że autorzy funkcji zazwyczaj ograniczają się
@@ -1003,7 +1006,62 @@ Sama konstrukcja składa się z~paru kroków, opisanych poniżej.
 
 
 \subsubsection{\texttt{MD5}}
+\texttt{MD5} jest pierwszą z~dwóch funkcji, na których się skupimy w~tej pracy.
+Jej wykorzystanie jest bardzo szerokie: znajduje zastosowanie w systemach
+bezpieczeństwa oraz systemach weryfikacji integralności danych.
 
+Oparta o~konstrukcję Merkle-Damg\r{a}rda, funkcja przekształca wiadomości
+o~dowolnej ilości bitów na skróty o~stałej długości 128~bitów. Jej schemat
+działania wygląda następująco:
+
+\begin{myenumerate}
+
+    \item Faza dopełnienia bitowego
+
+    \begin{myenumerate}
+
+        \item Dopisz bit $1$ na końcu wiadomości $m$.
+
+        \item Dopisz tyle bitów $0$ na końcu wiadomości $m$, ile potrzeba, aby
+        długość $m$ była mniejsza o 64 bity od wielokrotności 512. Innymi
+        słowy, dopisz $512 \cdot \ceil{\frac{|m|+64}{512}}-64-(|m| \mod{512})$
+        bitów $0$, gdzie $|m|$ oznacza długość wiadomości $m$.
+
+\pagebreak
+        \item Dopisz na końcu wiadomości zakodowaną długość oryginalnej
+        wiadomości $m$ (wpisując tam kolejne bitów $m \mod{2^{64}}$).
+        \footnote{Wprawdzie we wcześniejszym kroku mogliśmy zawinąć wiadomość
+        po prostu do długości podzielnej 512 bitów, a~w~tym kroku nadpisać
+        dodane zera, jednak takie podejście spowodowałoby, że moglibyśmy
+        nadpisać bajty oryginalnej wiadomości $m$. Dlatego też w powyższych
+        dwóch krokach zadbaliśmy nie tylko, aby długość wiadomości po dopisaniu
+        jej długości była podzielna przez 512, ale też aby nie nadpisano
+        żadnych ważnych bitów.}
+
+        Ma to na celu zapewnienie własności sformułowanych przez Mihira
+        Bellare, który udowodnił~\cite{merkle_damgard_strengthening}, że aby
+        konstrukcja Merkle-Damg\r{a}rda była bezpieczna, wystarcza, by funkcja
+        $\mathtt{Pad}$ spełniała następujące własności:
+
+        \begin{itemize}
+
+            \item $m$ jest prefiksem $\mathtt{Pad}(m)$,
+
+            \item gdy $|m_1| = |m_2|$, to $|\mathtt{Pad}(m_1)| =
+            |\mathtt{Pad}(m_2)|$,
+
+            \item gdy $m_1 \neq m_2$, to ostatni blok $\mathtt{Pad}(m_1)$ jest
+            różny od ostatniego bloku $\mathtt{Pad}(m_2)$. (Długość bloku
+            w~tym kontekście jest taka sama, jak długość bloku używanego przez
+            całą konstrukcję Merkle-Damg\r{a}rda.)
+
+        \end{itemize}
+
+    \end{myenumerate}
+
+    \item Faza kompresji
+
+\end{myenumerate}
 
 
 \subsubsection{\texttt{SHA-1}}
