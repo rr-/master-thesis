@@ -5,7 +5,6 @@
 \usepackage{pgfplots} %wykresy
 \usepackage[utf8]{inputenc}
 \usepackage[OT1]{fontenc}
-\usepackage{polski}
 \usepackage{graphicx} %wstawianie obrazków
 \usepackage{epstopdf} %wstawianie obrazków w formacie .eps
 \usepackage{setspace}
@@ -16,7 +15,8 @@
 \usepackage{microtype}
 \usepackage{url}
 \usepackage{floatrow} %domyślnie wyśrodkowuj ryciny
-\usepackage[polish,english]{babel}
+\usepackage[english,polish]{babel}
+\usepackage{polski}
 \usepackage{mathtools} %\ceil, \floor
 
 \pgfplotsset{compat=1.5} %wersja biblioteki do wykresów; usuwa problemy
@@ -1007,7 +1007,7 @@ Sama konstrukcja składa się z~paru kroków, opisanych poniżej.
 
 \subsubsection{\texttt{MD5}}
 \texttt{MD5} jest pierwszą z~dwóch funkcji, na których się skupimy w~tej pracy.
-Jej wykorzystanie jest bardzo szerokie: znajduje zastosowanie w systemach
+Jej wykorzystanie jest bardzo szerokie: znajduje zastosowanie w~systemach
 bezpieczeństwa oraz systemach weryfikacji integralności danych.
 
 Oparta o~konstrukcję Merkle-Damg\r{a}rda, funkcja przekształca wiadomości
@@ -1023,20 +1023,20 @@ działania wygląda następująco:
         \item Dopisz bit $1$ na końcu wiadomości $m$.
 
         \item Dopisz tyle bitów $0$ na końcu wiadomości $m$, ile potrzeba, aby
-        długość $m$ była mniejsza o 64 bity od wielokrotności 512. Innymi
+        długość $m$ była mniejsza o~64~bity od wielokrotności 512. Innymi
         słowy, dopisz $512 \cdot \ceil{\frac{|m|+64}{512}}-64-(|m| \mod{512})$
         bitów $0$, gdzie $|m|$ oznacza długość wiadomości $m$.
+        \pagebreak
 
-\pagebreak
         \item Dopisz na końcu wiadomości zakodowaną długość oryginalnej
-        wiadomości $m$ (wpisując tam kolejne bitów $m \mod{2^{64}}$).
-        \footnote{Wprawdzie we wcześniejszym kroku mogliśmy zawinąć wiadomość
-        po prostu do długości podzielnej 512 bitów, a~w~tym kroku nadpisać
-        dodane zera, jednak takie podejście spowodowałoby, że moglibyśmy
-        nadpisać bajty oryginalnej wiadomości $m$. Dlatego też w powyższych
-        dwóch krokach zadbaliśmy nie tylko, aby długość wiadomości po dopisaniu
-        jej długości była podzielna przez 512, ale też aby nie nadpisano
-        żadnych ważnych bitów.}
+        wiadomości $m$ (wpisując tam kolejne bity $m \mod{2^{64}}$).
+        \footnote{Wprawdzie wydawałoby się, że we wcześniejszym kroku mogliśmy
+        zawinąć wiadomość do długości po prostu podzielnej przez 512~bitów,
+        a~w~aktualnym kroku nadpisać dodane zera, jednak takie podejście
+        spowodowałoby, że moglibyśmy nadpisać bajty oryginalnej wiadomości $m$.
+        Dlatego też w~powyższych dwóch krokach zadbaliśmy nie tylko, aby
+        długość wiadomości po dopisaniu jej długości była podzielna przez 512,
+        ale też aby nie nadpisano żadnych ważnych bitów.}
 
         Ma to na celu zapewnienie własności sformułowanych przez Mihira
         Bellare, który udowodnił~\cite{merkle_damgard_strengthening}, że aby
@@ -1061,14 +1061,94 @@ działania wygląda następująco:
 
     \item Faza kompresji
 
+    \begin{myenumerate}
+
+        \item Na początku zostaje wprowadzony wewnętrzny stan funkcji skrótu,
+        będący wektorem 128~bitów, w~którym wyróżniamy 4~wektory oznaczone
+        kolejno: $A$, $B$, $C$ i~$D$ (każdy o~długości 32~bitów). Wektor ten
+        jest inicjowany stałym wektorem $\mathtt{IV}$, co przekłada się na
+        przydzielenie $A$, $B$, $C$ i~$D$ następujących wartości:
+
+        \[
+            \begin{aligned}
+                A &:= \mathtt{0x67452301} \\
+                B &:= \mathtt{0xefcdab89} \\
+                C &:= \mathtt{0x98badcfe} \\
+                D &:= \mathtt{0x10325476}
+            \end{aligned}
+        \]
+
+        \item Następnie dla każdego kolejnego bloku wiadomości $M_0, M_1, M_2,
+        \ldots, M_n$ będziemy aktualizować wewnętrzny stan $(A,B,C,D)$
+        przypisując mu w~każdym kroku wartość funkcji kompresji obliczoną na
+        podstawie danego bloku i~poprzedniego stanu:
+        $(A,B,C,D) := \mathtt{Comp}((A,B,C,D),M_i)$.
+
+        \pagebreak
+        Funkcja kompresji składa się z~4~rund. W~każdej rundzie wykonywane jest
+        16~operacji przekształcających stan $(A,B,C,D)$, przedstawionych na
+        rysunku~\ref{fig:md5_operation}. Każda operacja wykorzystuje funkcję
+        $F$, która jest zależna od aktualnej rundy w~następujący sposób:
+
+        \begin{itemize}
+
+            \item runda 1 -- $F(B,C,D) = (B \land C) \lor (\lnot B \land D)$,
+            \item runda 2 -- $F(B,C,D) = (B \land D) \lor (C \land \lnot D)$,
+            \item runda 3 -- $F(B,C,D) = B \oplus C \oplus D$,
+            \item runda 4 -- $F(B,C,D) = C \oplus (B \lor \lnot D)$.
+
+        \end{itemize}
+
+        Oznaczenia:
+
+        \begin{itemize}
+
+            \item $\land$ -- operator koniunkcji,
+            \item $\lor$ -- operator alternatywy,
+            \item $\oplus$ -- operator alternatywy wykluczającej.
+
+        \end{itemize}
+
+        Powyższe operatory przypisują dla każdej pary bitów $a$, $b$
+        w~wektorach $A$~i~$B$ wartości zgodnie z~poniższą tabelką:
+
+        \begin{center}
+            \begin{tabular}{ |c|c||c|c|c| }
+                \hline
+                $a$ & $b$ & $a \land b$ & $a \lor b$ & $a \oplus b$ \\
+                \hline
+                1 & 1 & 1 & 1 & 0 \\
+                1 & 0 & 0 & 1 & 1 \\
+                0 & 1 & 0 & 1 & 1 \\
+                0 & 0 & 0 & 0 & 0 \\
+                \hline
+            \end{tabular}
+        \end{center}
+
+        %todo: opisz rotację i przesunięcia bitowe
+
+        \begin{figure}
+            \includegraphics[width=2cm]{logo-uam/logo-uam.png}
+            %todo: faktyczna operacja md5 a nie placeholder
+            \caption{Jedna operacja \texttt{MD5}.}
+            \label{fig:md5_operation}
+        \end{figure}
+
+    \end{myenumerate}
+
+    \item Po wykonaniu wszystkich 64~operacji (4~rundy $\times$
+    16~operacji), stan wewnętrzny $(A,B,C,D)$ jest zwracany jako wyjściowy
+    skrót z~funkcji.
+
 \end{myenumerate}
-
-
-\subsubsection{\texttt{SHA-1}}
 
 
 
 \newpage
+\subsubsection{\texttt{SHA-1}}
+
+
+
 \section{Ataki uniwersalne}
 \label{sec:universal_attacks}
 
