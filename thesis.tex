@@ -18,9 +18,10 @@
 \usepackage[english,polish]{babel}
 \usepackage{polski}
 \usepackage{mathtools} %\ceil, \floor
+\usepackage[title]{appendix} %appendices
+\usepackage{caption} %multi-line captions
 
 \pgfplotsset{compat=1.5} %wersja biblioteki do wykresów; usuwa problemy
-\newcounter{attcounter} %licznik załączników
 
 \begin{document}
 \newgeometry{margin=3cm}
@@ -446,9 +447,8 @@ lawinowego.
         \end{axis}
     \end{tikzpicture}
     \caption{Przykładowy rozkład prawdopodobieństwa występowania "1" na
-    kolejnych bitach skrótów \texttt{MD5}, otrzymanych z~zahaszowania 390532
-    wyrazów z~załącznika~\ref{att:english_wordlist}.}
-\end{figure}
+    kolejnych bitach skrótów \texttt{MD5}, otrzymanych z~zahaszowania wyrazów
+    z~załącznika~\ref{app:english_wordlist}.} \end{figure}
 \pagebreak
 
 
@@ -1012,7 +1012,9 @@ bezpieczeństwa oraz systemach weryfikacji integralności danych.
 
 Oparta o~konstrukcję Merkle-Damg\r{a}rda, funkcja przekształca wiadomości
 o~dowolnej ilości bitów na skróty o~stałej długości 128~bitów. Jej schemat
-działania wygląda następująco:
+został przedstawiony poniżej (wszystkie operacje są dokonywane w~porządku
+bitowym \en{little endian}; znaczenie operatorów wprowadzonych w~tej sekcji
+zostało opisane w~dodatku~\ref{app:bitwise_operations}.
 
 \begin{myenumerate}
 
@@ -1026,20 +1028,19 @@ działania wygląda następująco:
         długość $m$ była mniejsza o~64~bity od wielokrotności 512. Innymi
         słowy, dopisz $512 \cdot \ceil{\frac{|m|+64}{512}}-64-(|m| \mod{512})$
         bitów $0$, gdzie $|m|$ oznacza długość wiadomości $m$.
-        \pagebreak
+        \footnote{Zawijamy wiadomość $m$ w~taki skomplikowany sposób dlatego,
+        że za chwilę będziemy dopisywać do niej nową wartość $x$ (o~długości
+        64~bitów). Gdybyśmy po prostu zawinęli $m$ do 512 bitów, a~następnie
+        nadpisali ostatnie 64~bity bitami $x$, mogłoby się zdarzyć, że
+        nadpisalibyśmy bity oryginalnej $m$, co jest niepożądane -- dlatego
+        dbamy, aby długość wiadomości \emph{po dopisaniu} była podzielna przez
+        512.}
 
         \item Dopisz na końcu wiadomości zakodowaną długość oryginalnej
-        wiadomości $m$ (wpisując tam kolejne bity $m \mod{2^{64}}$).
-        \footnote{Wprawdzie wydawałoby się, że we wcześniejszym kroku mogliśmy
-        zawinąć wiadomość do długości po prostu podzielnej przez 512~bitów,
-        a~w~aktualnym kroku nadpisać dodane zera, jednak takie podejście
-        spowodowałoby, że moglibyśmy nadpisać bajty oryginalnej wiadomości $m$.
-        Dlatego też w~powyższych dwóch krokach zadbaliśmy nie tylko, aby
-        długość wiadomości po dopisaniu jej długości była podzielna przez 512,
-        ale też aby nie nadpisano żadnych ważnych bitów.}
+        wiadomości $m$ (wpisując tam kolejne bity $|m| \mod{2^{64}}$).
 
         Ma to na celu zapewnienie własności sformułowanych przez Mihira
-        Bellare, który udowodnił~\cite{merkle_damgard_strengthening}, że aby
+        Bellare, który pokazał~\cite{merkle_damgard_strengthening}, że aby
         konstrukcja Merkle-Damg\r{a}rda była bezpieczna, wystarcza, by funkcja
         $\mathtt{Pad}$ spełniała następujące własności:
 
@@ -1066,8 +1067,8 @@ działania wygląda następująco:
         \item Na początku zostaje wprowadzony wewnętrzny stan funkcji skrótu,
         będący wektorem 128~bitów, w~którym wyróżniamy 4~wektory oznaczone
         kolejno: $A$, $B$, $C$ i~$D$ (każdy o~długości 32~bitów). Wektor ten
-        jest inicjowany stałym wektorem $\mathtt{IV}$, co przekłada się na
-        przydzielenie $A$, $B$, $C$ i~$D$ następujących wartości:
+        jest inicjowany stałym wektorem $\mathtt{IV}$ zgodnym z~poniższym
+        równaniem:
 
         \[
             \begin{aligned}
@@ -1079,60 +1080,17 @@ działania wygląda następująco:
         \]
 
         \item Następnie dla każdego kolejnego bloku wiadomości $M_0, M_1, M_2,
-        \ldots, M_n$ będziemy aktualizować wewnętrzny stan $(A,B,C,D)$
-        przypisując mu w~każdym kroku wartość funkcji kompresji obliczoną na
+        \ldots, M_n$ będziemy aktualizować $(A,B,C,D)$
+        wartością funkcji kompresji obliczoną na
         podstawie danego bloku i~poprzedniego stanu:
         $(A,B,C,D) := \mathtt{Comp}((A,B,C,D),M_i)$.
 
-        \pagebreak
-        Funkcja kompresji składa się z~4~rund. W~każdej rundzie wykonywane jest
-        16~operacji przekształcających stan $(A,B,C,D)$, przedstawionych na
+        Sama funkcja kompresji składa się z~4~rund. W~każdej rundzie wykonywane
+        jest 16~operacji przekształcających stan $(A,B,C,D)$ -- konstrukcja
+        pojedynczej operacji została przedstawiona na
         rysunku~\ref{fig:md5_operation}. Każda operacja wykorzystuje funkcję
-        $F$, która jest zależna od aktualnej rundy w~następujący sposób:
-
-        \begin{itemize}
-
-            \item runda 1 -- $F(B,C,D) = (B \land C) \lor (\lnot B \land D)$,
-            \item runda 2 -- $F(B,C,D) = (B \land D) \lor (C \land \lnot D)$,
-            \item runda 3 -- $F(B,C,D) = B \oplus C \oplus D$,
-            \item runda 4 -- $F(B,C,D) = C \oplus (B \lor \lnot D)$.
-
-        \end{itemize}
-
-        Oznaczenia:
-
-        \begin{itemize}
-
-            \item $\land$ -- operator koniunkcji,
-            \item $\lor$ -- operator alternatywy,
-            \item $\oplus$ -- operator alternatywy wykluczającej.
-
-        \end{itemize}
-
-        Powyższe operatory przypisują dla każdej pary bitów $a$, $b$
-        w~wektorach $A$~i~$B$ wartości zgodnie z~poniższą tabelką:
-
-        \begin{center}
-            \begin{tabular}{ |c|c||c|c|c| }
-                \hline
-                $a$ & $b$ & $a \land b$ & $a \lor b$ & $a \oplus b$ \\
-                \hline
-                1 & 1 & 1 & 1 & 0 \\
-                1 & 0 & 0 & 1 & 1 \\
-                0 & 1 & 0 & 1 & 1 \\
-                0 & 0 & 0 & 0 & 0 \\
-                \hline
-            \end{tabular}
-        \end{center}
-
-        %todo: opisz rotację i przesunięcia bitowe
-
-        \begin{figure}
-            \includegraphics[width=2cm]{logo-uam/logo-uam.png}
-            %todo: faktyczna operacja md5 a nie placeholder
-            \caption{Jedna operacja \texttt{MD5}.}
-            \label{fig:md5_operation}
-        \end{figure}
+        $F$, która jest zależna od aktualnej rundy zgodnie
+        z~tabelą~\ref{tbl:md5_round_function}.
 
     \end{myenumerate}
 
@@ -1142,10 +1100,78 @@ działania wygląda następująco:
 
 \end{myenumerate}
 
+\begin{figure}
+    \includegraphics[width=7.5cm]{img/md5_operation.eps}
+    \captionsetup{singlelinecheck=off}
+    \caption[blablabla]{
+    Jedna operacja \texttt{MD5}. Oznaczenia:
+    \begin{itemize}
+        \item $A$, $B$, $C$~i~$D$ -- wektory stanu wewnętrznego,
+        \item $F$ -- funkcja rundy,
+        \item $M_i$ -- 32-bitowy fragment 512-bitowego bloku wiadomości,
+        \item $K_i$ -- 32-bitowa stała,
+        \item $S_i$ -- stała oznaczająca ilość bitów w przesunięciu cyklicznym.
+    \end{itemize}
+    Każda kolejna operacja używa innego zestawu stałych $K_i$ oraz $S_i$, które
+    zostały opisane w tabeli~\ref{tbl:md5_operation_const}.}
+    \label{fig:md5_operation}
+\end{figure}
+
+\begin{table}
+    \caption{Funkcja $F$ użyta w~kolejnych rundach.}
+    \label{tbl:md5_round_function}
+    \begin{tabular}{|l|l|}
+        \hline
+        Runda & Funkcja rundy \\
+        \hline
+        Runda 1 & $F(B,C,D) = (B \land C) \lor (\lnot B \land D)$ \\
+        Runda 2 & $F(B,C,D) = (B \land D) \lor (C \land \lnot D)$ \\
+        Runda 3 & $F(B,C,D) = B \oplus C \oplus D$ \\
+        Runda 4 & $F(B,C,D) = C \oplus (B \lor \lnot D)$ \\
+        \hline
+    \end{tabular}
+\end{table}
+
+\begin{table}[thb]
+    \resizebox{\columnwidth}{!}{
+    \begin{tabular}{ |c|c|c|| c|c|c|| c|c|c|| c|c|c| }
+        \hline
+            \multicolumn{3}{|c||}{Runda 1} &
+            \multicolumn{3}{|c||}{Runda 2} &
+            \multicolumn{3}{|c||}{Runda 3} &
+            \multicolumn{3}{|c|}{Runda 4} \\
+        \hline
+        $i$ & $K_i$ & $S_i$ & $i$ & $K_i$ & $S_i$ & $i$ & $K_i$ & $S_i$ & $i$ & $K_i$ & $S_i$ \\
+        \hline
+        0 & $\mathtt{0xd76aa478}$ & 7 & 16 & $\mathtt{0xf61e2562}$ & 5 & 32 & $\mathtt{0xfffa3942}$ & 4 & 48 & $\mathtt{0xf4292244}$ & 6 \\
+        1 & $\mathtt{0xe8c7b756}$ & 12 & 17 & $\mathtt{0xc040b340}$ & 9 & 33 & $\mathtt{0x8771f681}$ & 11 & 49 & $\mathtt{0x432aff97}$ & 10 \\
+        2 & $\mathtt{0x242070db}$ & 17 & 18 & $\mathtt{0x265e5a51}$ & 14 & 34 & $\mathtt{0x6d9d6122}$ & 16 & 50 & $\mathtt{0xab9423a7}$ & 15 \\
+        3 & $\mathtt{0xc1bdceee}$ & 22 & 19 & $\mathtt{0xe9b6c7aa}$ & 20 & 35 & $\mathtt{0xfde5380c}$ & 23 & 51 & $\mathtt{0xfc93a039}$ & 21 \\
+        4 & $\mathtt{0xf57c0faf}$ & 7 & 20 & $\mathtt{0xd62f105d}$ & 5 & 36 & $\mathtt{0xa4beea44}$ & 4 & 52 & $\mathtt{0x655b59c3}$ & 6 \\
+        5 & $\mathtt{0x4787c62a}$ & 12 & 21 & $\mathtt{0x02441453}$ & 9 & 37 & $\mathtt{0x4bdecfa9}$ & 11 & 53 & $\mathtt{0x8f0ccc92}$ & 10 \\
+        6 & $\mathtt{0xa8304613}$ & 17 & 22 & $\mathtt{0xd8a1e681}$ & 14 & 38 & $\mathtt{0xf6bb4b60}$ & 16 & 54 & $\mathtt{0xffeff47d}$ & 15 \\
+        7 & $\mathtt{0xfd469501}$ & 22 & 23 & $\mathtt{0xe7d3fbc8}$ & 20 & 39 & $\mathtt{0xbebfbc70}$ & 23 & 55 & $\mathtt{0x85845dd1}$ & 21 \\
+        8 & $\mathtt{0x698098d8}$ & 7 & 24 & $\mathtt{0x21e1cde6}$ & 5 & 40 & $\mathtt{0x289b7ec6}$ & 4 & 56 & $\mathtt{0x6fa87e4f}$ & 6 \\
+        9 & $\mathtt{0x8b44f7af}$ & 12 & 25 & $\mathtt{0xc33707d6}$ & 9 & 41 & $\mathtt{0xeaa127fa}$ & 11 & 57 & $\mathtt{0xfe2ce6e0}$ & 10 \\
+        10 & $\mathtt{0xffff5bb1}$ & 17 & 26 & $\mathtt{0xf4d50d87}$ & 14 & 42 & $\mathtt{0xd4ef3085}$ & 16 & 58 & $\mathtt{0xa3014314}$ & 15 \\
+        11 & $\mathtt{0x895cd7be}$ & 22 & 27 & $\mathtt{0x455a14ed}$ & 20 & 43 & $\mathtt{0x04881d05}$ & 23 & 59 & $\mathtt{0x4e0811a1}$ & 21 \\
+        12 & $\mathtt{0x6b901122}$ & 7 & 28 & $\mathtt{0xa9e3e905}$ & 5 & 44 & $\mathtt{0xd9d4d039}$ & 4 & 60 & $\mathtt{0xf7537e82}$ & 6 \\
+        13 & $\mathtt{0xfd987193}$ & 12 & 29 & $\mathtt{0xfcefa3f8}$ & 9 & 45 & $\mathtt{0xe6db99e5}$ & 11 & 61 & $\mathtt{0xbd3af235}$ & 10 \\
+        14 & $\mathtt{0xa679438e}$ & 17 & 30 & $\mathtt{0x676f02d9}$ & 14 & 46 & $\mathtt{0x1fa27cf8}$ & 16 & 62 & $\mathtt{0x2ad7d2bb}$ & 15 \\
+        15 & $\mathtt{0x49b40821}$ & 22 & 31 & $\mathtt{0x8d2a4c8a}$ & 20 & 47 & $\mathtt{0xc4ac5665}$ & 23 & 63 & $\mathtt{0xeb86d391}$ & 21 \\
+        \hline
+    \end{tabular}
+    }
+    \caption{Stałe $K_i$ oraz $S_i$ użyte w~kolejnych operacjach
+    podczas działania funkcji kompresji.}
+    \label{tbl:md5_operation_const}
+\end{table}
 
 
-\newpage
+
+\pagebreak
 \subsubsection{\texttt{SHA-1}}
+\pagebreak
 
 
 
@@ -1181,15 +1207,65 @@ działania wygląda następująco:
 \bibliography{bibliography}
 \endgroup
 
-\section{Załączniki}
+\begin{appendices}
+\section{Oznaczenia operacji bitowych}
+\label{app:bitwise_operations}
 
-\begin{myenumerate}
+    W~pracy używane są następujące oznaczenia operatorów:
 
-    \item \refstepcounter{attcounter}\label{att:english_wordlist}Lista
-    przypadkowych, niepowtarzających się angielskich wyrazów używana do
-    przeprowadzania testów statystycznych.
+    \begin{itemize}
+        \item $\land$ lub $\&$ -- operator koniunkcji,
+        \item $\lor$ lub $|$ -- operator alternatywy,
+        \item $\oplus$ -- operator alternatywy wykluczającej.
+    \end{itemize}
+
+    \noindent Powyższe operatory przypisują dla każdej pary bitów $a$, $b$
+    w~wektorach $A$~i~$B$ wartości zgodnie z~poniższą tabelą:
+
+    \begin{center}
+        \begin{tabular}{ |c|c||c|c|c| }
+            \hline
+            $a$ & $b$ & $a \land b$ & $a \lor b$ & $a \oplus b$ \\
+            \hline
+            1 & 1 & 1 & 1 & 0 \\
+            1 & 0 & 0 & 1 & 1 \\
+            0 & 1 & 0 & 1 & 1 \\
+            0 & 0 & 0 & 0 & 0 \\
+            \hline
+        \end{tabular}
+    \end{center}
+
+    \noindent Ponadto wykorzystane są poniższe oznaczenia operatorów przesunięć
+    ($c$ oznacza ilość bitów, którą dana zmienna jest w~stanie pomieścić).
+
+    \begin{itemize}
+
+        \item $\ll$ -- operator przesunięcia bitowego w~lewo. $a \ll n$ oznacza
+        $a$ przesunięte w~lewo o~$n$ bitów gdzie bity, które w~wyniku
+        przesunięcia wychodzą poza zakres $c$, są tracone.
+
+        \item $\gg$ -- operator przesunięcia bitowego w~prawo. Działanie jest
+        analogiczne do poprzedniego operatora.
+
+        \item $\llless$ -- operator cyklicznego przesunięcia bitowego w~lewo.
+        $a \llless n$ oznacza $a$ przesunięcie w~lewo o~$n$ bitów gdzie bity,
+        które w~wyniku przesunięcia wychodzą poza zakres $c$, są dopisywane
+        z~powrotem z~prawej strony; $a \llless n =\break ((a \ll n) \land
+        \underbrace{111\ldots1}_{c\;\text{bitów}}) \;\lor\; (a \gg (c-n))$.
+
+        \item $\ggg$ -- operator cyklicznego przesunięcia bitowego w~prawo.
+        Działanie jest analogiczne do poprzedniego operatora.
+
+    \end{itemize}
+
+\section{Lista słów użyta do statystyk}
+\label{app:english_wordlist}
+
+    W~pracy w~testach statystycznych korzystano z~jednej listy, na którą składa
+    się 390516 przypadkowych, niepowtarzających się słów z~języka angielskiego.
+    Lista dostępna jest pod adresem:
     \url{http://download.openwall.net/pub/wordlists/languages/English/3-large/lower.gz}
 
-\end{myenumerate}
+\end{appendices}
 
 \end{document}
