@@ -19,7 +19,8 @@
 \usepackage{polski}
 \usepackage{mathtools} %\ceil, \floor
 \usepackage[title]{appendix} %appendices
-\usepackage{caption} %multi-line captions
+\usepackage{caption} %multi-line caption
+\usepackage{xparse} %skomplikowane komendy
 
 \pgfplotsset{compat=1.5} %wersja biblioteki do wykresów; usuwa problemy
 
@@ -28,7 +29,7 @@
 \onehalfspacing
 \newcommand{\myparagraph}[1]{\paragraph{#1}\mbox{}\\}
 \newcommand{\latin}[1]{\foreignlanguage{latin}{\textit{#1}}}
-\newcommand{\en}[1]{\foreignlanguage{english}{\textit{#1}}}
+\NewDocumentCommand{\en}{sm}{\foreignlanguage{english}{\IfBooleanF{#1}{\textit{#2}}\IfBooleanT{#1}{#2}}}
 \newcommand{\abbr}[1]{\textit{#1}}
 \newenvironment{myenumerate}
     {\begin{enumerate}[label*=\arabic*.]}
@@ -681,12 +682,12 @@ Tak naprawdę do dnia dzisiejszego niewiele się zmieniło: od lat mamy do
 czynienia z~ciągłym procesem wykazywania słabości istniejących rozwiązań
 i~w~odpowiedzi wymyślania kolejnych usprawnień bądź całkiem nowych konstrukcji.
 Proces ten zyskał nawet niedawno własne wydarzenie medialne w~postaci konkursu
-ogłoszonego przez National Institute of Standards and Technology, mającego na
-celu wyłonienie następcy funkcji haszujących SHA-1 i~SHA-2 spośród
-kilkudziesięciu kandydatów zgłoszonych przez kryptologów z~całego świata. Cykl
-ten będzie prawdopodobnie trwał tak długo, aż zostanie odkryta uniwersalna
-nieodwracalna funkcja skrótu lub wykazana zostanie niemożność stworzenia
-takowej.
+ogłoszonego przez \en*{National Institute of Standards and Technology}, mającego
+na celu wyłonienie następcy funkcji haszujących \texttt{SHA-1} i~\texttt{SHA-2}
+spośród kilkudziesięciu kandydatów zgłoszonych przez kryptologów z~całego
+świata. Cykl ten będzie prawdopodobnie trwał tak długo, aż zostanie odkryta
+uniwersalna nieodwracalna funkcja skrótu lub wykazana zostanie niemożność
+stworzenia takowej.
 
 
 
@@ -957,6 +958,7 @@ będzie odporna na kolizje, to funkcja haszująca zbudowana za pomocą takiej
 konstrukcji także będzie odporna na kolizje.
 
 Sama konstrukcja składa się z~paru kroków, opisanych poniżej.
+%todo: zacytować RFC
 
 \begin{myenumerate}
 
@@ -1007,7 +1009,7 @@ Sama konstrukcja składa się z~paru kroków, opisanych poniżej.
 
 \subsubsection{\texttt{MD5}}
 \texttt{MD5} jest pierwszą z~dwóch funkcji, na których się skupimy w~tej pracy.
-Jej wykorzystanie jest bardzo szerokie: znajduje zastosowanie w~systemach
+Jej wykorzystanie jest bardzo szerokie; znajduje zastosowanie w~systemach
 bezpieczeństwa oraz systemach weryfikacji integralności danych.
 
 Oparta o~konstrukcję Merkle-Damg\r{a}rda, funkcja przekształca wiadomości
@@ -1030,9 +1032,9 @@ zostało opisane w~dodatku~\ref{app:bitwise_operations}.
         bitów $0$, gdzie $|m|$ oznacza długość wiadomości $m$.
         \footnote{Zawijamy wiadomość $m$ w~taki skomplikowany sposób dlatego,
         że za chwilę będziemy dopisywać do niej nową wartość $x$ (o~długości
-        64~bitów). Gdybyśmy po prostu zawinęli $m$ do 512 bitów, a~następnie
+        64~bitów). Gdybyśmy po prostu zawinęli $m$ do 512~bitów, a~następnie
         nadpisali ostatnie 64~bity bitami $x$, mogłoby się zdarzyć, że
-        nadpisalibyśmy bity oryginalnej $m$, co jest niepożądane -- dlatego
+        nadpisalibyśmy bity oryginalnej $m$, co jest niepożądane~-- dlatego
         dbamy, aby długość wiadomości \emph{po dopisaniu} była podzielna przez
         512.}
 
@@ -1079,18 +1081,32 @@ zostało opisane w~dodatku~\ref{app:bitwise_operations}.
             \end{aligned}
         \]
 
-        \item Następnie dla każdego kolejnego bloku wiadomości $M_0, M_1, M_2,
-        \ldots, M_n$ będziemy aktualizować $(A,B,C,D)$
-        wartością funkcji kompresji obliczoną na
-        podstawie danego bloku i~poprzedniego stanu:
-        $(A,B,C,D) := \mathtt{Comp}((A,B,C,D),M_i)$.
+        \item Następnie dla każdego kolejnego 512-bitowego bloku wiadomości
+        \break $M_0, M_1, M_2, \ldots, M_n$ będziemy aktualizować stan
+        wewnętrzny $(A,B,C,D)$ wartością funkcji kompresji obliczoną na
+        podstawie poprzedniej jego wartości oraz danego bloku wiadomości $M_k$.
+        Funkcja kompresji przebiega w~następujący sposób:
 
-        Sama funkcja kompresji składa się z~4~rund. W~każdej rundzie wykonywane
-        jest 16~operacji przekształcających stan $(A,B,C,D)$ -- konstrukcja
-        pojedynczej operacji została przedstawiona na
-        rysunku~\ref{fig:md5_operation}. Każda operacja wykorzystuje funkcję
-        $F$, która jest zależna od aktualnej rundy zgodnie
-        z~tabelą~\ref{tbl:md5_round_function}.
+        \begin{itemize}
+
+            \item Podziel blok wiadomości $M_k$ na $16$ fragmentów $W_{0 \leq j
+            \leq 15}$, każdy o długości 32~bitów.
+
+            \item Wykonaj 4~rundy:
+
+            \begin{itemize}
+
+                \item Wybierz funkcję rundy $F$ zgodnie
+                z~tabelą~\ref{tbl:md5_round_function}.
+
+                \item Wykonaj 16~operacji przekształcających stan $(A,B,C,D)$
+                na podstawie jego poprzedniej wartości, funkcji rundy $F$ oraz
+                wektorów $W$. Konstrukcja pojedynczej operacji została
+                przedstawiona na rysunku~\ref{fig:md5_operation}.
+
+            \end{itemize}
+
+        \end{itemize}
 
     \end{myenumerate}
 
@@ -1100,39 +1116,51 @@ zostało opisane w~dodatku~\ref{app:bitwise_operations}.
 
 \end{myenumerate}
 
-\begin{figure}
+\begin{figure}[H]
     \includegraphics[width=7.5cm]{img/md5_operation.eps}
     \captionsetup{singlelinecheck=off}
     \caption[blablabla]{
     Jedna operacja \texttt{MD5}. Oznaczenia:
     \begin{itemize}
-        \item $A$, $B$, $C$~i~$D$ -- wektory stanu wewnętrznego,
-        \item $F$ -- funkcja rundy,
-        \item $M_i$ -- 32-bitowy fragment 512-bitowego bloku wiadomości,
-        \item $K_i$ -- 32-bitowa stała,
-        \item $S_i$ -- stała oznaczająca ilość bitów w przesunięciu cyklicznym.
+        \item $A$, $B$, $C$~i~$D$~-- wektory stanu wewnętrznego,
+        \item $F$~-- funkcja rundy,
+        \item $W_j$~-- $j$-ty 32-bitowy fragment pochodzący od 512-bitowego
+        bloku wiadomości,
+        \item $K_i$~-- 32-bitowa stała,
+        \item $S_i$~-- stała oznaczająca ilość bitów w~przesunięciu cyklicznym.
+        \item $i$~-- numer operacji w~kontekście funkcji kompresji ($i \in (0,
+        1, \ldots, 63)$),
+        \item $j$~-- numer operacji w~danej rundzie ($j \in (0, 1, \ldots,
+        15)$).
     \end{itemize}
     Każda kolejna operacja używa innego zestawu stałych $K_i$ oraz $S_i$, które
-    zostały opisane w tabeli~\ref{tbl:md5_operation_const}.}
+    zostały opisane w~tabeli~\ref{tbl:md5_operation_const}.}
     \label{fig:md5_operation}
 \end{figure}
 
-\begin{table}
-    \caption{Funkcja $F$ użyta w~kolejnych rundach.}
+\begin{table}[H]
+    \caption{Funkcja $F$ użyta w~kolejnych rundach \texttt{MD5}.}
     \label{tbl:md5_round_function}
     \begin{tabular}{|l|l|}
         \hline
         Runda & Funkcja rundy \\
         \hline
-        Runda 1 & $F(B,C,D) = (B \land C) \lor (\lnot B \land D)$ \\
-        Runda 2 & $F(B,C,D) = (B \land D) \lor (C \land \lnot D)$ \\
-        Runda 3 & $F(B,C,D) = B \oplus C \oplus D$ \\
-        Runda 4 & $F(B,C,D) = C \oplus (B \lor \lnot D)$ \\
+        Runda 1 &
+        $F(B,C,D) = (B \land C) \lor (\lnot B \land D)$ \\
+
+        Runda 2 &
+        $F(B,C,D) = (B \land D) \lor (C \land \lnot D)$ \\
+
+        Runda 3 &
+        $F(B,C,D) = B \oplus C \oplus D$ \\
+
+        Runda 4 &
+        $F(B,C,D) = C \oplus (B \lor \lnot D)$ \\
         \hline
     \end{tabular}
 \end{table}
 
-\begin{table}[thb]
+\begin{table}[H]
     \resizebox{\columnwidth}{!}{
     \begin{tabular}{ |c|c|c|| c|c|c|| c|c|c|| c|c|c| }
         \hline
@@ -1163,7 +1191,7 @@ zostało opisane w~dodatku~\ref{app:bitwise_operations}.
     \end{tabular}
     }
     \caption{Stałe $K_i$ oraz $S_i$ użyte w~kolejnych operacjach
-    podczas działania funkcji kompresji.}
+    podczas działania funkcji kompresji \texttt{MD5}.}
     \label{tbl:md5_operation_const}
 \end{table}
 
@@ -1171,10 +1199,114 @@ zostało opisane w~dodatku~\ref{app:bitwise_operations}.
 
 \pagebreak
 \subsubsection{\texttt{SHA-1}}
-\pagebreak
+Funkcja \texttt{SHA-1}, podobnie jak funkcja \texttt{MD5}, oparta jest
+o~konstrukcję Merkle-Damg\r{a}rda. Została skonstruowana przez \en*{National
+Security Agency}; jej nazwa wywodzi się od \en{Secure Hash Algorithm}
+(bezpieczna funkcja haszująca). \texttt{SHA-1} jest jedną z~serii funkcji
+\texttt{SHA} i~choć po niej przyszły kolejne, bezpieczniejsze funkcje, to na
+obecną chwilę jest najpopularniejszą funkcją z~serii \texttt{SHA}.
+\texttt{SHA-1} zwraca skróty o~długości 160~bitów. Konstrukcja funkcji została
+przedstawiona poniżej.
+%todo: zacytować RFC
+
+\begin{myenumerate}
+
+    \item Faza dopełnienia bitowego: wygląda tak samo, jak faza dopełnienia
+    bitowego funkcji \texttt{MD5}.
+
+    \item Faza kompresji
+
+    \begin{myenumerate}
+
+        \item Wprowadzamy wewnętrzny stan, będący wektorem 160~bitów, w~którym
+        wyróżniamy 5~wektorów oznaczonych kolejno: $A$, $B$, $C$, $D$ i~$E$
+        (każdy o~długości 32~bitów). Wektor ten jest inicjowany wartościami na
+        podstawie stałego wektora $\mathtt{IV}$:
+
+        \[
+            \begin{aligned}
+                A &:= \mathtt{0x67452301} \\
+                B &:= \mathtt{0xefcdab89} \\
+                C &:= \mathtt{0x98badcfe} \\
+                D &:= \mathtt{0x10325476} \\
+                E &:= \mathtt{0xc3d2e1f0}
+            \end{aligned}
+        \]
+
+        \item Dla każdego kolejnego 512-bitowego bloku wiadomości \break $M_0,
+        M_1, M_2, \ldots, M_n$ aktualizujemy stan wewnętrzny funkcją kompresji,
+        która przebiega w~następujący sposób:
+
+        \begin{itemize}
+
+            \item Podziel blok wiadomości $M_k$ na $16$ fragmentów $W_{0 \leq j
+            \leq 15}$, każdy o długości 32~bitów.
+
+            \item Skonstruuj dodatkowe wektory $W_{16 \leq j \leq 79}$ zgodnie
+            z~wzorem:
+
+            $$
+                W_j = (W_{j-3} \oplus W_{j-8} \oplus W_{j-14} \oplus W_{j-16})
+                \llless 1
+            $$
+
+            \item Wykonaj 4~rundy:
+
+            \begin{itemize}
+
+                \item Wybierz funkcję rundy $F$ oraz stałą rundy $K$ zgodnie
+                z~tabelą~\ref{tbl:sha1_round_function}.
+
+                \item Wykonaj 16~operacji przekształcających stan $(A,B,C,D)$
+                na podstawie jego poprzedniej wartości, funkcji rundy $F$,
+                stałej rundy $K$ oraz wektorów $W$. Konstrukcja pojedynczej
+                operacji została przedstawiona na
+                rysunku~\ref{fig:sha1_operation}.
+
+            \end{itemize}
+
+        \end{itemize}
+
+    \end{myenumerate}
+
+    \item Po wykonaniu wszystkich 64~operacji (4~rundy $\times$
+    16~operacji), stan wewnętrzny $(A,B,C,D)$ jest zwracany jako wyjściowy
+    skrót z~funkcji.
+
+\end{myenumerate}
+
+\begin{table}[H]
+    \caption{Funkcja $F$ oraz stała $K$ użyta w~kolejnych rundach
+    \texttt{SHA-1}.}
+    \label{tbl:sha1_round_function}
+    \begin{tabular}{|l|l|l|}
+        \hline
+        Runda & Funkcja rundy & Stała K \\
+        \hline
+        Runda 1 &
+        $F(B,C,D) = (B \land C) \lor (\lnot B \land D)$ &
+        $K = \mathtt{0x5a827999}$ \\
+
+        Runda 2 &
+        $F(B,C,D) = B \oplus C \oplus D$ &
+        $K = \mathtt{0x6ed9eba1}$ \\
+
+        Runda 3 &
+        $F(B,C,D) = (B \land C) \lor (B \land D) \lor (C \land D)$ &
+        $K = \mathtt{0x8f1bbcdc}$ \\
+
+        Runda 4 &
+        $F(B,C,D) = B \oplus C \oplus D$ &
+        $K = \mathtt{0xca62c1d6}$ \\
+        \hline
+    \end{tabular}
+\end{table}
+
+%todo: sha1_operation
 
 
 
+\newpage
 \section{Ataki uniwersalne}
 \label{sec:universal_attacks}
 
@@ -1214,9 +1346,9 @@ zostało opisane w~dodatku~\ref{app:bitwise_operations}.
     W~pracy używane są następujące oznaczenia operatorów:
 
     \begin{itemize}
-        \item $\land$ lub $\&$ -- operator koniunkcji,
-        \item $\lor$ lub $|$ -- operator alternatywy,
-        \item $\oplus$ -- operator alternatywy wykluczającej.
+        \item $\land$ lub $\&$~-- operator koniunkcji,
+        \item $\lor$ lub $|$~-- operator alternatywy,
+        \item $\oplus$~-- operator alternatywy wykluczającej.
     \end{itemize}
 
     \noindent Powyższe operatory przypisują dla każdej pary bitów $a$, $b$
@@ -1240,20 +1372,20 @@ zostało opisane w~dodatku~\ref{app:bitwise_operations}.
 
     \begin{itemize}
 
-        \item $\ll$ -- operator przesunięcia bitowego w~lewo. $a \ll n$ oznacza
+        \item $\ll$~-- operator przesunięcia bitowego w~lewo. $a \ll n$ oznacza
         $a$ przesunięte w~lewo o~$n$ bitów gdzie bity, które w~wyniku
         przesunięcia wychodzą poza zakres $c$, są tracone.
 
-        \item $\gg$ -- operator przesunięcia bitowego w~prawo. Działanie jest
+        \item $\gg$~-- operator przesunięcia bitowego w~prawo. Działanie jest
         analogiczne do poprzedniego operatora.
 
-        \item $\llless$ -- operator cyklicznego przesunięcia bitowego w~lewo.
+        \item $\llless$~-- operator cyklicznego przesunięcia bitowego w~lewo.
         $a \llless n$ oznacza $a$ przesunięcie w~lewo o~$n$ bitów gdzie bity,
         które w~wyniku przesunięcia wychodzą poza zakres $c$, są dopisywane
         z~powrotem z~prawej strony; $a \llless n =\break ((a \ll n) \land
         \underbrace{111\ldots1}_{c\;\text{bitów}}) \;\lor\; (a \gg (c-n))$.
 
-        \item $\ggg$ -- operator cyklicznego przesunięcia bitowego w~prawo.
+        \item $\ggg$~-- operator cyklicznego przesunięcia bitowego w~prawo.
         Działanie jest analogiczne do poprzedniego operatora.
 
     \end{itemize}
