@@ -957,8 +957,7 @@ odpowiedni schemat dopełnienia bitowego oraz zastosowana funkcja kompresji
 będzie odporna na kolizje, to funkcja haszująca zbudowana za pomocą takiej
 konstrukcji także będzie odporna na kolizje.
 
-Sama konstrukcja składa się z~paru kroków, opisanych poniżej.
-%todo: zacytować RFC
+Sama konstrukcja składa się z~kroków opisanych poniżej.
 
 \begin{myenumerate}
 
@@ -1013,10 +1012,11 @@ Jej wykorzystanie jest bardzo szerokie; znajduje zastosowanie w~systemach
 bezpieczeństwa oraz systemach weryfikacji integralności danych.
 
 Oparta o~konstrukcję Merkle-Damg\r{a}rda, funkcja przekształca wiadomości
-o~dowolnej ilości bitów na skróty o~stałej długości 128~bitów. Jej schemat
-został przedstawiony poniżej (wszystkie operacje są dokonywane w~porządku
-bitowym \en{little endian}; znaczenie operatorów wprowadzonych w~tej sekcji
-zostało opisane w~dodatku~\ref{app:bitwise_operations}.
+o~dowolnej ilości bitów na skróty o~stałej długości 128~bitów. Jej
+schemat~\cite{md5_definition} został przedstawiony poniżej (wszystkie operacje
+są dokonywane w~porządku bitowym \en{little endian}; znaczenie operatorów
+wprowadzonych w~tej sekcji zostało opisane
+w~dodatku~\ref{app:bitwise_operations}.
 
 \begin{myenumerate}
 
@@ -1054,9 +1054,9 @@ zostało opisane w~dodatku~\ref{app:bitwise_operations}.
             |\mathtt{Pad}(m_2)|$,
 
             \item gdy $m_1 \neq m_2$, to ostatni blok $\mathtt{Pad}(m_1)$ jest
-            różny od ostatniego bloku $\mathtt{Pad}(m_2)$. (Długość bloku
-            w~tym kontekście jest taka sama, jak długość bloku używanego przez
-            całą konstrukcję Merkle-Damg\r{a}rda.)
+            różny od ostatniego bloku $\mathtt{Pad}(m_2)$. (Długość bloku w~tym
+            kontekście jest taka sama, jak długość bloku używanego przez całą
+            konstrukcję Merkle-Damg\r{a}rda.)
 
         \end{itemize}
 
@@ -1068,7 +1068,7 @@ zostało opisane w~dodatku~\ref{app:bitwise_operations}.
 
         \item Na początku zostaje wprowadzony wewnętrzny stan funkcji skrótu,
         będący wektorem 128~bitów, w~którym wyróżniamy 4~wektory oznaczone
-        kolejno: $A$, $B$, $C$ i~$D$ (każdy o~długości 32~bitów). Wektor ten
+        kolejno: $A$, $B$, $C$~i~$D$ (każdy o~długości 32~bitów). Wektor ten
         jest inicjowany stałym wektorem $\mathtt{IV}$ zgodnym z~poniższym
         równaniem:
 
@@ -1090,7 +1090,7 @@ zostało opisane w~dodatku~\ref{app:bitwise_operations}.
         \begin{itemize}
 
             \item Podziel blok wiadomości $M_k$ na $16$ fragmentów $W_{0 \leq j
-            \leq 15}$, każdy o długości 32~bitów.
+            \leq 15}$, każdy o~długości 32~bitów.
 
             \item Wykonaj 4~rundy:
 
@@ -1110,9 +1110,8 @@ zostało opisane w~dodatku~\ref{app:bitwise_operations}.
 
     \end{myenumerate}
 
-    \item Po wykonaniu wszystkich 64~operacji (4~rundy $\times$
-    16~operacji), stan wewnętrzny $(A,B,C,D)$ jest zwracany jako wyjściowy
-    skrót z~funkcji.
+    \item Po wykonaniu wszystkich 64~operacji (4~rundy $\times$ 16~operacji),
+    stan wewnętrzny $(A,B,C,D)$ jest zwracany jako wyjściowy skrót z~funkcji.
 
 \end{myenumerate}
 
@@ -1205,9 +1204,8 @@ Security Agency}; jej nazwa wywodzi się od \en{Secure Hash Algorithm}
 (bezpieczna funkcja haszująca). \texttt{SHA-1} jest jedną z~serii funkcji
 \texttt{SHA} i~choć po niej przyszły kolejne, bezpieczniejsze funkcje, to na
 obecną chwilę jest najpopularniejszą funkcją z~serii \texttt{SHA}.
-\texttt{SHA-1} zwraca skróty o~długości 160~bitów. Konstrukcja funkcji została
-przedstawiona poniżej.
-%todo: zacytować RFC
+\texttt{SHA-1} zwraca skróty o~długości 160~bitów. Konstrukcja
+funkcji~\cite{sha1_definition} została przedstawiona poniżej.
 
 \begin{myenumerate}
 
@@ -1239,14 +1237,14 @@ przedstawiona poniżej.
 
         \begin{itemize}
 
-            \item Podziel blok wiadomości $M_k$ na $16$ fragmentów $W_{0 \leq j
-            \leq 15}$, każdy o długości 32~bitów.
+            \item Podziel blok wiadomości $M_k$ na $16$ fragmentów $W_{0 \leq i
+            \leq 15}$, każdy o~długości 32~bitów.
 
-            \item Skonstruuj dodatkowe wektory $W_{16 \leq j \leq 79}$ zgodnie
+            \item Skonstruuj dodatkowe wektory $W_{16 \leq i \leq 79}$ zgodnie
             z~wzorem:
 
             $$
-                W_j = (W_{j-3} \oplus W_{j-8} \oplus W_{j-14} \oplus W_{j-16})
+                W_i = (W_{i-3} \oplus W_{i-8} \oplus W_{i-14} \oplus W_{i-16})
                 \llless 1
             $$
 
@@ -1257,7 +1255,7 @@ przedstawiona poniżej.
                 \item Wybierz funkcję rundy $F$ oraz stałą rundy $K$ zgodnie
                 z~tabelą~\ref{tbl:sha1_round_function}.
 
-                \item Wykonaj 16~operacji przekształcających stan $(A,B,C,D)$
+                \item Wykonaj 20~operacji przekształcających stan $(A,B,C,D,E)$
                 na podstawie jego poprzedniej wartości, funkcji rundy $F$,
                 stałej rundy $K$ oraz wektorów $W$. Konstrukcja pojedynczej
                 operacji została przedstawiona na
@@ -1269,9 +1267,8 @@ przedstawiona poniżej.
 
     \end{myenumerate}
 
-    \item Po wykonaniu wszystkich 64~operacji (4~rundy $\times$
-    16~operacji), stan wewnętrzny $(A,B,C,D)$ jest zwracany jako wyjściowy
-    skrót z~funkcji.
+    \item Po wykonaniu wszystkich 80~operacji (4~rundy $\times$ 20~operacji),
+    stan wewnętrzny $(A,B,C,D,E)$ jest zwracany jako wyjściowy skrót z~funkcji.
 
 \end{myenumerate}
 
@@ -1302,7 +1299,23 @@ przedstawiona poniżej.
     \end{tabular}
 \end{table}
 
-%todo: sha1_operation
+\begin{figure}[H]
+    \includegraphics[width=7.5cm]{img/sha1_operation.eps}
+    \captionsetup{singlelinecheck=off}
+    \caption[blablabla]{
+    Jedna operacja \texttt{SHA-1}. Oznaczenia:
+    \begin{itemize}
+        \item $A$, $B$, $C$, $D$~i~$E$~-- wektory stanu wewnętrznego,
+        \item $F$~-- funkcja rundy,
+        \item $K$~-- 32-bitowa stała rundy,
+        \item $W_i$~-- $i$-ty 32-bitowy fragment pochodzący od rozszerzenia
+        512-bitowego bloku wiadomości,
+        \item $i$~-- numer operacji w~kontekście funkcji kompresji ($i \in (0,
+        1, \ldots, 79)$).
+    \end{itemize}}
+    \label{fig:sha1_operation}
+\end{figure}
+
 
 
 
