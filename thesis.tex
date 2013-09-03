@@ -787,7 +787,8 @@ posiadanego konkretnego wyjścia.
     wejściowych),
 
     \item żaden probabilistyczny algorytm działający w~czasie wielomianowym nie
-    potrafi zgadnąć argumentu z~zaniedbywalnie małym prawdopodobieństwem.
+    potrafi zgadnąć argumentu z~zaniedbywalnie małym
+    prawdopodobieństwem~\cite{one_way_functions}.
 
 \end{itemize}
 
@@ -799,7 +800,7 @@ posiadanego konkretnego wyjścia.
 
     \item każdy probabilistyczny algorytm działający w~czasie wielomianowym,
     który ją potrafi odwrócić, zgaduje argumenty w~sposób niepoprawny
-    z~niezaniedbywalnie dużym prawdopodobieństwem.
+    z~niezaniedbywalnie dużym prawdopodobieństwem~\cite{one_way_functions}.
 
 \end{itemize}
 
@@ -813,22 +814,24 @@ powinny zatem przyciągnąć nasze zainteresowanie.
 
 \subsubsection{$\textrm{P} \neq \textrm{NP}$?}
 Problem z~funkcjami jednokierunkowymi jest niestety taki, że\ldots nie
-udowodniono ich istnienia. Istnieją pewne funkcje, które podejrzewamy
-o~jednokierunkowość, lecz nie potrafimy wykazać poprawności lub niepoprawności
-tego podejrzenia. Wykazano, że z~istnienia słabo jednokierunkowych funkcji
-wynika istnienie silnie jednokierunkowych funkcji. Ponadto udowodniono, że
-istnienie funkcji jednokierunkowych implikowałoby jednocześnie, że $\textrm{P}
-\neq \textrm{NP}$, co dałoby odpowiedź na jeden z~problemów milenijnych
-i~oznaczałoby, że klasa problemów, które da się \emph{rozwiązać} w~czasie
-wielomianowym ($\textrm{P}$) nie pokrywa się z~klasą, dla którego rozwiązanie
-da się \emph{zweryfikować} w~czasie wielomianowym ($\textrm{NP}$). Przykładowo:
-mając liczbę $x \in \mathbb{N}$ i~dany zbiór liczb pierwszych $x_i$, możemy
-w~banalny sposób \emph{zweryfikować}, czy $x_0 \cdot x_1 \cdot \ldots \cdot x_n
-= x$. Natomiast nie wiadomo, czy istnieje algorytm wielomianowy, który potrafi
-\emph{rozwiązać} ten problem, znajdując dla danego $x$ liczby pierwsze $x_0,
-x_1, \ldots, x_n$ takie, że $x_0 \cdot x_1 \cdot \ldots \cdot x_n = x$. Problem
-ten jest znany jako problem rozkładu liczby na czynniki pierwsze, lub inaczej
-problem faktoryzacji, i~stanowi pierwszy ze wspominanych kandydatów na funkcje
+udowodniono~\cite{one_way_functions_existence} ich istnienia. Istnieją pewne
+funkcje, które podejrzewamy o~jednokierunkowość, lecz nie potrafimy wykazać
+poprawności lub niepoprawności tego podejrzenia.
+Wykazano~\cite{one_way_functions}, że z~istnienia słabo jednokierunkowych
+funkcji wynika istnienie silnie jednokierunkowych funkcji. Ponadto
+udowodniono~\cite{one_way_functions}, że istnienie funkcji jednokierunkowych
+implikowałoby jednocześnie, że $\textrm{P} \neq \textrm{NP}$, co dałoby
+odpowiedź na jeden z~problemów milenijnych i~oznaczałoby, że klasa problemów,
+które da się \emph{rozwiązać} w~czasie wielomianowym ($\textrm{P}$) nie pokrywa
+się z~klasą, dla którego rozwiązanie da się \emph{zweryfikować} w~czasie
+wielomianowym ($\textrm{NP}$). Przykładowo: mając liczbę $x \in \mathbb{N}$
+i~dany zbiór liczb pierwszych $x_i$, możemy w~banalny sposób
+\emph{zweryfikować}, czy $x_0 \cdot x_1 \cdot \ldots \cdot x_n = x$. Natomiast
+nie wiadomo, czy istnieje algorytm wielomianowy, który potrafi \emph{rozwiązać}
+ten problem, znajdując dla danego $x$ liczby pierwsze $x_0, x_1, \ldots, x_n$
+takie, że $x_0 \cdot x_1 \cdot \ldots \cdot x_n = x$. Problem ten jest znany
+jako problem rozkładu liczby na czynniki pierwsze, lub inaczej problem
+faktoryzacji, i~stanowi pierwszy ze wspominanych kandydatów na funkcje
 jednokierunkowe.
 
 
@@ -1345,6 +1348,7 @@ funkcji~\cite{sha1_definition} została przedstawiona poniżej.
 
 \section{Podsumowanie}
 
+\newpage
 \section{Bibliografia}
 \begingroup
 \renewcommand{\section}[2]{}
@@ -1352,6 +1356,7 @@ funkcji~\cite{sha1_definition} została przedstawiona poniżej.
 \bibliography{bibliography}
 \endgroup
 
+\newpage
 \begin{appendices}
 \section{Oznaczenia operacji bitowych}
 \label{app:bitwise_operations}
