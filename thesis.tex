@@ -889,6 +889,7 @@ kosztowne są przekształcenia problemów).
 
 
 
+\pagebreak
 \subsection{Formalnie bezpieczne funkcje skrótu}
 Implementacje funkcji skrótu dzielą się na dwie kategorie. Pierwsza z~nich,
 omówiona tutaj, wywodzi się z~formalnego spojrzenia na problem haszowania. Tak
@@ -1095,16 +1096,17 @@ w~dodatku~\ref{app:bitwise_operations}.
             \item Podziel blok wiadomości $M_k$ na $16$ fragmentów $W_{0 \leq j
             \leq 15}$, każdy o~długości 32~bitów.
 
+            \pagebreak
             \item Wykonaj 4~rundy:
 
             \begin{itemize}
 
-                \item Wybierz funkcję rundy $F$ zgodnie
+                \item Wybierz funkcję rundy~$F$ zgodnie
                 z~tabelą~\ref{tbl:md5_round_function}.
 
                 \item Wykonaj 16~operacji przekształcających stan $(A,B,C,D)$
-                na podstawie jego poprzedniej wartości, funkcji rundy $F$ oraz
-                wektorów $W$. Konstrukcja pojedynczej operacji została
+                na podstawie jego poprzedniej wartości, funkcji rundy~$F$ oraz
+                wektorów~$W$. Konstrukcja pojedynczej operacji została
                 przedstawiona na rysunku~\ref{fig:md5_operation}.
 
             \end{itemize}
@@ -1118,29 +1120,7 @@ w~dodatku~\ref{app:bitwise_operations}.
 
 \end{myenumerate}
 
-\begin{figure}[H]
-    \includegraphics[width=7.5cm]{img/md5_operation.eps}
-    \captionsetup{singlelinecheck=off}
-    \caption[blablabla]{
-    Jedna operacja \texttt{MD5}. Oznaczenia:
-    \begin{itemize}
-        \item $A$, $B$, $C$~i~$D$~-- wektory stanu wewnętrznego,
-        \item $F$~-- funkcja rundy,
-        \item $W_j$~-- $j$-ty 32-bitowy fragment pochodzący od 512-bitowego
-        bloku wiadomości,
-        \item $K_i$~-- 32-bitowa stała,
-        \item $S_i$~-- stała oznaczająca ilość bitów w~przesunięciu cyklicznym.
-        \item $i$~-- numer operacji w~kontekście funkcji kompresji ($i \in (0,
-        1, \ldots, 63)$),
-        \item $j$~-- numer operacji w~danej rundzie ($j \in (0, 1, \ldots,
-        15)$).
-    \end{itemize}
-    Każda kolejna operacja używa innego zestawu stałych $K_i$ oraz $S_i$, które
-    zostały opisane w~tabeli~\ref{tbl:md5_operation_const}.}
-    \label{fig:md5_operation}
-\end{figure}
-
-\begin{table}[H]
+\begin{table}[htb]
     \caption{Funkcja $F$ użyta w~kolejnych rundach \texttt{MD5}.}
     \label{tbl:md5_round_function}
     \begin{tabular}{|l|l|}
@@ -1162,7 +1142,7 @@ w~dodatku~\ref{app:bitwise_operations}.
     \end{tabular}
 \end{table}
 
-\begin{table}[H]
+\begin{table}[htb]
     \resizebox{\columnwidth}{!}{
     \begin{tabular}{ |c|c|c|| c|c|c|| c|c|c|| c|c|c| }
         \hline
@@ -1196,6 +1176,28 @@ w~dodatku~\ref{app:bitwise_operations}.
     podczas działania funkcji kompresji \texttt{MD5}.}
     \label{tbl:md5_operation_const}
 \end{table}
+
+\begin{figure}[H]
+    \includegraphics[width=7.5cm]{img/md5_operation.eps}
+    \captionsetup{singlelinecheck=off}
+    \caption[blablabla]{
+    Jedna operacja \texttt{MD5}. Oznaczenia:
+    \begin{itemize}
+        \item $A$, $B$, $C$~i~$D$~-- wektory stanu wewnętrznego,
+        \item $F$~-- funkcja rundy,
+        \item $W_j$~-- $j$-ty 32-bitowy fragment pochodzący od 512-bitowego
+        bloku wiadomości,
+        \item $K_i$~-- 32-bitowa stała,
+        \item $S_i$~-- stała oznaczająca ilość bitów w~przesunięciu cyklicznym,
+        \item $i$~-- numer operacji w~kontekście funkcji kompresji ($i \in (0,
+        1, \ldots, 63)$),
+        \item $j$~-- numer operacji w~danej rundzie ($j \in (0, 1, \ldots,
+        15)$).
+    \end{itemize}
+    Każda kolejna operacja używa innego zestawu stałych $K_i$ oraz $S_i$, które
+    zostały opisane w~tabeli~\ref{tbl:md5_operation_const}.}
+    \label{fig:md5_operation}
+\end{figure}
 
 
 
@@ -1255,12 +1257,12 @@ funkcji~\cite{sha1_definition} została przedstawiona poniżej.
 
             \begin{itemize}
 
-                \item Wybierz funkcję rundy $F$ oraz stałą rundy $K$ zgodnie
+                \item Wybierz funkcję rundy~$F$ oraz stałą rundy~$K$ zgodnie
                 z~tabelą~\ref{tbl:sha1_round_function}.
 
                 \item Wykonaj 20~operacji przekształcających stan $(A,B,C,D,E)$
-                na podstawie jego poprzedniej wartości, funkcji rundy $F$,
-                stałej rundy $K$ oraz wektorów $W$. Konstrukcja pojedynczej
+                na podstawie jego poprzedniej wartości, funkcji rundy~$F$,
+                stałej rundy~$K$ oraz wektorów~$W$. Konstrukcja pojedynczej
                 operacji została przedstawiona na
                 rysunku~\ref{fig:sha1_operation}.
 
@@ -1303,7 +1305,7 @@ funkcji~\cite{sha1_definition} została przedstawiona poniżej.
 \end{table}
 
 \begin{figure}[H]
-    \includegraphics[width=7.5cm]{img/sha1_operation.eps}
+    \includegraphics[width=8.5cm]{img/sha1_operation.eps}
     \captionsetup{singlelinecheck=off}
     \caption[blablabla]{
     Jedna operacja \texttt{SHA-1}. Oznaczenia:
