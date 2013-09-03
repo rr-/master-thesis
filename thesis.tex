@@ -20,7 +20,6 @@
 \usepackage{mathtools} %\ceil, \floor
 \usepackage[title]{appendix} %appendices
 \usepackage{caption} %multi-line caption
-\usepackage{xparse} %skomplikowane komendy
 
 \pgfplotsset{compat=1.5} %wersja biblioteki do wykresów; usuwa problemy
 
@@ -29,7 +28,8 @@
 \onehalfspacing
 \newcommand{\myparagraph}[1]{\paragraph{#1}\mbox{}\\}
 \newcommand{\latin}[1]{\foreignlanguage{latin}{\textit{#1}}}
-\NewDocumentCommand{\en}{sm}{\foreignlanguage{english}{\IfBooleanF{#1}{\textit{#2}}\IfBooleanT{#1}{#2}}}
+\newcommand{\en}[1]{\textit{\enn{#1}}}
+\newcommand{\enn}[1]{\foreignlanguage{english}{#1}}
 \newcommand{\abbr}[1]{\textit{#1}}
 \newenvironment{myenumerate}
     {\begin{enumerate}[label*=\arabic*.]}
@@ -682,7 +682,7 @@ Tak naprawdę do dnia dzisiejszego niewiele się zmieniło: od lat mamy do
 czynienia z~ciągłym procesem wykazywania słabości istniejących rozwiązań
 i~w~odpowiedzi wymyślania kolejnych usprawnień bądź całkiem nowych konstrukcji.
 Proces ten zyskał nawet niedawno własne wydarzenie medialne w~postaci konkursu
-ogłoszonego przez \en*{National Institute of Standards and Technology}, mającego
+ogłoszonego przez \enn{National Institute of Standards and Technology}, mającego
 na celu wyłonienie następcy funkcji haszujących \texttt{SHA-1} i~\texttt{SHA-2}
 spośród kilkudziesięciu kandydatów zgłoszonych przez kryptologów z~całego
 świata. Cykl ten będzie prawdopodobnie trwał tak długo, aż zostanie odkryta
@@ -1202,7 +1202,7 @@ w~dodatku~\ref{app:bitwise_operations}.
 \pagebreak
 \subsubsection{\texttt{SHA-1}}
 Funkcja \texttt{SHA-1}, podobnie jak funkcja \texttt{MD5}, oparta jest
-o~konstrukcję Merkle-Damg\r{a}rda. Została skonstruowana przez \en*{National
+o~konstrukcję Merkle-Damg\r{a}rda. Została skonstruowana przez \enn{National
 Security Agency}; jej nazwa wywodzi się od \en{Secure Hash Algorithm}
 (bezpieczna funkcja haszująca). \texttt{SHA-1} jest jedną z~serii funkcji
 \texttt{SHA} i~choć po niej przyszły kolejne, bezpieczniejsze funkcje, to na
