@@ -24,6 +24,7 @@
 \usepackage{fancyvrb} %centrowanie verbatimów
 
 \pgfplotsset{compat=1.5} %wersja biblioteki do wykresów; usuwa problemy
+\newcounter{wlcounter} %licznik list słów
 
 \begin{document}
 \newgeometry{margin=3cm}
@@ -451,7 +452,9 @@ lawinowego.
     \end{tikzpicture}
     \caption{Przykładowy rozkład prawdopodobieństwa występowania ``1'' na
     kolejnych bitach skrótów \texttt{MD5}, otrzymanych z~zahaszowania wyrazów
-    z~załącznika~\ref{app:english_wordlist}.} \end{figure}
+    z~listy~\ref{wl:english_wordlist} w~dodatku~\ref{app:wordlists}.}
+    %todo: wspomnieć o programie z dodatku C
+    \end{figure}
 \pagebreak
 
 
@@ -1377,7 +1380,7 @@ się czynić swoich haseł bezpiecznymi i~korzysta z~haseł będącymi zwykłymi
 słowami istniejącymi w~jakimś języku (więcej
 w~sekcji~\ref{sec:dictionary_attacks}).
 
-%todo: obrazek z przykładowym wykresem częstości
+%todo: obrazek z przykładowym wykresem częstości sporządzonym z listy 2 i 1
 
 Można wykorzystać to na
 dwojaki sposób: po pierwsze, możemy ułożyć nasz alfabet w~kolejności zgodnej
@@ -1486,6 +1489,8 @@ Natomiast najczęściej występującymi trigramami są:
     nde, has, nce, edt, tis, oft, sth
     \end{BVerbatim}
     \end{center}
+%todo: zamienić to na tabelkę sporządzoną na podstawie listy 2, wraz z
+%prawdopodobieństwami
 Gdy usprawnimy swój generator w~ten sposób, staje się on naprawdę dobrym
 narzędziem, co znajduje potwierdzenie w~popularności, jaką cieszy się program
 \texttt{Johnny The Ripper} wykorzystujący powyższe techniki.
@@ -1575,13 +1580,29 @@ narzędziem, co znajduje potwierdzenie w~popularności, jaką cieszy się progra
 
     \end{itemize}
 
-\section{Lista słów użyta do statystyk}
-\label{app:english_wordlist}
+\section{Listy słów użyta do statystyk}
+\label{app:wordlists}
+W~pracy w~testach statystycznych korzystano z~kilku list.
 
-    W~pracy w~testach statystycznych korzystano z~jednej listy, na którą składa
-    się 390516 przypadkowych, niepowtarzających się słów z~języka angielskiego.
-    Lista dostępna jest pod adresem:
-    \url{http://download.openwall.net/pub/wordlists/languages/English/3-large/lower.gz}
+    \begin{myenumerate}
+
+        \item \refstepcounter{wlcounter}\label{wl:english_wordlist} Słownik
+        języka angielskiego zawierający 390516 niepowtarzających się wyrazów;
+        dostępny pod adresem:
+        \url{http://download.openwall.net/pub/wordlists/languages/English/3-large/lower.gz}
+
+        \item \refstepcounter{wlcounter}\label{wl:wiki_wordlist} Lista słów
+        \texttt{enwik8} używana w konkursie o~Nagrodzę Huttera, stanowiąca
+        pierwsze $10^8$ znaków zrzutu artykułów z~anglojęzycznej
+        \mbox{Wikipedii}; dostępna pod adresem:
+        \url{http://cs.fit.edu/~mmahoney/compression/enwik8.zip}. Usunięcie
+        składni mediawiki oraz XML dokonane przy użyciu \texttt{WikiExtractor}
+        dostepnego pod adresem:
+        \url{http://medialab.di.unipi.it/wiki/Wikipedia_Extractor}.
+
+    \end{myenumerate}
+
+%todo: nowy dodatek zawierający zrzuty użytych programów
 
 \end{appendices}
 
