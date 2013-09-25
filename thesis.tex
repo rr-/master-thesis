@@ -20,7 +20,7 @@
 \usepackage{mathtools} %\ceil, \floor
 \usepackage[title]{appendix} %appendices
 \usepackage{caption} %multi-line caption
-\usepackage{siunitx} %separatory w dużych liczbach
+\usepackage{numprint} %separatory w dużych liczbach
 \usepackage{fancyvrb} %centrowanie verbatimów
 
 \pgfplotsset{compat=1.5} %wersja biblioteki do wykresów; usuwa problemy
@@ -1365,7 +1365,7 @@ Przykładowo, chcąc sprawdzić wszystkie hasła nad alfabetem składającym si�
 z~cyfr oraz z~małych i~dużych znaków alfabetu łacińskiego (a~więc $|A| =
 26+26+10 = 62$) o~długości od~1~do~8~znaków, musimy wypróbować następującą
 liczbę możliwości:
-    $$\frac{62(62^8-1)}{62-1} = \num{221919451578090}$$
+    $$\frac{62(62^8-1)}{62-1} = \numprint{221919451578090}$$
 Zakładając, że potrafimy obliczyć 100000~haszy na~sekundę, nadal potrzebujemy
 ok.~70~lat na złamanie hasła, jest to zatem wyjątkowo niepraktyczne podejście
 i~z~reguły skazane jest na niepowodzenie.
@@ -1419,20 +1419,20 @@ Korzystając z~powyższego wzoru możemy obliczyć, ile nam zajmie znalezienie
 hasła metodą brutalną z~domyślnym alfabetem $A_1$:
     \[
         \begin{aligned}
-        n_1=\;&19 \cdot \num{916132832} + 7 \cdot \num{14776336}\\
-        +\;&4 \cdot \num{238328} + 18 \cdot \num{3844}\\
-        +\;&8 \cdot \num{62} + 18 \cdot \num{1}\\
-        =\;&\num{17510981178}
+        n_1=\;&19 \cdot \numprint{916132832} + 7 \cdot \numprint{14776336}\\
+        +\;&4 \cdot \numprint{238328} + 18 \cdot \numprint{3844}\\
+        +\;&8 \cdot \numprint{62} + 18 \cdot \numprint{1}\\
+        =\;&\numprint{17510981178}
         \end{aligned}
     \]
 \ldots a~ile zajmie nam znalezienie hasła przy pomocy mądrze spreparowanego
 $A_2$:
     \[
         \begin{aligned}
-        n_2=\;&1 \cdot \num{916132832} + 7 \cdot \num{14776336}\\
-        +\;&0 \cdot \num{238328} + 6 \cdot \num{3844}\\
-        +\;&4 \cdot \num{62} + 6 \cdot \num{1}\\
-        =\;&\num{1019590502}
+        n_2=\;&1 \cdot \numprint{916132832} + 7 \cdot \numprint{14776336}\\
+        +\;&0 \cdot \numprint{238328} + 6 \cdot \numprint{3844}\\
+        +\;&4 \cdot \numprint{62} + 6 \cdot \numprint{1}\\
+        =\;&\numprint{1019590502}
         \end{aligned}
     \]
 Jest to ponad 17 razy krócej. Przyrost ten głównie wynika z~dobrego wyboru
