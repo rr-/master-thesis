@@ -25,6 +25,7 @@
 
 \pgfplotsset{compat=1.5} %wersja biblioteki do wykresów; usuwa problemy
 \newcounter{wlcounter} %licznik list słów
+\newcounter{sccounter} %licznik kodów źródłowych
 
 \begin{document}
 \newgeometry{margin=3cm}
@@ -1580,6 +1581,7 @@ narzędziem, co znajduje potwierdzenie w~popularności, jaką cieszy się progra
 
     \end{itemize}
 
+\pagebreak
 \section{Listy słów użyta do statystyk}
 \label{app:wordlists}
 W~pracy w~testach statystycznych korzystano z~kilku list.
@@ -1597,12 +1599,74 @@ W~pracy w~testach statystycznych korzystano z~kilku list.
         \mbox{Wikipedii}; dostępna pod adresem:
         \url{http://cs.fit.edu/~mmahoney/compression/enwik8.zip}. Usunięcie
         składni mediawiki oraz XML dokonane przy użyciu \texttt{WikiExtractor}
-        dostepnego pod adresem:
+        dostępnego pod adresem:
         \url{http://medialab.di.unipi.it/wiki/Wikipedia_Extractor}.
 
     \end{myenumerate}
 
-%todo: nowy dodatek zawierający zrzuty użytych programów
+\section{Kody źródłowe skryptów}
+W~pracy do zebrania wyników statystycznych korzystano z~kilku skryptów.
+
+\begin{myenumerate}
+
+\item \refstepcounter{sccounter}\label{wl:ngrams_counter} Skrypt do analizy
+częstościowej występowania liter, digramów oraz trigramów w tekście źródłowym.
+Język: Python; użycie: \texttt{./ngrams.py ŹRÓDŁO} gdzie \texttt{ŹRÓDŁO}
+stanowi ścieżkę do pliku zawierającego tekst źródłowy.
+\begin{verbatim}
+#!/usr/bin/python
+import sys
+import re
+import string
+import itertools
+
+class Processor(object):
+    def __init__(self, file):
+        self.file = file
+        self.nums = [1, 2, 3]
+        self.alpha = string.ascii_lowercase
+        self.ngrams = {}
+        for n in self.nums:
+            self.ngrams[n] = {}
+            for key in itertools.product(self.alpha, repeat=n):
+                key = ''.join(key)
+                self.ngrams[n][key] = 0
+
+    def process(self, word):
+        for n in self.nums:
+            for i in xrange(len(word)+1-n):
+                key = word[i:i+n]
+                self.ngrams[n][key] += 1
+
+    def run(self):
+        with open(self.file) as f:
+            for line in f.readlines():
+                regex = r'[' + self.alpha + '\']+'
+                words = re.findall(regex, line)
+                for word in words:
+                    word = re.sub(r'\'', '', word)
+                    word = word.lower()
+                    self.process(word)
+
+        total = dict((n, sum(self.ngrams[n].values())) for n in self.nums)
+        pad1 = max(len(str(n)) for n in self.nums)
+        pad2 = max(len(str(total[n])) for n in self.nums)
+        format = '%' + str(pad1) + 's: %' + str(pad2) + 'd (%.05f%%)'
+        for n, ngram in self.ngrams.iteritems():
+            percent_multiplier = 100.0 / total[n]
+            keys = sorted(ngram, key=ngram.get, reverse=True)
+            for key in keys:
+                value = ngram[key]
+                if value > 0:
+                    percent = value * percent_multiplier
+                    print format % (key, value, percent)
+
+file = sys.argv[1]
+p = Processor(file)
+p.run()
+\end{verbatim}
+
+\end{myenumerate}
 
 \end{appendices}
 
