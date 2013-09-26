@@ -1359,26 +1359,24 @@ funkcji~\cite{sha1_definition} została przedstawiona poniżej.
 
 
 
-
 \newpage
 \section{Ataki uniwersalne}
 \label{sec:universal_attacks}
-
 Wprawdzie kryptograficzne funkcje haszujące z~założenia są bezpieczne, nie
 oznacza to, że są one nie do złamania. Istnieje kilka ogólnych technik, które
 można stosować do znajdywania oryginalnych wiadomości $m$ niezależnie od
 rodzaju użytej funkcji.
 
 \subsection{Ataki naiwne}
-
 Wyobraźmy sobie scenariusz, w~którym z~serwera uwierzytelniającego została
 wykradziona baza danych zawierająca nazwy użytkowników i~ich hasła zakodowane
 dowolną funkcją haszującą. W~naiwnym podejściu atakujący może próbować zgadnąć
 kolejne hasła, jakich mogli użyć użytkownicy i~porównywać hasze tych
 wymyślonych haseł z~haszami z~wykradzionej bazy danych.
 
-\subsubsection{Atak brutalny}
 
+
+\subsubsection{Atak brutalny}
 W~tym podejściu konsekwentnie wypróbowywane są wszystkie hasła, jakie się da
 utworzyć za pomocą danego alfabetu $A$, zwiększając długość wypróbowywanych
 haseł \latin{ad infinitum}. Przykładowo, mając alfabet $A=(\mathtt{a},
@@ -1400,39 +1398,64 @@ Zakładając, że potrafimy obliczyć 100000~haszy na~sekundę, nadal potrzebuje
 ok.~70~lat na złamanie hasła, jest to zatem wyjątkowo niepraktyczne podejście
 i~z~reguły skazane jest na niepowodzenie.
 
-\subsubsection{Statystyczne ataki brutalne}
 
+
+\subsubsection{Zrandomizowany atak brutalny}
 Mimo że ataki brutalne w~domyślnej formie są niepraktyczne, atakujący mogą
 jednak wprowadzić różnego rodzaju ulepszenia tak, by nie marnować czasu na
-przeszukiwanie nieprawdopodobnych haseł. Pierwszym z~takich podejść jest
-wykorzystanie zdobyczy analizy częstościowej: wiadomo, że w~pewnych językach
-pewne litery są częściej wykorzystywane niż inne, a~większość osób nie stara
-się czynić swoich haseł bezpiecznymi i~korzysta z~haseł będącymi zwykłymi
-słowami istniejącymi w~jakimś języku (więcej
-w~sekcji~\ref{sec:dictionary_attacks}).
+przeszukiwanie nieprawdopodobnych haseł. Jednym z~takich podejść jest
+wykorzystanie zdobyczy analizy częstości: wiadomo, że w~pewnych językach pewne
+litery są częściej wykorzystywane niż inne, a~większość osób nie stara się
+czynić swoich haseł bezpiecznymi i~korzysta z~haseł będącymi zwykłymi słowami
+istniejącymi w~jakimś języku (więcej w~sekcji~\ref{sec:dictionary_attacks}).
 
-%todo: obrazek z przykładowym wykresem częstości sporządzonym z listy 2 i 1
+\begin{table}[htb]
+    \caption{Rozkład częstości występowania liter alfabetu łacińskiego
+    w~przykładowym tekście (tabelka sporządzona na podstawie
+    listy~\ref{wl:wiki_wordlist} przy użyciu skryptu~\ref{sc:ngrams_counter}).}
+    \label{tbl:english_letter_frequencies}
+    \begin{tabular}{|c|r|l||c|r|l|}
+        \hline
+        Znak & \small Wystąpienia & \small \% wystąpień &
+        Znak & \small Wystąpienia & \small \% wystąpień \\
+        \hline
+        e & 5485131 & 12.47125\% & m & 1140502 & 2.59310\% \\
+        t & 3854260 &  8.76323\% & f &  974805 & 2.21636\% \\
+        a & 3732102 &  8.48548\% & p &  898858 & 2.04369\% \\
+        i & 3395590 &  7.72037\% & g &  816191 & 1.85573\% \\
+        o & 3317573 &  7.54299\% & y &  714180 & 1.62379\% \\
+        n & 3284150 &  7.46700\% & w &  634873 & 1.44348\% \\
+        s & 2967003 &  6.74592\% & b &  622654 & 1.41570\% \\
+        r & 2918273 &  6.63512\% & v &  458891 & 1.04336\% \\
+        h & 2061870 &  4.68796\% & k &  223042 & 0.50712\% \\
+        l & 1895112 &  4.30882\% & x &  106036 & 0.24109\% \\
+        d & 1648165 &  3.74735\% & z &   51794 & 0.11776\% \\
+        c & 1504344 &  3.42035\% & q &   46667 & 0.10610\% \\
+        u & 1188260 &  2.70168\% & j &   41877 & 0.09521\% \\
+        \hline
+    \end{tabular}
+\end{table}
 
-Można wykorzystać to na
-dwojaki sposób: po pierwsze, możemy ułożyć nasz alfabet w~kolejności zgodnej
-z~kolejnością występowania liter w~danym języku. Przykładowo, podczas gdy
-domyślnie korzystalibyśmy z~alfabetu ułożonego w~następujący sposób:
+Można wykorzystać, układając nasz alfabet w~kolejności zgodnej z~kolejnością
+występowania liter w~danym języku, tak by polepszyć prawdopodobieństwo
+wczesnego dobrego doboru literek. Przykładowo, podczas gdy domyślnie
+korzystalibyśmy z~alfabetu ułożonego w~następujący sposób:
     $$A_1 = (
     \mathtt{a}, \mathtt{b}, \mathtt{c}, \mathtt{d}, \mathtt{e}, \mathtt{f},
     \mathtt{g}, \mathtt{h}, \mathtt{i}, \mathtt{j}, \mathtt{k}, \mathtt{l},
     \mathtt{m}, \mathtt{n}, \mathtt{o}, \mathtt{p}, \mathtt{q}, \mathtt{r},
     \mathtt{s}, \mathtt{t}, \mathtt{u}, \mathtt{v}, \mathtt{w}, \mathtt{x},
     \mathtt{y}, \mathtt{z})$$
-Dla języka angielskiego moglibyśmy ułożyć alfabet w~kolejności
-następującej:
+Dla języka angielskiego moglibyśmy ułożyć alfabet w~kolejności następującej:
     $$A_2 = (
     \mathtt{e}, \mathtt{t}, \mathtt{a}, \mathtt{o}, \mathtt{i}, \mathtt{n},
     \mathtt{s}, \mathtt{h}, \mathtt{r}, \mathtt{d}, \mathtt{l}, \mathtt{c},
     \mathtt{u}, \mathtt{m}, \mathtt{w}, \mathtt{f}, \mathtt{g}, \mathtt{y},
     \mathtt{p}, \mathtt{b}, \mathtt{v}, \mathtt{k}, \mathtt{j}, \mathtt{x},
     \mathtt{q}, \mathtt{z})$$
-Przypuśćmy, że hasło brzmi ``thesis'' i~szukamy go metodą brutalną. Dla
-zadanego alfabetu $A$, zanim znajdziemy słowo ``thesis'' musimy wygenerować
+
+\pagebreak Przypuśćmy, że hasło brzmi ``thesis'' i~szukamy go metodą brutalną.
+Dla zadanego alfabetu $A$, zanim znajdziemy słowo ``thesis'' musimy wygenerować
 następującą liczbę pozycji:
     \[
         \begin{aligned}
@@ -1465,66 +1488,111 @@ $A_2$:
         =\;&\numprint{1019590502}
         \end{aligned}
     \]
-Jest to ponad 17 razy krócej. Przyrost ten głównie wynika z~dobrego wyboru
-pierwszej litery.
+Jest to ponad 17 razy krócej. Należy jednak zauważyć, że tak dobry przyrost
+wynika głównie z~szczęśliwego wyboru pierwszej litery -- dla każdej
+nietrafionej pierwszej litery hasła, czas szukania kolizji wydłuża się nam
+o~$|A|^{n-1}$.
 
-\subsubsection{Zrandomizowane ataki brutalne}
-Powyższa obserwacja prowadzi nas do innego sposobu optymalizowania szukania:
-gdy przeszukujemy przestrzeń haseł liniowo, to tak naprawdę powodzenie szukania
-jest najbardziej uzależnione od dobrego doboru pierwszej litery. Jest to
-niepożądane zjawisko, dlatego wykształciła się inna rodzina ataków brutalnych,
-jaką są ataki zrandomizowane -- zamiast liniowo przeszukiwać przestrzeń haseł,
-próbujemy je przeszukiwać nieliniowo tak, by każda kombinacja miała równą
-szansę być wypróbowana wraz z~upływem czasu. Wyszukiwanie nieliniowe można
-zaimplementować na kilka sposobów.
+Powyższa obserwacja prowadzi nas do szukania innego sposobu na optymalizację.
+Tak naprawdę zawsze, gdy przeszukujemy przestrzeń haseł liniowo, szybkość
+znalezienia kolizji będzie najbardziej uzależniona od wczesnych wyborów cechy,
+którą liniowo zmieniamy (w przypadku klasycznych ataków brutalnych cechą ta
+jest dobór kolejnych liter). Jest to niepożądane zjawisko, dlatego wykształciła
+się inna rodzina ataków brutalnych, jaką są ataki zrandomizowane. W~tym
+podejściu zamiast liniowo przeszukiwać przestrzeń haseł próbujemy je
+przeszukiwać tak, by każda kombinacja miała względnie równą szansę być
+wypróbowana wraz z~upływem czasu bez znacznego faworyzowania jakichkolwiek cech
+(w~szczególności bez np. faworyzowania haseł zaczynających się na
+literkę~``a'', w~następnej kolejności~``aa'' itd.). Do implementacji takiego
+wyszukiwania można podejść na kilka sposobów.
 \begin{myenumerate}
     \item Na pierwszy rzut oka nasuwa się myśl, że moglibyśmy po prostu
     wygenerowane hasła potasować. Podejście to jest jednak złe, ponieważ
     potasowanie odbywa się tutaj dopiero \emph{po} wygenerowaniu, a~zatem nic
     tak naprawdę nie zyskujemy, a~wręcz tracimy. Należy pamiętać, że kluczowym
-    elementem jest uzyskanie losowości już podczas generowania.
+    elementem jest uzyskanie losowości już \emph{podczas} generowania.
+
     \item Możemy zmienić sposób obliczania następnika, tzn. nowego hasła na
     podstawie starego, tak by wpływał na całe hasło w~sposób jak najbliższy
-    losowemu. Podejście to znajduje swoje korzenie w~trybach szyfrów blokowych,
-    gdzie zazwyczaj zależy nam by poprzedni blok wpływał jak najbardziej
-    nieprzewidywalny sposób na wygląd aktualnego bloku (dowolny tryb inny niż
-    \texttt{ECB}). Wadą tego rozwiązania jest to, że implementacja iteratora,
-    który będzie zwracał wyniki wyglądające jak losowe, jest kosztowna
-    obliczeniowo, a~przy generowaniu haseł zależy nam na jak najoptymalniejszym
-    szybkościowo i~pamięciowo działaniu procesu.
+    losowemu. Przykładowo, zamiast zwracać hasła w~kolejności $\mathtt{a},
+    \mathtt{b}, \mathtt{c}, \ldots, \mathtt{zz}$, możemy skonstruować iterator
+    zwracający je w~kolejności $\mathtt{gx}, \mathtt{zt}, \mathtt{a}, \ldots,
+    \mathtt{kk}$. Podejście to znajduje swoje korzenie w~trybach szyfrów
+    blokowych, gdzie zazwyczaj zależy nam by poprzedni blok wpływał jak
+    najbardziej nieprzewidywalny sposób na wygląd aktualnego bloku (co
+    realizuje dowolny tryb inny niż tryb \texttt{ECB}). Wadą tego rozwiązania
+    jest to, że implementacja iteratora, który będzie zwracał wyniki
+    w~kolejności przypominającej losową, jest kosztowna obliczeniowo, a~przy
+    generowaniu haseł zależy nam na jak najoptymalniejszym szybkościowo
+    i~pamięciowo działaniu procesu.
+
     \item Możemy też zwyczajnie\ldots generować przypadkowe hasła. Jest to
-    podejście najlepsze, bo nie dość, że jest mało kosztowne obliczeniowo
+    podejście atrakcyjne, bo nie dość, że jest mało kosztowne obliczeniowo
     (zakładając szybkość działania wykorzystanych generatorów liczb
     pseudolosowych), to zostawia także dużo miejsca na kolejne ulepszenia.
+
+    W~podejściu całkowicie losowym możemy po prostu składać ze sobą $n$
+    przypadkowych znaków z~alfabetu $A$. Popełnialibyśmy jednak w~ten sposób
+    ten sam błąd, co wcześniej -- także i~w~tym wypadku możemy skorzystać
+    z~dobrodziejstwa analizy~częstości i~uzależnić prawdopodobieństwa
+    wyciągnięcia odpowiednich liter od prawdopodobieństwa ich wystąpienia
+    w~zakładanym języku. Możemy pójść także krok dalej i~uzależnić swój
+    generator od prawdopodobieństw występowania tzw. digramów oraz trigramów,
+    czyli ciągów odpowiednio 2- i~3-literowych.
+
+    \pagebreak
+    \begin{table}[htb]
+        \caption{Najpopularniejsze digramy oraz trigramy złożone z~liter alfabetu
+        łacińskiego w~przykładowym tekście (tabelka sporządzona na podstawie
+        listy~\ref{wl:wiki_wordlist} przy użyciu skryptu~\ref{sc:ngrams_counter}).}
+        \label{tbl:english_letter_frequencies}
+        \begin{tabular}{|c|r||c|r|}
+            \hline
+            Bigram & \small \% wystąpień &
+            Trigram & \small \% wystąpień \\
+            \hline
+            th & 3.08514\% & the & 2.88025\% \\
+            he & 2.86055\% & and & 1.21997\% \\
+            in & 2.40712\% & ion & 0.95958\% \\
+            er & 2.15763\% & ing & 0.95724\% \\
+            an & 2.11390\% & tio & 0.76296\% \\
+            on & 1.77424\% & ent & 0.71174\% \\
+            re & 1.76263\% & ati & 0.56554\% \\
+            at & 1.41375\% & ter & 0.54204\% \\
+            ti & 1.39238\% & for & 0.48440\% \\
+            en & 1.38312\% & ate & 0.46068\% \\
+            es & 1.38072\% & her & 0.41935\% \\
+            or & 1.36063\% & all & 0.38966\% \\
+            te & 1.31308\% & ver & 0.37819\% \\
+            nd & 1.30632\% & ers & 0.37419\% \\
+            ed & 1.28358\% & ere & 0.37155\% \\
+            \hline
+        \end{tabular}
+    \end{table}
+
+    Kontrowersyjnie, wprowadzając zróżnicowane prawdopodobieństwa wyboru liter,
+    wiążemy wybór hasła z~cechą jaką jest rozkład prawdopodobieństwa liter.
+    Mimo to, podejście to ze względu na swoją losową naturę autor uważa za
+    lepsze niż pozostałe podejścia (klasyczne, w~którym hasło zaczynające się
+    na ``z'' \emph{musi} czekać aż wszystkie inne zostaną obliczone, oraz
+    całkowicie losowe, w~którym hasła, które uznajemy za bardziej prawdopodobne
+    na podstawie analizy językowej, są wybierane równie często jak pozostałe).
+
+    %Gdy usprawnimy swój generator w~ten sposób, staje się on naprawdę dobrym
+    %narzędziem, co znajduje potwierdzenie w~popularności, jaką cieszy się
+    %program \texttt{Johnny The Ripper} wykorzystujący powyższe techniki.
+
+    Główny problem wiążący się z losowaniem haseł jest taki, że możemy
+    wypróbowywać to samo hasło wielokrotnie, dopóki nie wprowadzimy
+    zabezpieczenia w postaci struktury danych zapamiętującej wypróbowane hasła.
+    Wiąże się to jednak z~wysokimi kosztami: pamięciowymi w~celu trzymania
+    zapamiętanych haseł, a~także obliczeniowymi w~celu sprawdzania, czy
+    wylosowane hasło zostało już sprawdzone. Zależnie od szybkości działania
+    łamanej funkcji haszującej oraz charakteru ataku (łamanie pojedynczego
+    hasła vs. łamanie zbioru haseł), implementowanie tego typu sprawdzania może
+    być opłacalne lub nie.
+
 \end{myenumerate}
-Generowanie losowych haseł możemy zaimplementować na różne sposoby. Możemy na
-przykład po prostu składać ze sobą $n$ przypadkowych znaków z~alfabetu $A$.
-Popełnialibyśmy jednak w~ten sposób ten sam błąd, co wcześniej -- także i~w~tym
-podejściu powinniśmy skorzystać z~dobrodziejstwa analizy~częstościowej
-i~uzależnić prawdopodobieństwa wyciągnięcia odpowiednich liter od
-prawdopodobieństwa ich wystąpienia w~zakładanym języku. Możemy pójść także krok
-dalej i~uzależnić swój generator od prawdopodobieństw występowania tzw.
-digramów oraz trigramów, czyli ciągów odpowiednio 2- i~3-literowych.
-Przykładowo, w~języku angielskim najpopularniejszymi digramami są:
-    \begin{center}
-    \begin{BVerbatim}
-    th, er, on, an, re, he, in, ed, nd, ha,
-    at, en, es, of, or, nt, ea, ti, to, it,
-    st, io, le, is, ou, ar, as, de, rt, ve
-    \end{BVerbatim}
-    \end{center}
-Natomiast najczęściej występującymi trigramami są:
-    \begin{center}
-    \begin{BVerbatim}
-    the, and, tha, ent, ion, tio, for,
-    nde, has, nce, edt, tis, oft, sth
-    \end{BVerbatim}
-    \end{center}
-%todo: zamienić to na tabelkę sporządzoną na podstawie listy 2, wraz z
-%prawdopodobieństwami
-Gdy usprawnimy swój generator w~ten sposób, staje się on naprawdę dobrym
-narzędziem, co znajduje potwierdzenie w~popularności, jaką cieszy się program
-\texttt{Johnny The Ripper} wykorzystujący powyższe techniki.
 
 
 
@@ -1535,6 +1603,7 @@ narzędziem, co znajduje potwierdzenie w~popularności, jaką cieszy się progra
 
 \subsubsection{Przyspieszanie obliczeń}
 
+\pagebreak
 \subsection{Tęczowe tablice}
 
 \subsection{Ataki typu Denial of Service}
