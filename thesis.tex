@@ -2,32 +2,44 @@
 \usepackage{geometry}
 \geometry{a4paper}
 
-\usepackage{pgfplots} %wykresy
-\usepackage[utf8]{inputenc}
-\usepackage[OT1]{fontenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage[utf8]{inputenc} %kompilowanie polskich literek
+\usepackage[OT1]{fontenc} %wyświetlanie polskich literek
+\usepackage{polski} %wyświetlanie polskich literek cz. II
+\usepackage[english,polish]{babel} %zasady łamania wierszy, domyślnie polski
 \usepackage{graphicx} %wstawianie obrazków
 \usepackage{epstopdf} %wstawianie obrazków w formacie .eps
 \usepackage{setspace}
 \usepackage{fancyhdr} %nagłówki i stopki na każdej stronie
-\usepackage{amsmath}
-\usepackage{amssymb}
 \usepackage{enumitem}
 \usepackage{microtype}
-\usepackage{url}
+\usepackage{hyperref} %możliwość linkowania
 \usepackage{floatrow} %domyślnie wyśrodkowuj ryciny
-\usepackage[english,polish]{babel}
-\usepackage{polski}
 \usepackage{mathtools} %\ceil, \floor
-\usepackage[title]{appendix} %appendices
-\usepackage{caption} %multi-line caption
+\usepackage[title]{appendix} %wsparcie dla sekcji "dodatki"
+\usepackage{caption} %łamanie \caption na wiele linii
 \usepackage{numprint} %separatory w dużych liczbach
+\usepackage{pgfplots} %wykresy
 \usepackage{fancyvrb} %centrowanie verbatim
 \usepackage{xcolor} %kolory w kodzie
 \usepackage{listings} %zrzuty kodów
+\usepackage{textcomp} %konwersja apostrofów w zrzutach kodów
 
 \pgfplotsset{compat=1.5} %wersja biblioteki do wykresów; usuwa problemy
 \newcounter{wlcounter} %licznik list słów
 \newcounter{sccounter} %licznik kodów źródłowych
+
+%usuń kiczowate ramki dookoła linków
+\definecolor{dark-red}{rgb}{0.4,0.15,0.15}
+\definecolor{dark-blue}{rgb}{0.15,0.15,0.4}
+\definecolor{medium-blue}{rgb}{0,0,0.5}
+\hypersetup{
+    colorlinks, linkcolor={dark-red},
+    citecolor={dark-blue}, urlcolor={medium-blue}
+}
+
+\expandafter\def\expandafter\UrlBreaks\expandafter{\UrlBreaks\do\-}
 
 \begin{document}
 \newgeometry{margin=3cm}
@@ -57,6 +69,7 @@
 \lstset{keywordstyle=\color{olive}}
 \lstset{stringstyle=\color{red}}
 \lstset{basicstyle=\ttfamily\small}
+\lstset{upquote=true}
 
 \begin{titlepage}
     \begin{center}
@@ -1607,17 +1620,16 @@ W~pracy w~testach statystycznych korzystano z~kilku list.
 
         \item \refstepcounter{wlcounter}\label{wl:english_wordlist} Słownik
         języka angielskiego zawierający 390516 niepowtarzających się wyrazów;
-        dostępny pod adresem:
+        dostępny pod następującym adresem:
         \url{http://download.openwall.net/pub/wordlists/languages/English/3-large/lower.gz}
 
         \item \refstepcounter{wlcounter}\label{wl:wiki_wordlist} Lista słów
-        \texttt{enwik8} używana w konkursie o~Nagrodzę Huttera, stanowiąca
-        pierwsze $10^8$ znaków zrzutu artykułów z~anglojęzycznej
-        \mbox{Wikipedii}; dostępna pod adresem:
-        \url{http://cs.fit.edu/~mmahoney/compression/enwik8.zip}. Usunięcie
-        składni mediawiki oraz XML dokonane przy użyciu \texttt{WikiExtractor}
-        dostępnego pod adresem:
-        \url{http://medialab.di.unipi.it/wiki/Wikipedia_Extractor}.
+        wyciągnięta z~pliku \texttt{enwik8}, używanego w~konkursie o~Nagrodzę
+        Huttera, zawierającego pierwsze $10^8$ bajtów zrzutu XML artykułów
+        z~anglojęzycznej \mbox{Wikipedii}. Plik \texttt{enwik8} dostępny jest
+        pod następującym adresem:
+        \url{http://cs.fit.edu/~mmahoney/compression/enwik8.zip}. Ekstrakcja
+        słów z~pliku dokonana przy użyciu skryptu \ref{sc:wiki_extractor}.
 
     \end{myenumerate}
 
@@ -1626,11 +1638,18 @@ W~pracy do zebrania wyników statystycznych korzystano z~kilku skryptów.
 
 \begin{myenumerate}
 
-    \item \refstepcounter{sccounter}\label{wl:ngrams_counter} Skrypt do analizy
-    częstościowej występowania liter, digramów oraz trigramów w tekście źródłowym.
-    Język: Python; użycie: \texttt{./ngrams.py <ŹRÓDŁO} gdzie \texttt{<ŹRÓDŁO}
-    oznacza przekazanie do skryptu mechanizmem potoków zawartości pliku
-    \texttt{ŹRÓDŁO}.
+    \item \refstepcounter{sccounter}\label{sc:wiki_extractor}
+    \texttt{WikiExtractor} \\
+    Skrypt do ekstrakcji słów z~zrzutów XML artykułów z~Wikipedii, usuwający
+    składnię mediawiki oraz tagi XML. Projekt dostępny pod następującym
+    \mbox{adresem}: \url{http://medialab.di.unipi.it/wiki/Wikipedia_Extractor}.
+
+    \item \refstepcounter{sccounter}\label{sc:ngrams_counter}
+    \texttt{ngrams.py} \\
+    Skrypt do analizy częstościowej występowania liter, digramów oraz trigramów
+    w~tekście źródłowym. Język: Python; użycie: \texttt{./ngrams.py <ŹRÓDŁO}
+    gdzie \texttt{<ŹRÓDŁO} oznacza przekazanie do skryptu mechanizmem potoków
+    zawartości pliku \texttt{ŹRÓDŁO}.
     \lstinputlisting[language=python,caption=ngrams.py]{code/ngrams.py}
 
 \end{myenumerate}
