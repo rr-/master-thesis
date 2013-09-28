@@ -1,47 +1,39 @@
 #!/usr/bin/python
-import sys
-import re
+import sys, re
 import string
-from itertools import product
 
+#ignoruj "broken pipe"
+from signal import signal, SIGPIPE, SIG_DFL
+signal(SIGPIPE,SIG_DFL)
+
+num = int(sys.argv[1])
 alpha = string.ascii_lowercase
-nums = [1, 2, 3]
 
 def ngram(word, n):
 	for i in xrange(len(word)+1-n):
 		yield word[i:i+n]
 
-ngrams = {}
-for n in nums:
-	ngrams[n] = {}
-	for key in product(alpha, repeat=n):
-		key = ''.join(key)
-		ngrams[n][key] = 0
-
 regex = '[%s\']+' % alpha
+ngrams = {}
 for line in sys.stdin.readlines():
 	words = re.findall(regex, line)
 	for word in words:
-		word = re.sub('\'', '', word)
-		word = word.lower()
-		for n in nums:
-			for key in ngram(word, n):
-				ngrams[n][key] += 1
+		word = re.sub('\'', '', word).lower()
+		for key in ngram(word, num):
+			if key not in ngrams:
+				ngrams[key] = 0
+			ngrams[key] += 1
 
-total = {}
-pad1 = pad2 = 0
-for n, ngram in ngrams.iteritems():
-	total[n] = sum(ngram.values())
-	pad1 = max(pad1, n)
-	pad2 = max(pad2, len(str(max(ngram.values()))))
-format  = '%' + str(pad1) + 's: '
-format += '%' + str(pad2) + 'd (%.05f%%)'
+if len(ngrams) == 0:
+	sys.exit(0)
 
-for n, ngram in ngrams.iteritems():
-	keys = sorted(ngram, key=ngram.get, reverse=True)
-	for key in keys:
-		value = ngram[key]
-		if value > 0:
-			percent = value * 100.0 / total[n]
-			print format % (key, value, percent)
-	print
+total = sum(ngrams.values())
+pad = len(str(max(ngrams.values())))
+fmt = '%s: %' + str(pad) + 'd (%.05f%%)'
+
+keys = sorted(ngrams, key=ngrams.get, reverse=True)
+for key in keys:
+	value = ngrams[key]
+	if value > 0:
+		percent = value * 100.0 / total
+		print fmt % (key, value, percent)

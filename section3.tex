@@ -1,0 +1,439 @@
+\section{Ataki uniwersalne}
+\label{sec:universal_attacks}
+Wprawdzie kryptograficzne funkcje haszujące z~założenia są bezpieczne, nie
+oznacza to, że są one nie do złamania. Istnieje kilka ogólnych technik, które
+można stosować do znajdywania oryginalnych wiadomości $m$ niezależnie od
+rodzaju użytej funkcji.
+
+\subsection{Ataki naiwne}
+Wyobraźmy sobie scenariusz, w~którym z~serwera uwierzytelniającego została
+wykradziona baza danych zawierająca nazwy użytkowników i~ich hasła zakodowane
+dowolną funkcją haszującą. W~naiwnym podejściu atakujący może próbować zgadnąć
+kolejne hasła, jakich mogli użyć użytkownicy i~porównywać hasze tych
+wymyślonych haseł z~haszami z~wykradzionej bazy danych.
+
+
+
+%todo ataki online ataki offline
+
+
+
+\subsubsection{Atak brutalny}
+W~tym podejściu konsekwentnie wypróbowywane są wszystkie hasła, jakie się da
+utworzyć za pomocą danego alfabetu $A$, zwiększając długość wypróbowywanych
+haseł \latin{ad infinitum}. Przykładowo, mając alfabet $A=(\mathtt{a},
+\mathtt{b}, \mathtt{c}, \ldots, \mathtt{z})$ atakujący będzie próbował znaleźć
+kolizje haszy dla kolejnych haseł: $\mathtt{a}, \mathtt{b}, \mathtt{c}, \ldots,
+\mathtt{z}, \mathtt{aa}, \mathtt{ab}, \ldots$ itd.
+
+Technika ta, zwana także czasem przeszukiwaniem pełnym, przy odpowiednim
+alfabecie sprawia, że pomyślne znalezienie kolizji jest jedynie kwestią czasu.
+Jest ona jednak wyjątkowo nieoptymalna z~uwagi na ilość zasobów, które są
+potrzebne do pomyślnego przeprowadzenia. Chcąc sprawdzić wszystkie hasła
+długości \mbox{$|m| \in (1, \ldots n)$} nad alfabetem długości $a=|A|$, musimy
+przeprowadzić następującą liczbę operacji haszowania:
+    $$\sum_{i=1}^n a^i = \frac{a(a^n-1)}{a-1}$$
+Przykładowo, chcąc sprawdzić wszystkie hasła nad alfabetem składającym się
+z~cyfr oraz z~małych i~wielkich znaków alfabetu łacińskiego (a~więc $|A| =
+10+26+26 = 62$) o~długości od~1~do~8~znaków, musimy wypróbować następującą
+liczbę możliwości:
+    $$\frac{62(62^8-1)}{62-1} = \numprint{221919451578090}$$
+Zakładając, że atakujący~potrafi obliczyć 100000~haszy na~sekundę, nadal
+potrzebuje ok.~70~lat na złamanie hasła; jest to zatem wyjątkowo niepraktyczne
+podejście i~z~reguły skazane jest na niepowodzenie.
+
+
+
+\subsubsection{Zrandomizowany atak brutalny}
+Mimo że ataki brutalne w~domyślnej formie są niepraktyczne, atakujący mogą
+wprowadzić różnego rodzaju ulepszenia, tak by nie marnować czasu na
+przeszukiwanie nieprawdopodobnych haseł. Jednym z~takich podejść jest
+wykorzystanie zdobyczy analizy częstości: wiadomo, że w~pewnych językach pewne
+litery są częściej wykorzystywane niż inne, a~większość osób nie stara się
+czynić swoich haseł bezpiecznymi i~korzysta z~haseł będącymi zwykłymi słowami
+istniejącymi w~jakimś języku (więcej w~sekcji~\ref{sec:dictionary_attacks}).
+
+%todo: rozszerzyć tabelę o język polski
+\begin{table}[htb]
+    \caption{Przybliżony rozkład częstości występowania liter alfabetu
+    łacińskiego w~języku angielskim (tabelka sporządzona na podstawie
+    listy~\ref{wl:wiki_wordlist} przy użyciu skryptu~\ref{sc:ngrams_counter}).}
+    \begin{tabular}{|r||c|l|}
+        \hline
+        &Znak & \small \small \% wystąpień \\
+        \hline
+        1  & e & 12.47125\% \\
+        2  & t &  8.76323\% \\
+        3  & a &  8.48548\% \\
+        4  & i &  7.72037\% \\
+        5  & o &  7.54299\% \\
+        6  & n &  7.46700\% \\
+        7  & s &  6.74592\% \\
+        8  & r &  6.63512\% \\
+        9  & h &  4.68796\% \\
+        10 & l &  4.30882\% \\
+        11 & d &  3.74735\% \\
+        12 & c &  3.42035\% \\
+        13 & u &  2.70168\% \\
+        14 & m & 2.59310\% \\
+        15 & f & 2.21636\% \\
+        16 & p & 2.04369\% \\
+        17 & g & 1.85573\% \\
+        18 & y & 1.62379\% \\
+        19 & w & 1.44348\% \\
+        20 & b & 1.41570\% \\
+        21 & v & 1.04336\% \\
+        22 & k & 0.50712\% \\
+        23 & x & 0.24109\% \\
+        24 & z & 0.11776\% \\
+        25 & q & 0.10610\% \\
+        26 & j & 0.09521\% \\
+        \hline
+    \end{tabular}
+\end{table}
+
+Można to wykorzystać układając alfabet w~kolejności zgodnej z~kolejnością
+występowania liter w~danym języku, tak by polepszyć prawdopodobieństwo
+wczesnego dobrego doboru literek. Przykładowo, domyślnie korzystalibyśmy
+z~alfabetu ułożonego w~następujący sposób:
+    $$A_1 = (
+    \mathtt{a}, \mathtt{b}, \mathtt{c}, \mathtt{d}, \mathtt{e}, \mathtt{f},
+    \mathtt{g}, \mathtt{h}, \mathtt{i}, \mathtt{j}, \mathtt{k}, \mathtt{l},
+    \mathtt{m}, \mathtt{n}, \mathtt{o}, \mathtt{p}, \mathtt{q}, \mathtt{r},
+    \mathtt{s}, \mathtt{t}, \mathtt{u}, \mathtt{v}, \mathtt{w}, \mathtt{x},
+    \mathtt{y}, \mathtt{z})$$
+Dla języka angielskiego moglibyśmy natomiast ułożyć alfabet w~poniższej
+kolejności:
+    $$A_2 = (
+    \mathtt{e}, \mathtt{t}, \mathtt{a}, \mathtt{o}, \mathtt{i}, \mathtt{n},
+    \mathtt{s}, \mathtt{h}, \mathtt{r}, \mathtt{d}, \mathtt{l}, \mathtt{c},
+    \mathtt{u}, \mathtt{m}, \mathtt{w}, \mathtt{f}, \mathtt{g}, \mathtt{y},
+    \mathtt{p}, \mathtt{b}, \mathtt{v}, \mathtt{k}, \mathtt{j}, \mathtt{x},
+    \mathtt{q}, \mathtt{z})$$
+Przypuśćmy, że hasło brzmi ``thesis'' i~szukamy go metodą brutalną.
+Dla zadanego alfabetu $A$, zanim znajdziemy słowo ``thesis'' trzeba wygenerować
+następującą liczbę haseł:
+    \[
+        \begin{aligned}
+        (A[\mathtt{t}]-1)\cdot(|A|^5) &+\\
+        (A[\mathtt{h}]-1)\cdot(|A|^4) &+\\
+        (A[\mathtt{e}]-1)\cdot(|A|^3) &+\\
+        (A[\mathtt{s}]-1)\cdot(|A|^2) &+\\
+        (A[\mathtt{i}]-1)\cdot(|A|^1) &+\\
+        (A[\mathtt{s}]-1)\cdot(|A|^0)
+        \end{aligned}
+    \]
+gdzie $A[x]$ oznacza pozycję litery $x$ w~alfabecie $A$ (indeksując od 1).
+Korzystając z~powyższego wzoru można obliczyć ile operacji zajmie znalezienie
+hasła metodą brutalną z~domyślnym alfabetem $A_1$:
+    \[
+        \begin{aligned}
+        n_1=\;&19 \cdot 62^5 + 7 \cdot 62^4 \\
+        +\;&4 \cdot 62^3 + 18 \cdot 62^2 \\
+        +\;&8 \cdot 62^1 + 18 \cdot 62^0 \\
+        =\;&\numprint{17510981178}
+        \end{aligned}
+    \]
+\ldots a~ile zajmie znalezienie hasła przy pomocy mądrze spreparowanego
+$A_2$:
+    \[
+        \begin{aligned}
+        n_2=\;&1 \cdot 62^5 + 7 \cdot 62^4 \\
+        +\;&0 \cdot 62^3 + 6 \cdot 62^2 \\
+        +\;&4 \cdot 62^1 + 6 \cdot 62^0 \\
+        =\;&\numprint{1019590502}
+        \end{aligned}
+    \]
+Jest to ponad 17 razy krócej. Należy jednak zauważyć, że tak dobry przyrost
+wynika głównie ze szczęśliwego wyboru pierwszej litery: w~pierwszym podejściu
+przy najwyższej potędze występował mnożnik 19, w~drugim -- tylko 1. Widać stąd,
+że przy takiej strategii im mniej używana będzie pierwsza litera faktycznego
+hasła które atakujący próbuje znaleźć, tym dłuższy będzie czas jego łamania.
+
+Powyższa obserwacja prowadzi do szukania innego sposobu na optymalizację. Tak
+naprawdę zawsze, gdy przestrzeń haseł przeszukuje się liniowo, szybkość
+znalezienia kolizji będzie najbardziej uzależniona od wczesnych wyborów cechy,
+która jest modyfikowana (w przypadku klasycznych ataków brutalnych cechą tą
+jest dobór kolejnych liter). Jest to niepożądane zjawisko, dlatego wykształciła
+się inna rodzina ataków brutalnych, jaką są ataki zrandomizowane. W~tym
+podejściu zamiast liniowo przeszukiwać przestrzeń haseł próbuje się je
+przeszukiwać tak, by każda kombinacja miała względnie równą szansę być
+wypróbowana wraz z~upływem czasu, bez znacznego faworyzowania jakichkolwiek
+cech (w~szczególności bez np. faworyzowania haseł zaczynających się na
+literkę~``a'', w~następnej kolejności~``aa'' itd.). Do implementacji takiego
+wyszukiwania można podejść na kilka sposobów.
+\begin{myenumerate}
+    \item Na pierwszy rzut oka nasuwa się myśl, że można by po prostu
+    wygenerowane hasła potasować. Podejście to jest jednak nieskuteczne,
+    ponieważ potasowanie odbywa się tutaj dopiero \emph{po} wygenerowaniu. Nic
+    tak naprawdę nie zyskujemy, a~wręcz tracimy: najpierw należy całość
+    wygenerować i~przechować w~jakiejś strukturze danych, co niesie ze sobą
+    ogromne koszty pamięciowe, a~następnie wykonać długotrwałą operację
+    tasowania. Kluczowym elementem jest uzyskanie losowości już \emph{podczas}
+    generowania tak, by nie trzeba było przechowywać wypróbowywanych haseł
+    w~pamięci.
+
+    \item W~sytuacji, kiedy chcemy osiągnąć losowy porządek już na etapie
+    tworzenia listy, możemy zmienić sposób obliczania nowego hasła na podstawie
+    poprzedniego. Niech $N(x, A)=y$, gdzie $x$ to poprzednie hasło, $y$ to
+    nowo wygenerowane hasło a~$A$ to alfabet. W~klasycznym ataku brutalnym
+    funkcja następnika dla $A=(\mathtt{a}, \mathtt{b}, \mathtt{c}, \ldots,
+    \mathtt{z})$ zachowuje się następująco:
+    \[
+        \begin{aligned}
+            N(\varnothing, A) &= \mathtt{a} \\
+            N(\mathtt{a},  A) &= \mathtt{b} \\
+            N(\mathtt{b},  A) &= \mathtt{c} \\
+            &\vdots \\
+            N(\mathtt{z},  A) &= \mathtt{aa} \\
+            N(\mathtt{aa}, A) &= \mathtt{ab} \\
+            &\vdots
+        \end{aligned}
+    \]
+    W~teorii można jednak skonstruować funkcję następnika, która przyjmując
+    dodatkowe parametry oznaczające minimalną i~maksymalną długość hasła,
+    będzie zwracała hasła w~kolejności przypominającej losową:
+    \[
+        \begin{aligned}
+            N(\varnothing, A, 1, 2) &= \mathtt{gx} \\
+            N(\mathtt{gx}, A, 1, 2) &= \mathtt{zt} \\
+            N(\mathtt{zt}, A, 1, 2) &= \mathtt{a} \\
+            N(\mathtt{a}, A, 1, 2) &= \mathtt{kk} \\
+            &\vdots
+        \end{aligned}
+    \]
+
+    Mając taką funkcję można dowiedzieć się, jakie hasło powinno zostać
+    wypróbowane w~następnej kolejności, przy zachowaniu pseudolosowego porządku
+    oraz bez żadnych kosztów pamięciowych.
+
+    Podejście to znajduje swoje korzenie w~trybach szyfrów blokowych, gdzie
+    zazwyczaj zależy nam by poprzedni blok wpływał w~jak najbardziej
+    nieprzewidywalny sposób na wygląd aktualnego bloku (co realizuje dowolny
+    tryb inny niż \texttt{ECB}). Wadą tego rozwiązania jest to, że
+    implementacja iteratora, który będzie zwracał wyniki w~kolejności
+    przypominającej losową, jest trudna w~implementacji oraz kosztowna
+    obliczeniowo, a~przy generowaniu haseł zależy nam na jak najoptymalniejszym
+    szybkościowo i~pamięciowo działaniu procesu.
+
+    \item Można też zwyczajnie generować przypadkowe hasła. Jest to podejście
+    atrakcyjne, bo nie dość, że jest proste w~implementacji oraz tanie
+    obliczeniowo (zakładając szybkość działania wykorzystanych generatorów
+    liczb pseudolosowych), to zostawia także dużo miejsca na kolejne
+    ulepszenia.
+
+    Głównym problemem wiążącym się z~losowaniem haseł jest możliwość
+    otrzymywania tego samego hasła wielokrotnie, dopóki nie zostanie
+    wprowadzone zabezpieczenie w~postaci struktury danych zapamiętującej
+    wypróbowane hasła. To jednak z~kolei oznacza wysokie koszty: pamięciowe,
+    w~celu trzymania zapamiętanych haseł, oraz obliczeniowe, w~celu
+    sprawdzania, czy wylosowane hasło zostało już wybrane. Zależnie od
+    szybkości działania łamanej funkcji haszującej oraz charakteru ataku
+    (łamanie pojedynczego hasła vs. łamanie zbioru haseł), implementowanie tego
+    typu sprawdzania może być opłacalne lub nie.
+
+    Samo generowanie losowych haseł można zrealizować kierując się różnymi
+    wytycznymi. W~podejściu całkowicie losowym można po prostu składać ze sobą
+    $n$ przypadkowych znaków z~alfabetu $A$. Popełnialibyśmy jednak w~ten
+    sposób ten sam błąd, co wcześniej -- także i~w~tym wypadku można skorzystać
+    z~dobrodziejstwa analizy~częstości i~uzależnić prawdopodobieństwa
+    wyciągnięcia odpowiednich liter od prawdopodobieństwa ich wystąpienia
+    w~zakładanym języku. Możemy pójść także krok dalej i~uzależnić swój
+    generator od prawdopodobieństw występowania tzw. digramów oraz trigramów,
+    czyli ciągów odpowiednio 2- i~3-literowych.
+
+    \begin{table}[htb]
+        \caption{Przybliżenie 15 najczęściej występujących digramów oraz
+        trigramów złożonych z~liter alfabetu łacińskiego w~języku~angielskim
+        (tabelka sporządzona na podstawie listy~\ref{wl:wiki_wordlist} przy
+        użyciu skryptu~\ref{sc:ngrams_counter}).}
+        \begin{tabular}{|r||c|l||c|l|}
+            \hline
+            & Bigram & \small \% wystąpień &
+            Trigram & \small \% wystąpień \\
+            \hline
+            1  & th & 3.08514\% & the & 2.88025\% \\
+            2  & he & 2.86055\% & and & 1.21997\% \\
+            3  & in & 2.40712\% & ion & 0.95958\% \\
+            4  & er & 2.15763\% & ing & 0.95724\% \\
+            5  & an & 2.11390\% & tio & 0.76296\% \\
+            6  & on & 1.77424\% & ent & 0.71174\% \\
+            7  & re & 1.76263\% & ati & 0.56554\% \\
+            8  & at & 1.41375\% & ter & 0.54204\% \\
+            9  & ti & 1.39238\% & for & 0.48440\% \\
+            10 & en & 1.38312\% & ate & 0.46068\% \\
+            11 & es & 1.38072\% & her & 0.41935\% \\
+            12 & or & 1.36063\% & all & 0.38966\% \\
+            13 & te & 1.31308\% & ver & 0.37819\% \\
+            14 & nd & 1.30632\% & ers & 0.37419\% \\
+            15 & ed & 1.28358\% & ere & 0.37155\% \\
+            \hline
+        \end{tabular}
+    \end{table}
+
+    Wprowadzając zróżnicowane prawdopodobieństwa wyboru liter, wybór hasła
+    zostaje związany z~cechą jaką jest rozkład prawdopodobieństwa liter. Jednak
+    w~odróżnieniu od poprzedniej metody, faworyzowanie tym sposobem odbywa się
+    w~sposób nieliniowy, co eliminuje opisaną wcześniej niechcianą stronniczość
+    związaną z~wyborem pierwszych liter. Z~tego też powodu autor uważa opisaną
+    w~tym punkcie metodę za lepszą od obu wcześniejszych podejść (klasyczne,
+    w~którym hasło zaczynające się na ``z'' \emph{musi} czekać aż wszystkie
+    inne zostaną obliczone, oraz całkowicie losowe, w~którym hasła, które
+    uznane są za bardziej prawdopodobne na podstawie analizy językowej, są
+    wybierane równie często jak pozostałe).
+
+\end{myenumerate}
+
+Analiza częstości, w~szczególności di- oraz trigramów, jest uznaną metodą
+ulepszania ataku brutalnego i~wykorzystywana jest w~programach takich jak
+\texttt{John The Ripper}~\cite{john_the_ripper_modes}.
+\pagebreak
+
+
+
+\subsubsection{Atak słownikowy}
+\label{sec:dictionary_attacks}
+Innym rodzajem ataku jest atak słownikowy. Podobnie jak omówione powyżej metody
+opiera się on na wypróbowaniu kolejnych haseł, jednak w~tym przypadku zamiast
+sprawdzać \emph{wszystkie} możliwe hasła, co może zająć bardzo dużo czasu,
+atakujący zawęża wybór swoich kandydatów do z~góry znanego stałego zbioru
+o~skończonej wielkości (czyli tytułowego słownika). Słownik powinien się
+składać z~wyrazów, których użycie jako hasło przez użytkowników jest
+najbardziej prawdopodobne. Mogą to być słowa w~określonym języku, imiona itp.;
+tak naprawdę nawet gdy dany słownik zawiera kilkanaście milionów słów,
+sprawdzanie nimi metodą ``offline'' odbywa się bardzo szybko. Atakujący mogą
+także pójść krok dalej i~skorzystać z~publicznie dostępnych raportów
+o~najczęściej używanych hasłach -- przykładem takiego raportu może być
+lista~\ref{wl:xato_passwords}.
+
+    \begin{table}[htb]
+        \caption{Przybliżenie 15 najpopularniej stosowanych haseł przez
+        użytkowników Internetu (tabelka sporządzona na podstawie
+        listy~\ref{wl:xato_passwords} przy użyciu
+        skryptu~\ref{sc:freq_percentages}).}
+        \begin{tabular}{|r||c|c|}
+            \hline
+            & Hasło & \small \% wystąpień \\
+            \hline
+            1  & password & 1.70768\% \\
+            2  & 123456   & 1.38467\% \\
+            3  & 12345678 & 0.46212\% \\
+            4  & 1234     & 0.30851\% \\
+            5  & qwerty   & 0.29086\% \\
+            6  & 12345    & 0.24117\% \\
+            7  & dragon   & 0.23040\% \\
+            8  & p\censor{uss}y & 0.21035\% \\
+            9  & baseball & 0.19936\% \\
+            10 & football & 0.19632\% \\
+            11 & letmein  & 0.18854\% \\
+            12 & monkey   & 0.18593\% \\
+            13 & 696969   & 0.17836\% \\
+            14 & abc123   & 0.17649\% \\
+            15 & mustang  & 0.17537\% \\
+            \hline
+        \end{tabular}
+    \end{table}
+
+Dodatkowo w~przypadku gdy atakujący obiera na cel konkretny system, może on
+rozszerzać swój słownik o~dodatkowe informacje kontekstowe związane
+z~tym systemem. Przykładowo, dla portalu internetowego słownik może zostać
+rozszerzony o~słowa kluczowe występujące na jego stronach, a~w~przypadku
+zdalnych terminali o~nazwy użytkowników i~katalogów domowych.
+
+
+
+\subsubsection{``Mutowanie'' kandydatów}
+Często się zdarza tak, że na użytkownikach jest wymuszane stosowanie hasła
+przykładowo zawierającego co~najmniej jedną cyfrę. W~wypadku, gdy słownik
+atakującego zawiera wyłącznie kandydatów pozbawionych cyfr, słownik taki
+staje się bezużyteczny. Dlatego też czasem stosuje się swoiste ``mutowanie''
+kandydatów, na które przypada szereg technik przetwarzających bazowe hasło na
+takie, które mogło zostać wykorzystane przez ewentualnego użytkownika.
+Przykładowe techniki zostały wymienione poniżej.
+
+\begin{itemize}
+
+    \item
+        Zmiana wielkości liter \\
+        Liczba generowanych haseł: $2^n$, gdzie $n$ to długość hasła.
+
+        \lstinputlisting[language=python,caption=Przykładowy kod
+        w~Pythonie]{code/mutate_alpha.py}
+        \lstinputlisting[caption=Przykładowe użycie dla
+        \texttt{mutate\_alpha('abc')}]{code/mutate_alpha.txt}
+
+    \pagebreak
+    \item
+        Dopisywanie cyfr na końcu hasła \\
+        Liczba generowanych haseł: 11.
+
+        \lstinputlisting[language=python,caption=Przykładowy kod
+        w~Pythonie]{code/mutate_digit_end.py}
+        \lstinputlisting[caption=Przykładowe użycie dla
+        \texttt{mutate\_digit\_end('abc')}]{code/mutate_digit_end.txt}
+
+    \item
+        Dopisywanie znaków z~określonego zbioru w~dowolnym miejscu hasła \\
+        Liczba generowanych haseł: $1 + |A| \cdot n$, gdzie $n$ to długość hasła,
+        $A$ to zbiór znaków do dopisania.
+
+        \lstinputlisting[language=python,caption=Przykładowy kod
+        w~Pythonie]{code/mutate_char_insert.py}
+        \pagebreak
+        \lstinputlisting[caption=Przykładowe użycie dla
+        \texttt{mutate\_char\_insert('abc','de',2)}]{code/mutate_char_insert.txt}
+
+    \item
+        Zamiana liter zgodnie z~tablicą możliwych podstawień \\
+        Przeciętna liczba generowanych haseł jest zależna od rozkładu częstości
+        liter w~słowniku używanych przez tablicę podstawień.
+
+        \lstinputlisting[language=python,caption=Przykładowy kod
+        w~Pythonie]{code/mutate_char_sub.py}
+
+        \lstinputlisting[caption=Przykładowe użycie dla
+        \texttt{mutate\_char\_sub('leet', {'l':['L','1'], 'e':['E','e'],
+        't':['T','7']})}]{code/mutate_char_sub.txt}
+
+    \item
+        Usuwanie znaków \\
+        Liczba generowanych haseł: $n \choose m$, gdzie $n$ to długość hasła,
+        $m$ to ilość usuwanych znaków.
+        %todo: kod?
+
+    \item
+        Generowanie permutacji wejściowego hasła \\
+        Liczba generowanych haseł: $n!$.
+        %todo: kod?
+
+\end{itemize}
+
+Zdecydowana większość z~tych technik zwiększa wielkość słownika
+w~niekontrolowany sposób. Przykładowo, samo sprawdzanie pojedynczego wariantu
+hasła z~dopisanym na końcu znakiem ``1'' wydłuża rozmiar słownika dwukrotnie.
+Większość z~tych operacji jest zatem w~zasadzie nieopłacalna, chyba że
+atakujący zastosuje dodatkowe triki takie jak uzależnienie technik mutowania od
+długości kandydatów.
+
+
+
+\subsubsection{Przyspieszanie obliczeń}
+Atakujący dysponując słownikiem albo ogólnym pojęciem o przestrzeni haseł, jaką
+chce przeszukać, może przedsięwziąć pewne kroki pozwalające na znaczne
+przyspieszenie obliczeń. Tak naprawdę problem przeprowadzenia ataku brutalnego
+bądź słownikowego z szerszego punktu widzenia nie różni się od dowolnego innego
+obliczeniowo kosztownego problemu. Współczesna informatyka wykształciła szereg
+technik racjonalizujących czas potrzebny na przeprowadzenie kosztownych
+obliczeń, wśród których najbardziej skutecznym jak do tej pory okazuje się
+przetwarzanie równoległe.
+
+%todo: botnety
+%todo: dedykowane maszyny
+
+
+
+\subsection{Tęczowe tablice}
+
+
+
+\subsection{Ataki typu Denial of Service}
