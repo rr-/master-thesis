@@ -1,0 +1,6 @@
+>>>pretty_print(mutate_suffix('abc', [str(i) for i in range(10)] + ['123', '2000', '2001', '2013']),3)
+abc       abc0      abc1
+abc2      abc3      abc4
+abc5      abc6      abc7
+abc8      abc9      abc123
+abc2000   abc2001   abc2013

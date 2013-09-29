@@ -1,8 +1,9 @@
-abc
-abC
-aBc
-aBC
-Abc
-AbC
-ABc
-ABC
+>>>pretty_print(mutate_alpha('abcd'),2)
+abcd   abcD
+abCd   abCD
+aBcd   aBcD
+aBCd   aBCD
+Abcd   AbcD
+AbCd   AbCD
+ABcd   ABcD
+ABCd   ABCD

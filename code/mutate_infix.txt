@@ -1,0 +1,5 @@
+>>>pretty_print(mutate_infix('abc', ['0', '1', '2']),3)
+abc    0abc   1abc
+2abc   a0bc   a1bc
+a2bc   ab0c   ab1c
+ab2c

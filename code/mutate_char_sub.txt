@@ -1,9 +1,15 @@
-LEET  LEE7  LEEt  LEeT
-LEe7  LEet  LeET  LeE7
-LeEt  LeeT  Lee7  Leet
-1EET  1EE7  1EEt  1EeT
-1Ee7  1Eet  1eET  1eE7
-1eEt  1eeT  1ee7  1eet
-lEET  lEE7  lEEt  lEeT
-lEe7  lEet  leET  leE7
-leEt  leeT  lee7  leet
+>>>pretty_print(mutate_char_sub('leet', {'l':['L','1'], 'e':['E','3'], 't':['T','7']}),6)
+leet   leeT   lee7   leEt   leET   leE7
+le3t   le3T   le37   lEet   lEeT   lEe7
+lEEt   lEET   lEE7   lE3t   lE3T   lE37
+l3et   l3eT   l3e7   l3Et   l3ET   l3E7
+l33t   l33T   l337   Leet   LeeT   Lee7
+LeEt   LeET   LeE7   Le3t   Le3T   Le37
+LEet   LEeT   LEe7   LEEt   LEET   LEE7
+LE3t   LE3T   LE37   L3et   L3eT   L3e7
+L3Et   L3ET   L3E7   L33t   L33T   L337
+1eet   1eeT   1ee7   1eEt   1eET   1eE7
+1e3t   1e3T   1e37   1Eet   1EeT   1Ee7
+1EEt   1EET   1EE7   1E3t   1E3T   1E37
+13et   13eT   13e7   13Et   13ET   13E7
+133t   133T   1337
