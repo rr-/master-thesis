@@ -1,24 +1,41 @@
 \section{Ataki uniwersalne}
 \label{sec:universal_attacks}
 Wprawdzie kryptograficzne funkcje haszujące z~założenia są bezpieczne, nie
-oznacza to, że są one nie do złamania. Istnieje kilka ogólnych technik, które
-można stosować do znajdywania oryginalnych wiadomości $m$ niezależnie od
-rodzaju użytej funkcji.
+oznacza to jednak, że nie da się ich złamać. Istnieje kilka ogólnych technik,
+które można stosować do znajdywania oryginalnych wiadomości $m$ niezależnie od
+rodzaju użytej funkcji haszującej. Techniki te są stosowane wówczas, gdy nie są
+znane żadne inne wady danego systemu kryptograficznego. Opisane w~tym rozdziale
+metody w~większości opierają się na wypróbowywaniu kolejnych możliwych wejść
+$m_0, m_1, m_2, \ldots$ tak długo, aż nie zostanie znalezione $m : H(m) = h$,
+gdzie $h$ to łamany skrót.
 
-\subsection{Ataki naiwne}
-Wyobraźmy sobie scenariusz, w~którym z~serwera uwierzytelniającego została
-wykradziona baza danych zawierająca nazwy użytkowników i~ich hasła zakodowane
-dowolną funkcją haszującą. W~naiwnym podejściu atakujący może próbować zgadnąć
-kolejne hasła, jakich mogli użyć użytkownicy i~porównywać hasze tych
-wymyślonych haseł z~haszami z~wykradzionej bazy danych.
-
-
-
-%todo ataki online ataki offline
-
+Przykłady będą odnosiły się do scenariuszu opisanego
+w~sekcji~\ref{sec:secure_pasword_storage}, w~którym atakujący stara się
+(pośrednio lub bezpośrednio) znaleźć kolizje dla skrótów otrzymanych z~haseł
+użytkowników pewnego serwisu internetowego. Jest to oczywiście tylko jedno
+z~możliwych zastosowań tych technik.
 
 
-\subsubsection{Atak brutalny}
+
+\subsection{Atak \en{online} a~\en{offline}}
+Atak online jest to taki atak, w~którym atakujący nie ma dostępu do
+wewnętrznych informacji takich jak skróty haseł użytkowników i~dokonuje prób
+znalezienia \mbox{$m : H(m) = h$} poprzez publicznie dostępny zasób taki jak
+strona logowania lub zdalny terminal. Atak taki jest łatwo wykrywalny
+i~nietrudno mu zapobiec.
+%todo: co zostało opisane w X i Y
+
+Znacznie ciekawszym rodzajem ataku jest atak \en{offline}. W~tym przypadku
+atakujący ma częściowy lub kompletny dostęp bazy danych zawierającej dane takie
+jak hasze haseł czy nazwy użytkowników. Pozwala mu to przeprowadzić atak
+\en{offline}, gdzie wypróbowywanie kolejnych haseł nie wymaga jakiejkolwiek
+interakcji z~atakowanym zasobem~-- wystarczy, że dla wymyślonych przez siebie
+$m_0, m_1, m_2, \ldots$ atakujący będzie sprawdzał na własnym komputerze, czy
+$H(m)$ istnieje w~lokalnej kopii wykradzionej bazy danych.
+
+
+
+\subsection{Atak brutalny}
 W~tym podejściu konsekwentnie wypróbowywane są wszystkie hasła, jakie się da
 utworzyć za pomocą danego alfabetu $A$, zwiększając długość wypróbowywanych
 haseł \latin{ad infinitum}. Przykładowo, mając alfabet $A=(\mathtt{a},
@@ -38,13 +55,13 @@ z~cyfr oraz z~małych i~wielkich znaków alfabetu łacińskiego (a~więc $|A| =
 10+26+26 = 62$) o~długości od~1~do~8~znaków, musimy wypróbować następującą
 liczbę możliwości:
     $$\frac{62(62^8-1)}{62-1} = \numprint{221919451578090}$$
-Zakładając, że atakujący~potrafi obliczyć 100000~haszy na~sekundę, nadal
-potrzebuje ok.~70~lat na złamanie hasła; jest to zatem wyjątkowo niepraktyczne
-podejście i~z~reguły skazane jest na niepowodzenie.
+Zakładając, że atakujący~potrafi obliczyć \numprint{1000000}~haszy na~sekundę,
+nadal potrzebuje ok.~7~lat na złamanie hasła; jest to zatem wyjątkowo
+niepraktyczne podejście i~z~reguły skazane jest na niepowodzenie.
 
 
 
-\subsubsection{Zrandomizowany atak brutalny}
+\subsection{Zrandomizowany atak brutalny}
 Mimo że ataki brutalne w~domyślnej formie są niepraktyczne, atakujący mogą
 wprowadzić różnego rodzaju ulepszenia, tak by nie marnować czasu na
 przeszukiwanie nieprawdopodobnych haseł. Jednym z~takich podejść jest
@@ -110,6 +127,7 @@ kolejności:
     \mathtt{u}, \mathtt{m}, \mathtt{w}, \mathtt{f}, \mathtt{g}, \mathtt{y},
     \mathtt{p}, \mathtt{b}, \mathtt{v}, \mathtt{k}, \mathtt{j}, \mathtt{x},
     \mathtt{q}, \mathtt{z})$$
+\newpage
 Przypuśćmy, że hasło brzmi ``thesis'' i~szukamy go metodą brutalną.
 Dla zadanego alfabetu $A$, zanim znajdziemy słowo ``thesis'' trzeba wygenerować
 następującą liczbę haseł:
@@ -146,7 +164,7 @@ $A_2$:
     \]
 Jest to ponad 17 razy krócej. Należy jednak zauważyć, że tak dobry przyrost
 wynika głównie ze szczęśliwego wyboru pierwszej litery: w~pierwszym podejściu
-przy najwyższej potędze występował mnożnik 19, w~drugim -- tylko 1. Widać stąd,
+przy najwyższej potędze występował mnożnik 19, w~drugim~-- tylko 1. Widać stąd,
 że przy takiej strategii im mniej używana będzie pierwsza litera faktycznego
 hasła które atakujący próbuje znaleźć, tym dłuższy będzie czas jego łamania.
 
@@ -235,7 +253,7 @@ wyszukiwania można podejść na kilka sposobów.
     Samo generowanie losowych haseł można zrealizować kierując się różnymi
     wytycznymi. W~podejściu całkowicie losowym można po prostu składać ze sobą
     $n$ przypadkowych znaków z~alfabetu $A$. Popełnialibyśmy jednak w~ten
-    sposób ten sam błąd, co wcześniej -- także i~w~tym wypadku można skorzystać
+    sposób ten sam błąd, co wcześniej~-- także i~w~tym wypadku można skorzystać
     z~dobrodziejstwa analizy~częstości i~uzależnić prawdopodobieństwa
     wyciągnięcia odpowiednich liter od prawdopodobieństwa ich wystąpienia
     w~zakładanym języku. Możemy pójść także krok dalej i~uzależnić swój
@@ -291,7 +309,7 @@ ulepszania ataku brutalnego i~wykorzystywana jest w~programach takich jak
 
 
 
-\subsubsection{Atak słownikowy}
+\subsection{Atak słownikowy}
 \label{sec:dictionary_attacks}
 Innym rodzajem ataku jest atak słownikowy. Podobnie jak omówione powyżej metody
 opiera się on na wypróbowaniu kolejnych haseł, jednak w~tym przypadku zamiast
@@ -303,7 +321,7 @@ najbardziej prawdopodobne. Mogą to być słowa w~określonym języku, imiona it
 tak naprawdę nawet gdy dany słownik zawiera kilkanaście milionów słów,
 sprawdzanie nimi metodą ``offline'' odbywa się bardzo szybko. Atakujący mogą
 także pójść krok dalej i~skorzystać z~publicznie dostępnych raportów
-o~najczęściej używanych hasłach -- przykładem takiego raportu może być
+o~najczęściej używanych hasłach~-- przykładem takiego raportu może być
 lista~\ref{wl:xato_passwords}.
 
     \begin{table}[htb]
@@ -359,41 +377,41 @@ Przykładowe techniki zostały wymienione poniżej.
 
         \lstinputlisting[language=python,caption=Przykładowy kod
         w~Pythonie]{code/mutate_alpha.py}
-        \lstinputlisting[caption=Przykładowe użycie dla
-        \texttt{mutate\_alpha('abc')}]{code/mutate_alpha.txt}
 
-    \pagebreak
-    \item
-        Dopisywanie cyfr na końcu hasła \\
-        Liczba generowanych haseł: 11.
-
-        \lstinputlisting[language=python,caption=Przykładowy kod
-        w~Pythonie]{code/mutate_digit_end.py}
-        \lstinputlisting[caption=Przykładowe użycie dla
-        \texttt{mutate\_digit\_end('abc')}]{code/mutate_digit_end.txt}
+        \lstinputlisting[language=python,tabsize=4,caption=Przykładowe
+        użycie]{code/mutate_alpha.txt}
 
     \item
-        Dopisywanie znaków z~określonego zbioru w~dowolnym miejscu hasła \\
-        Liczba generowanych haseł: $1 + |A| \cdot n$, gdzie $n$ to długość hasła,
-        $A$ to zbiór znaków do dopisania.
+        Dopisywanie sufiksów na końcu hasła \\
+        Liczba generowanych haseł: $1+n$, gdzie $n$ to liczba sufiksów.
 
         \lstinputlisting[language=python,caption=Przykładowy kod
-        w~Pythonie]{code/mutate_char_insert.py}
-        \pagebreak
-        \lstinputlisting[caption=Przykładowe użycie dla
-        \texttt{mutate\_char\_insert('abc','de',2)}]{code/mutate_char_insert.txt}
+        w~Pythonie]{code/mutate_suffix.py}
+
+        \lstinputlisting[language=python,tabsize=4,caption=Przykładowe
+        użycie]{code/mutate_suffix.txt}
+
+    \item
+        Dopisywanie infiksów z~określonego zbioru w~dowolnym miejscu hasła \\
+        Liczba generowanych haseł: $1 + |A| \cdot n$, gdzie $n$ to długość
+        hasła, $A$ to zbiór infiksów do dopisania.
+
+        \lstinputlisting[language=python,caption=Przykładowy kod
+        w~Pythonie]{code/mutate_infix.py}
+
+        \lstinputlisting[language=python,tabsize=4,caption=Przykładowe
+        użycie]{code/mutate_infix.txt}
 
     \item
         Zamiana liter zgodnie z~tablicą możliwych podstawień \\
         Przeciętna liczba generowanych haseł jest zależna od rozkładu częstości
-        liter w~słowniku używanych przez tablicę podstawień.
+        liter w~słowniku, używanych przez tablicę podstawień.
 
         \lstinputlisting[language=python,caption=Przykładowy kod
         w~Pythonie]{code/mutate_char_sub.py}
 
-        \lstinputlisting[caption=Przykładowe użycie dla
-        \texttt{mutate\_char\_sub('leet', {'l':['L','1'], 'e':['E','e'],
-        't':['T','7']})}]{code/mutate_char_sub.txt}
+        \lstinputlisting[language=python,tabsize=4,caption=Przykładowe
+        użycie]{code/mutate_char_sub.txt}
 
     \item
         Usuwanie znaków \\
@@ -404,6 +422,16 @@ Przykładowe techniki zostały wymienione poniżej.
     \item
         Generowanie permutacji wejściowego hasła \\
         Liczba generowanych haseł: $n!$.
+        %todo: kod?
+
+    \item
+        Zapisanie hasła podwójnie \\
+        Liczba generowanych haseł: 2.
+        %todo: kod?
+
+    \item
+        Konkatenacja kandydata z~innym kandydatem \\
+        Liczba generowanych haseł: $n$, gdzie $n$ to rozmiar słownika.
         %todo: kod?
 
 \end{itemize}
@@ -417,22 +445,67 @@ długości kandydatów.
 
 
 
-\subsubsection{Przyspieszanie obliczeń}
-Atakujący dysponując słownikiem albo ogólnym pojęciem o przestrzeni haseł, jaką
-chce przeszukać, może przedsięwziąć pewne kroki pozwalające na znaczne
-przyspieszenie obliczeń. Tak naprawdę problem przeprowadzenia ataku brutalnego
-bądź słownikowego z szerszego punktu widzenia nie różni się od dowolnego innego
+\subsubsection{Tęczowe tablice}
+
+
+
+\subsection{Przyspieszanie obliczeń}
+Atakujący dysponując słownikiem albo ogólnym pojęciem o~przestrzeni haseł, jaką
+chce przeszukać, może przedsięwziąć pewne kroki pozwalające na przyspieszenie
+obliczeń. Tak naprawdę problem przeprowadzenia ataku brutalnego bądź
+słownikowego z~szerszego punktu widzenia nie różni się od dowolnego innego
 obliczeniowo kosztownego problemu. Współczesna informatyka wykształciła szereg
 technik racjonalizujących czas potrzebny na przeprowadzenie kosztownych
-obliczeń, wśród których najbardziej skutecznym jak do tej pory okazuje się
-przetwarzanie równoległe.
+obliczeń.
 
-%todo: botnety
+
+
+\subsubsection{Dedykowany \enn{hardware}}
+
 %todo: dedykowane maszyny
 
 
 
-\subsection{Tęczowe tablice}
+\subsubsection{Obliczenia równoległe}
+
+Przeciętne komputery klasy desktop z~użyciem odpowiedniego oprogramowania
+potrafią w~dzisiejszych czasach przetworzyć nawet do kilku milionów haszy na
+sekundę~\cite{oclhashcat,john_the_ripper_benchmarks}. Gdy atakujący zaprzęgnie
+do przeszukiwania przestrzeni haszy jeszcze $n$ dodatkowych komputerów, czas
+przeszukiwania skróci się $n$-krotnie. Z~pomocą w~praktycznej implementacji
+takiego ataku przychodzi parę rozwiązań.
+
+\begin{itemize}
+
+    \item Botnety, czyli sieci komputerów należących do nieświadomych
+    użytkowników, zainfekowane złośliwym oprogramowaniem nielegalnie
+    udostępniającym osobom trzecim zasoby typu łącze sieciowe, cykle procesora
+    czy też pamięć. Atakujący chcący złamać daną listę haszy nie musi
+    samodzielnie zajmować się tworzeniem takiej sieci: może wynająć już
+    istniejącą sieć od innego podmiotu~\cite{botnet_rental,botnet_rental2}.
+
+    \item Legalne platformy chmurowe takie jak \enn{Windows Azure}, \enn{Amazon
+    Elastic Compute Cloud (EC2)} czy też \enn{Rackspace}. Stopień prywatności
+    którą powinny gwarantować takie usługi jest dopiero kształtującą się
+    kwestią; dlatego też usługodawcom tego typu trudno odróżnić klientów
+    chcących przeprowadzić legalne obliczenia (których szczegóły są np.
+    chronione tajemnicą przemysłową) od klientów chcących wykorzystać usługę do
+    nielegalnych celów~\cite{cloud_criminals}.
+
+    \item Rozwiązania do własnego użytku takie jak \enn{OpenStack}, które nie
+    dostarczają infrastruktury sieciowej, a~zamiast tego umożliwiają łatwe
+    pisanie skalowalnego oprogramowania, które w~tym przypadku mogłoby posłużyć
+    do przyspieszenia łamania.
+
+\end{itemize}
+
+Podejście to jest o~tyle lepsze od korzystania z~dedykowanego \enn{hardware},
+że w~tym przypadku stopień skalowalności jest praktycznie nieograniczony:
+wystarczy dołączyć do sieci jeszcze jedną maszynę, aby wyniki uzyskiwać
+szybciej.  Rozwiązanie to jest także dużo tańsze. Nie jest ono jednak
+pozbawione wad~-- gdy atakujący korzysta z~maszyn, nad którymi ktoś inny
+sprawuje faktyczną kontrolę, zdemaskowanie staje się znacznie bardziej
+prawdopodobne.
 
 
 

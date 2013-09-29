@@ -1,6 +1,6 @@
 https://misio.ftj.agh.edu.pl/
 https://misio.ftj.agh.edu.pl/media/misiofiles/be4cd3ce4611ca9f668cdfd7ae432c14.pdf
-http://en.wikipedia.org/wiki/Provably_secure_cryptographic_hash_function
+http://en.wikipedia.org/wiki/Password_cracking
 
 http://seewhatyoudidthere.com/2010/02/18/how-the-blizzard-authenticators-work-and-why-you-want-one/
 http://en.wikipedia.org/wiki/Secure_Remote_Password_protocol
@@ -13,6 +13,7 @@ Research atak urodzinowy
 Przykład o łamaniu CRC32
 
 Wykorzystane:
+http://en.wikipedia.org/wiki/Provably_secure_cryptographic_hash_function
 http://www.cosic.esat.kuleuven.be/publications/article-1532.pdf
 http://pl.wikipedia.org/wiki/Security_through_obscurity
 http://pl.wikipedia.org/wiki/Funkcja_%22na%22
