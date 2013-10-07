@@ -462,18 +462,38 @@ obliczeń.
 
 \subsubsection{Dedykowany \enn{hardware}}
 
-%todo: dedykowane maszyny
+Pierwsze rozwiązanie stanowi użycie procesorów GPU montowanych w~kartach
+graficznych, które okazują się być bardzo wydajne jeśli chodzi o~obliczenia
+wartości funkcji haszujących~-- dużo wydajniejsze od tradycyjnych procesorów
+CPU. Szybkość obliczania haszy przy użyciu GPU może osiągać do paru miliardów
+haszy na sekundę~\cite{gpu_cracking_benchmarks}, co pozwala dokonywać
+niewiarygodnie szybkich ataków słownikowych oraz brutalnych.
+
+Pomysł ten można dalej rozwijać zastępując pojedynczą kartę graficzną wieloma
+kartami. Dotychczasowe ataki praktyczne korzystające z~takich macierzy kart
+graficznych potrafią atakującemu osiągać prędkości prędkości rzędu setek
+miliardów haszy na sekundę~\cite{gpu_cracking_parallel}.
 
 
 
 \subsubsection{Obliczenia równoległe}
 
-Przeciętne komputery klasy desktop z~użyciem odpowiedniego oprogramowania
-potrafią w~dzisiejszych czasach przetworzyć nawet do kilku milionów haszy na
-sekundę~\cite{oclhashcat,john_the_ripper_benchmarks}. Gdy atakujący zaprzęgnie
-do przeszukiwania przestrzeni haszy jeszcze $n$ dodatkowych komputerów, czas
-przeszukiwania skróci się $n$-krotnie. Z~pomocą w~praktycznej implementacji
-takiego ataku przychodzi parę rozwiązań.
+Użycie kart graficznych do przeprowadzania ataków brutalnych oraz słownikowych
+wymaga wysoce wyspecjalizowanego oprogramowania, które nie zawsze jest dostępne
+oraz sprzętu, którego zakup lub wynajem nie zawsze jest korzystny finansowo.
+Natomiast przeciętne komputery klasy desktop z~użyciem odpowiedniego
+oprogramowania potrafią w~dzisiejszych czasach przetworzyć do kilku milionów
+haszy na sekundę~\cite{oclhashcat,john_the_ripper_benchmarks}, co w~porównaniu
+z~kartami graficznymi wydaje się niedużo. Jednak gdy atakujący sprzęgnie wiele
+takich komputerów w~jedną dużą macierz obliczeniową, może się okazać, że
+rozwiązanie takie jest bardziej opłacalne. Szczególną korzyścią płynącą ze
+stosowania tej metodologii jest łatwa do osiągnięcia skalowalność: aby jeszcze
+bardziej przyspieszyć obliczenia, wystarczy dołączyć do sieci dodatkowe
+komputery, co zazwyczaj jest stosunkowo proste w~wykonaniu. Nie trzeba się
+martwić o~sprawy takie jak chłodzenie, zwiększony pobór prądu itp., jako że
+wszystko to jest zapewnione w~każdej z~maszyn z~osobna).
+
+Z~pomocą w~praktycznej implementacji takiego ataku przychodzi parę rozwiązań.
 
 \begin{itemize}
 
@@ -509,4 +529,43 @@ prawdopodobne.
 
 
 
-\subsection{Ataki typu Denial of Service}
+\subsection{Ataki typu \enn{Denial of Service}}
+Odmiennym do wszystkich wymienionych powyżej ataków jest atak typu \enn{Denial
+of Service}. W~przeciwieństwie do poprzednich ataków, atak ten nie ma na celu
+wykradzenia oryginalnych wejść do funkcji haszujących; jego celem jest
+natomiast tymczasowe utrudnienie lub wręcz całkowite uniemożliwienie dostępu do
+danej usługi. Opiera się on na wykorzystaniu słabości funkcji haszujących,
+którą mogą demonstrować nawet kryptograficznie bezpieczne funkcje skrótu.
+Słabości te zostały wymienione poniżej.
+
+\begin{itemize}
+
+    \item Wysoka złożoność obliczeniowa funkcji haszujących \\
+    Gdy dana funkcja haszująca jest trudna do obliczenia, atakujący może
+    wykonać wiele zapytań do serwera mających na celu obliczenie wartości
+    takiej funkcji, nie patrząc w~ogóle na to, co taka funkcja zwraca. Gdy
+    zapytań, a~zatem zadań obliczeń wartości funkcji jest wystarczająco dużo,
+    serwer zaczyna odczuwać duże obciążenie procesora przez co w~rezultacie
+    wydłuża się średni czas odpowiedzi, a~to z~kolei powoduje utrudnienia
+    w~dostępie do usługi.
+
+    \item Źle zaimplementowane struktury danych \\
+    Wiele struktur danych takich jak tablice mieszające korzysta z~funkcji
+    haszujących, aby dokonać rzutowania danego obiektu na jakąś wartość
+    liczbową, która posłuży później do wewnętrznego identyfikowania takiego
+    obiektu. Gdy zastosowana funkcja haszująca nie posiada własności
+    \en{collision resistance}, a~więc można znaleźć $m \neq m'$ takie że $H(m)
+    = H(m')$, atakujący może wykorzystać tę słabość i~wysłać do serwera duże
+    ilości zapytań odwołujących się do $m$~i~$m'$. Ponieważ struktury danych
+    zazwyczaj mają dobrą złożoność obliczeniową odwoływania się do elementów po
+    ich haszach tylko dopóki nie następuje kolizja tych skrótów, gdy taka
+    kolizja już nastąpi, obsłużenie jej zajmuje dużo więcej czasu. Dlatego też
+    tego typu atak również potencjalnie może doprowadzić do znacznego
+    przeciążenia serwera.
+
+\end{itemize}
+
+Ponadto należy pamiętać o tym, że także i~w~tym przypadku atakujący może
+uskutecznić swoje działania stosując obliczenia równoległe: gdy takie ataki
+przeprowadzone zostaną z~wielu komputerów jednocześnie (\enn{Distributed Denial
+of Service}), jeszcze bardziej zwiększy to skalę przeciążenia.
