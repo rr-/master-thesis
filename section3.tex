@@ -445,7 +445,227 @@ długości kandydatów.
 
 
 
-\subsubsection{Tęczowe tablice}
+\subsubsection{Łańcuchy haszy}
+Naiwny atak słownikowy można zrealizować na dwa sposoby.
+
+\begin{myenumerate}
+
+    \item Dla każdego kandydata obliczać jego hasz w~ciągu trwania ataku.
+    Takie obliczanie haszy na bieżąco nosi ze sobą wysokie koszty obliczeniowe.
+    Ma to szczególne znaczenie jeśli zamierza się łamać więcej niż jedną bazę
+    lub hasło~-- dla każdego niezależnego ataku trzeba ponownie obliczać hasz
+    dla danego kandydata.
+
+    \item Skorzystać z~obliczonej wcześniej tablicy zapamiętującej dla pewnego
+    zbioru kandydatów $M$ ich wartości $H$. Wówczas mając dane $h$, sprawdzenie
+    jakie hasło $m \in M$ daje $H(m) = h$ przy pomocy takiej tablicy będzie
+    względnie szybkie bez względu na $|M|$ i~ilość niezależnych ataków. Jednak
+    aby przechować taką tablicę w~pamięci komputera, potrzebne są czasem nawet
+    i~tysiące gigabajtów. Chcąc przechować nieskompresowaną mapę skrótów
+    długości $b$ bitów utworzoną z~haseł długości $n$ nad alfabetem $A$
+    potrzebujemy minimalnie $|A|^n \cdot (n + \ceil{\frac{b}{8}})$ bajtów
+    pamięci (8 oznacza ilość bitów przechowywaną przez pojedynczy bajt).
+    Przykładowo, dla \texttt{MD5} i~haseł długości 8~utworzonych z~cyfr oraz
+    małych i~wielkich znaków alfabetu łacińskiego potrzeba $62^8 \cdot (8 +
+    \ceil{\frac{128}{8}})$ bajtów pamięci, czyli ok. 4765 eksabajtów.
+
+\end{myenumerate}
+
+Oba podejścia na dłuższą metę są nieopłacalne, dlatego opracowano inny sposób
+przechowywania dużych tablic, zwany łańcuchami haszy. Ma on na celu zapewnienie
+kompromisu między kosztem pamięciowym a~czasowym. Docelowo atakujący chce dla
+danego $h$ znaleźć w~swoim dużym zbiorze kandydatów $M$ wejście $m \in M : H(m)
+= h$ lub dowiedzieć się, że nie ma takiego $m$~-- im szybciej, tym lepiej.
+Podczas gdy normalnie sprawdzałby $\forall m \in M \; H(m) \stackrel{?}{=} h$,
+w podejściu korzystającym z~łańcuchów haszy atak będzie przebiegał nieco
+inaczej.
+
+Kluczowym konceptem jest wprowadzenie funkcji redukcji $R$, która będzie
+dokonywać przekształcenia $H \to M$. Charakter tego przekształcenia nie polega
+na \emph{odwróceniu} $H$~-- chodzi tylko o~przekształcanie w~jakikolwiek
+względnie bezkolizyjny sposób danego $h$ na $m \in M$. Mając daną funkcję
+redukcji $R$ można konstruować łańcuchy haszy długości $k$ w~sposób opisany
+poniżej.
+
+\begin{myenumerate}
+
+    \item Wybierz dowolne hasło $m \in M$
+
+    \item Stwórz pusty łańcuch $C := (\texttt{NULL}, m)$
+
+    \item Powtórz $k$ razy:
+
+    \begin{myenumerate}
+
+        \item Oblicz $h := H(m)$
+
+        \item Oblicz $m := R(h)$
+
+        \item Rozszerz łańcuch $C := C \cup (h, m)$
+
+    \end{myenumerate}
+
+\end{myenumerate}
+
+Przykładowo gdy przestrzeń haseł składa się z~wyrazów o~długości 5~nad
+alfabetem $A = (\mathtt{a}, \mathtt{b}, \mathtt{c}, \ldots, \mathtt{z})$,
+przykładowy łańcuch długości $k=3$ mógłby wyglądać w~następujący sposób:
+
+\[
+\begin{tikzcd}
+    \mathtt{aaaaa} \arrow{rd}{\mathtt{MD5}} & \\
+    & \arrow{ld}{R} \mathtt{594f803b380a41396ed63dca39503542} \\
+    \mathtt{kgeca} \arrow{rd}{\mathtt{MD5}} & \\
+    & \arrow{ld}{R} \mathtt{9fb5cc35cd55717db41eec8dfb2b931c} \\
+    \mathtt{tojmd} \arrow{rd}{\mathtt{MD5}} & \\
+    & \arrow{ld}{R} \mathtt{2a65895d5add273e6de19b5472b1ab0b} \\
+    \mathtt{zqjwc}
+\end{tikzcd}
+\]
+
+Parametr $k$ oznaczający długość tworzonych łańcuchów jest dobierany przez
+atakującego i~służy do kontroli nad stosunkiem kosztu pamięci do ilości
+obliczeń wymaganych do odwracania $h$. Im większe $k$, tym mniej pamięci będzie
+potrzebne na przechowanie łańcuchów, ale też sprawdzanie będzie się odbywało
+wolniej i~\en{vice versa}.
+
+Budując tablicę mającą na celu przechować zbiór kandydatów $M$, wybierany jest
+przypadkowy podzbiór $M' \subset M$ i~dla każdego $m \in M'$ konstruowany jest
+łańcuch $C_m$ o~określonej długości $k$. Dla każdego łańcucha zapisywane są
+jedynie jego początkowy oraz końcowy element (w~przykładzie są to odpowiednio:
+$\mathtt{aaaaa}$ oraz $\mathtt{zqjwc}$); nie zapisywane są żadne z~pośrednich
+wartości.
+
+Mając wszystkie ``początki'' $C_B$ wszystkich łańcuchów, odpowiadające im
+``końcówki`` $C_E$, funkcję redukcji $R$, funkcję skrótu $H$ oraz hasz $h$ do
+złamania, atakujący może się zabrać do odwracania $h$. W~tym celu oblicza
+$R(h)$ i~sprawdza, czy wyjście z~tej funkcji znajduje się wśród końcówek $C_E$.
+Jeżeli nie, to sprawdza $R(H(R(h)))$, $R(H(R(H(Rh))))$ itd. powtarzając tę
+operację aż do pełnego przebiegu $k$ razy. Jeżeli atakujący wykonał cykl $k$
+razy i~$R(\ldots)$ ani razu nie znalazło się w~$C_E$, oznacza to niepowodzenie
+łamania.
+
+Gdy jednak na pewnym etapie obliczeń okaże się, że $R(\ldots) \in C_E$, wówczas
+można mówić o~szansie na złamanie $h$. Należy w~tym momencie prześledzić, jak
+wygląda cykl haszowania i~redukowania dla łańcucha, na którego końcówkę
+natrafiliśmy. Jeżeli okaże się że $\exists m \in C : H(m) = h$, oznacza to
+pozytywne złamanie $h$.
+
+Kontynuując wcześniejszy przykład, atakujący mając taką samą funkcję redukcji
+$R$, $C_B = (\mathtt{aaaaa})$, $C_E = (\mathtt{zqjwc})$ i~hasz
+$h=\mathtt{9fb5cc35cd55717db41eec8dfb2b931c}$, oblicza $R(h)$ dostając
+$\mathtt{tojmd}$. Ponieważ $\mathtt{tojmd} \not\in C_E$, oblicza
+$R(H(\mathtt{tojmd}))$ i~dostaje $\mathtt{zqjwc}$. Tym razem $\mathtt{zqjwc}
+\in C_E$, zatem należy przyjrzeć się dokładniej łańcuchowi którego końcówka
+właśnie została natrafiona. Dzięki $C_B$ wiadomo, że zaczyna się on od
+$\mathtt{aaaaa}$. Atakujący oblicza zatem $H(\mathtt{aaaaa})$,
+$H(R(H(\mathtt{aaaaa})))$ itd. (maksymalnie $k$ razy) sprawdzając po każdym
+kroku, czy nie natrafił na $h$. Jeżeli tak się stało, oznacza to, że $h$
+zostało złamane; jeżeli nie~-- oznacza to że przy pomocy posiadanej tablicy
+skrótu nie da się odwrócić.
+
+Nie zawsze jest tak, że gdy trafi się na wartość $x \in C_E$, będzie ona
+odwracalna przy pomocy danego łańcucha. Wynika to z~faktu, że funkcja redukcji
+z~definicji nie jest perfekcyjna i~może doprowadzać do kolizji, czyli
+przykładowo dochodzi do sytuacji, w~których z~dwóch różnych haszy $h_1$, $h_2$
+znajdujących się w~różnych łańcuchach dostajemy to samo $R(h_1) = R(h_2)$, co
+czyni powtarzające się fragmenty łańcuchów niepotrzebnymi.
+
+\begin{multicols}{2}
+    \[
+    \begin{tikzcd}
+        \mathtt{aaaaa} \arrow{d}{\mathtt{MD5}} \\
+        \mathtt{594f803b380a41396ed63dca39503542} \arrow{d}{R} \\
+        \mathtt{kgeca} \arrow{d}{\mathtt{MD5}} \\
+        \mathtt{9fb5cc35cd55717db41eec8dfb2b931c} \arrow[color=red]{d}{R} \\
+        \mathtt{\textcolor{red}{tojmd}} \arrow[color=red]{d}{\mathtt{MD5}} \\
+        \mathtt{\textcolor{red}{2a65895d5add273e6de19b5472b1ab0b}} \arrow[color=red]{d}{R} \\
+        \mathtt{\textcolor{red}{zqjwc}}
+    \end{tikzcd}
+    \]
+
+\columnbreak
+
+    \[
+    \begin{tikzcd}
+        \mathtt{ihjrc} \arrow{d}{\mathtt{MD5}} \\
+        \mathtt{492ba685d856633d39ef7f868b5638a7} \arrow[color=red]{d}{R} \\
+        \mathtt{\textcolor{red}{tojmd}} \arrow[color=red]{d}{\mathtt{MD5}} \\
+        \mathtt{\textcolor{red}{2a65895d5add273e6de19b5472b1ab0b}} \arrow[color=red]{d}{R} \\
+        \mathtt{\textcolor{red}{zqjwc}} \arrow{d}{\mathtt{MD5}} \\
+        \mathtt{3c683a47a5b37669468660abe795b251} \arrow{d}{R} \\
+        \mathtt{whelo}
+    \end{tikzcd}
+    \]
+\end{multicols}
+
+W~powyższym przykładzie $h = \mathtt{492ba685d856633d39ef7f868b5638a7}$ nie
+zostanie znalezione w~łańcuchu~1 mimo że atakujący będzie zmuszony go dokładnie
+sprawdzić z~racji trafienia na $\mathtt{zqjwc} \in C_E$ po 2~iteracjach.
+Dopiero łańcuch~2 jest w~stanie odwrócić $h$ (w 3~iteracji).
+
+
+
+\subsubsection{Tablice tęczowe}
+Wysoka nieodporność na kolizje opisanych wyżej prostych łańcuchów haszy
+powoduje, że przy wystarczającej długości łańcuchów i~liczności zbioru
+kandydatów $M$ wyszukiwanie przy pomocy tej metody staje się stosunkowo
+długie (i~monotonne) z~uwagi na konieczność sprawdzania dużych ilości
+powtarzających się fragmentów łańcuchów.
+
+Tablice tęczowe stanowią wariant łańcuchów haszy, które zamieniają pojedynczą
+funkcję redukcji $R$ na ciąg funkcji $R_i$ o~długości $k$. Ma to na celu
+zmniejszenie prawdopodobieństwa kolizji~-- filozofia tej metody zakłada, że
+jeżeli już musi dojść do kolizji $R_i(h)$ i~$R_j(h')$, to i~tak użycie
+$R_{i+1}(h)$ oraz $R_{j+1}(h)$ wyprodukuje najprawdopodobniej znacząco się
+różniące, a~więc bardziej przydatne, łańcuchy.
+
+\begin{multicols}{2}
+    \[
+    \begin{tikzcd}
+        \mathtt{aaaaa} \arrow{d}{\mathtt{MD5}} \\
+        \mathtt{594f803b380a41396ed63dca39503542} \arrow{d}{R_1} \\
+        \mathtt{flaiq} \arrow{d}{\mathtt{MD5}} \\
+        \mathtt{0cbec3379db2438afd4e1a08ecf8cf8e} \arrow[color=red]{d}{R_2} \\
+        \mathtt{\textcolor{red}{mqusj}} \arrow[color=red]{d}{\mathtt{MD5}} \\
+        \mathtt{\textcolor{red}{535e4e89269db763cf1ed26d1e837b5e}} \arrow[color=red]{d}{R_3} \\
+        \mathtt{letqn}
+    \end{tikzcd}
+    \]
+
+\columnbreak
+
+    \[
+    \begin{tikzcd}
+        \mathtt{ihjrc} \arrow{d}{\mathtt{MD5}} \\
+        \mathtt{492ba685d856633d39ef7f868b5638a7} \arrow[color=red]{d}{R_1} \\
+        \mathtt{\textcolor{red}{mqusj}} \arrow[color=red]{d}{\mathtt{MD5}} \\
+        \mathtt{\textcolor{red}{535e4e89269db763cf1ed26d1e837b5e}} \arrow[color=red]{d}{R_2} \\
+        \mathtt{wnalp} \arrow{d}{\mathtt{MD5}} \\
+        \mathtt{9bb59c3da1721396b3cef428ca317329} \arrow{d}{R_3} \\
+        \mathtt{jubxl}
+    \end{tikzcd}
+    \]
+\end{multicols}
+
+Tak naprawdę by łańcuchy stały się niepotrzebne, do kolizji musiałoby dojść
+na poziomie tej samej iteracji, jednak nawet wówczas można odfiltrować łańcuchy
+których końcówki są zdublowane w~celu dodatkowego zmniejszenia kosztów
+obliczeniowych i~pamięciowych podczas faktycznego ataku.
+
+Sprawdzanie, czy $h$ znajduje się w~$C_E$ wymaga małych zmian: zamiast obliczać
+$R(h)$, $R(H(R(h)))$ itd., należy sprawdzać teraz $R_k(h)$, $R_k(H(R_{k-1}(h)))$
+itd. Wydłuża to nieco czas wyszukiwania, jednak mimo tej niedogodności użycie
+tablic tęczowych jest dużo bardziej opłacalne z~racji na zminimalizowane
+kolizje.
+
+Wadą rozwiązań opartych o~łańcuchy haszy jest to, że stworzenie sensownej
+funkcji redukcji której przeciwdziedzina pokrywa 100\% haseł z~zadanego $M$
+i~która działa sensownie szybko jest względnie trudne. Dodatkową cechą, o~którą
+należy zadbać przy konstruowaniu funkcji redukcji jest w~miarę równy rozkład
+prawdopodobieństwa otrzymania dowolnego $m \in M$ na podstawie $h$.
+Najprostszym przykładem funkcji redukcji może być $R(h) = M_{h \mod |M|}$,
+gdzie $M_i$ oznacza $i$-ty element zbioru kandydatów $M$.
 
 
 
@@ -522,10 +742,9 @@ Z~pomocą w~praktycznej implementacji takiego ataku przychodzi parę rozwiązań
 Podejście to jest o~tyle lepsze od korzystania z~dedykowanego \enn{hardware},
 że w~tym przypadku stopień skalowalności jest praktycznie nieograniczony:
 wystarczy dołączyć do sieci jeszcze jedną maszynę, aby wyniki uzyskiwać
-szybciej.  Rozwiązanie to jest także dużo tańsze. Nie jest ono jednak
-pozbawione wad~-- gdy atakujący korzysta z~maszyn, nad którymi ktoś inny
-sprawuje faktyczną kontrolę, zdemaskowanie staje się znacznie bardziej
-prawdopodobne.
+szybciej. Rozwiązanie to jest także dużo tańsze. Nie jest ono jednak pozbawione
+wad~-- gdy atakujący korzysta z~maszyn, nad którymi ktoś inny sprawuje
+faktyczną kontrolę, zdemaskowanie staje się znacznie bardziej prawdopodobne.
 
 
 
@@ -565,7 +784,7 @@ Słabości te zostały wymienione poniżej.
 
 \end{itemize}
 
-Ponadto należy pamiętać o tym, że także i~w~tym przypadku atakujący może
+Ponadto należy pamiętać o~tym, że także i~w~tym przypadku atakujący może
 uskutecznić swoje działania stosując obliczenia równoległe: gdy takie ataki
 przeprowadzone zostaną z~wielu komputerów jednocześnie (\enn{Distributed Denial
 of Service}), jeszcze bardziej zwiększy to skalę przeciążenia.
