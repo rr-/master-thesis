@@ -8,11 +8,11 @@ wykorzystywane będą następujące pojęcia:
 
 \begin{itemize}
 
-    \item \textbf{funkcja haszująca}~-- alternatywne określenie na
-    \emph{funkcję skrótu},
+    \item \textbf{funkcja haszująca}~-- alternatywne określenie \emph{funkcji
+    skrótu},
 
-    \item \textbf{bezpieczna funkcja haszująca}~-- alternatywne określenie na
-    \emph{kryptograficzną funkcję skrótu},
+    \item \textbf{bezpieczna funkcja haszująca}~-- alternatywne określenie
+    \emph{kryptograficznej funkcji skrótu},
 
     \item \textbf{zwykła funkcja haszująca}~-- funkcja skrótu, która może, ale
     nie musi być \emph{kryptograficzną funkcją skrótu},
@@ -154,7 +154,7 @@ argumentowi losową (z jednostajnym rozkładem prawdopodobieństwa) wartość
 z~określonej przeciwdziedziny w~taki sposób, że dla konkretnego argumentu
 zawsze wybiera taką samą wartość. Jest to abstrakcyjna funkcja matematyczna,
 o~której udowodniono~\cite{random_oracle}, że nie może posiadać żadnej
-implementacji. Pożądane jest to, by kryptograficzna funkcja skrótu była trudna
+implementacji.\renmich{Oj, to chyba niezupełnie tak. Chciałbym o~tym porozmawiać.} Pożądane jest to, by kryptograficzna funkcja skrótu była trudna
 do odróżnienia od \en{random oracle}, choć jest to zadanie znacznie trudniejsze
 od spełnienia poprzednich własności.
 
@@ -163,16 +163,26 @@ od spełnienia poprzednich własności.
 W~dobrych funkcjach haszujących powinien zachodzić tzw. efekt lawinowy. Jest to
 własność zapewniająca, że nawet mała zmiana wiadomości $m'$ w~stosunku do $m$
 powoduje duże zmiany w~wartości $H(m')$ w~porównaniu do $H(m)$. Jej celem jest
-zapewnienie jednej z~dwóch fundamentalnych własności dobrego systemu
+zapewnienie drugiej z~dwóch fundamentalnych własności dobrego systemu
 kryptograficznego, sformułowanych przez Shannona
-w~1949~\cite{confusion_diffusion}~-- kryteriów \en{confusion and diffusion}
-(zamieszanie i~rozpraszanie). Warunki te mówią o~tym, że zależności pomiędzy
-wiadomością a~jej szyfrogramem oraz między szyfrogramem a~kluczem użytym do
-szyfrowania powinny być jak najbardziej skomplikowane i~nieprzewidywalne tak,
-by utrudnić potencjalne ataki.
+w~1949~\cite{confusion_diffusion}:
 
-\noindent Formalnie mówi się o~dwóch, wymienionych poniżej, kryteriach efektu
-lawinowego.
+\begin{itemize}
+
+    \item \en{confusion} (zamieszanie) -- zależność między szyfrogramem
+    a~kluczem symetrycznym powinna być jak najbardziej skomplikowana
+    i~nieprzewidywalna,
+
+    \item \en{diffusion} (rozpraszanie) -- zależność między szyfrogramem
+    a~tekstem jawnym powinna być jak najbardziej skomplikowana
+    i~nieprzewidywalna.
+
+\end{itemize}
+
+Spełnienie tych warunków utrudnia potencjalne ataki.
+
+\noindent Mówi się o~dwóch, wymienionych poniżej, kryteriach efektu
+lawinowego~\cite{avalanche_criterion1,avalanche_criterion2}.
 
 \begin{myenumerate}
 
@@ -180,9 +190,28 @@ lawinowego.
     \abbr{SAC}): po zmianie dowolnego bitu wejścia, każdy bit wyjścia powinien
     się zmienić z~prawdopodobieństwem równym $\frac{1}{2}$.
 
+    Formalnie funkcja $f : \mathbb{Z}_2^n \to \mathbb{Z}_2^m$ spełnia ścisłe
+    kryterium lawinowe, gdy:
+
+    $$\forall i,j \; \sum_{x \in \mathbb{Z}_2^n} D_H(f(x) \oplus f(x \oplus
+    C_i^n)) = m 2^{n-1}$$
+
+    gdzie $D_H$ oznacza odległość Hamminga, a $C_i^n$ oznacza $i$-ty wiersz
+    macierzy identyczności $I$ (czyli wektor złożonych z~1 na $i$-tym miejscu
+    i~0 na pozostałych miejscach).
+
     \item Kryterium niezależności bitowej (\en{bit independence criterion},
     \abbr{BIC}): po zmianie dowolnego bitu wejścia, każde dwa bity wyjścia
     powinny zmieniać się w~sposób niezależny od siebie.
+
+    Możliwe jest ocenienie stopnia, w~jakim dana funkcja $f$ spełnia kryterium
+    niezależności bitowej. Formalnie:
+
+    $$BIC(f) = \max_{x, y \in \mathbb{Z}_2^n} \left( \max_{1 \leq i \leq n}
+    |corr(f(x) \oplus (f(x) \oplus C_i^n), f(y) \oplus (f(y) \oplus C_i^n))|
+    \right)$$
+
+    W~najlepszym wypadku $BIC(f) = 0$, w~najgorszym $BIC(f) = 1$.
 
 \end{myenumerate}
 
@@ -347,7 +376,8 @@ kryptograficznych funkcji skrótu, jaką jest odporność na kolizje.
 Wyobraźmy sobie sytuację, w~której użytkownik o~imieniu Alicja zmuszony jest
 przetransportować jakieś dane przez niebezpieczny kanał informacji, który jest
 podatny na zakłócenia, do użytkownika imieniem Bob. Niech wiadomość wysłana
-przez Alicję oznaczona będzie $m$, a~wiadomość odebrana przez Boba będzie $m'$.
+przez Alicję oznaczona będzie $m$, a~wiadomość odebrana przez Boba będzie
+oznaczona przez $m'$.
 
 \begin{figure}[htb!]
     \includegraphics[width=10cm]{img/usage1.eps}

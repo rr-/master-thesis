@@ -58,11 +58,11 @@ losowe permutacje!), jest podejściem złym z~prostych przyczyn:
     z~\en{security through obscurity} (bezpieczeństwo poprzez niezrozumiałość),
     co jest bardzo negatywnym zjawiskiem w~kryptografii i~łamie tzw. zasadę
     Kerckhoffsa. Zasada ta jest jedną z~kilku reguł sformułowanych w~XIX w.
-    przez Kerckhoffsa, traktujących na temat bezpieczeństwa kryptosystemów.
-    Mówi ona, że każdy system kryptograficzny musi być bezpieczny nawet, gdy
-    jego sposób działania wraz ze szczegółami implementacji jest jawny (za
-    wyjątkiem klucza, który jest z~definicji tajny, z~tym że funkcje haszujące
-    nie używają klucza).
+    przez Kerckhoffsa, traktujących o bezpieczeństwie kryptosystemów. Mówi ona,
+    że każdy system kryptograficzny musi być bezpieczny nawet, gdy jego sposób
+    działania wraz ze szczegółami implementacji jest jawny (za wyjątkiem
+    klucza, który jest z~definicji tajny, z~tym że funkcje haszujące nie
+    używają klucza).
 
     \item Nawet gdy zignorujemy powyższe przykazanie, nasz algorytm będzie
     nieodporny na proste ataki statystyczne: analizując rozkład
@@ -120,10 +120,10 @@ powinny zatem przyciągnąć nasze zainteresowanie.
 
 
 \subsubsection{$\textrm{P} \neq \textrm{NP}$?}
-Problem z~funkcjami jednokierunkowymi jest niestety taki, że\ldots nie
-udowodniono~\cite{one_way_functions_existence} ich istnienia. Istnieją pewne
-funkcje, które podejrzewamy o~jednokierunkowość, lecz nie potrafimy wykazać
-poprawności lub niepoprawności tego podejrzenia.
+Tak naprawdę nie wiadomo, czy funkcje jednokierunkowe\ldots w~ogóle istnieją.
+Nie udowodniono~\cite{one_way_functions_existence} ich istnienia. Istnieją
+pewne funkcje, które podejrzewamy o~jednokierunkowość, lecz nie potrafimy
+wykazać poprawności lub niepoprawności tego podejrzenia.
 Wykazano~\cite{one_way_functions}, że z~istnienia słabo jednokierunkowych
 funkcji wynika istnienie silnie jednokierunkowych funkcji. Ponadto
 udowodniono~\cite{one_way_functions}, że istnienie funkcji jednokierunkowych
@@ -144,7 +144,7 @@ jednokierunkowe.
 
 
 \subsubsection{Problem faktoryzacji}
-Niech $f(S) = \prod_{s \in S} s$, gdzie $S$ jest dowolnym zbiorem liczb
+\renmich{Przydałyby się w tych podpunktach jakieś odnośniki. Skąd wiadomo te rzeczy? Gdzie udowodniono?}Niech $f(S) = \prod_{s \in S} s$, gdzie $S$ jest dowolnym zbiorem liczb
 pierwszych oraz $x \in \mathbb{N}$. Obliczenie $f(S)$ jest trywialne. Natomiast
 obliczenie wartości odwróconej funkcji $f^{-1}(x)=S$, a~więc znalezienie dla
 danej liczby $x$ jej czynników pierwszych, jest trudne, tzn. nieznany jest
@@ -175,7 +175,7 @@ wcześniej.
 Zastosowania funkcji jednokierunkowych są niejako podzbiorem tego, do czego
 potrzebujemy bezpiecznych funkcji haszujących: łatwe obliczenie $f(x)$, łatwa
 weryfikacja $f(x)=f(x')$ i~trudne uzyskanie odwróconej funkcji $f^{-1}(y)=x$.
-Stąd też nie powinno dziwić, że ostatnim, niewspomnianym dotąd kandydatem na
+Stąd też nie powinno dziwić, że ostatnim, niewymienionym dotąd kandydatem na
 funkcje jednokierunkowe są\ldots kryptograficzne funkcje skrótu.
 
 Zapotrzebowanie na funkcje jednokierunkowe jest duże, o~czym świadczy ich
@@ -235,7 +235,7 @@ rzeczywistym czy też systemy uwierzytelniania o~dużej przepustowości).
 
 W~związku z~tym została stworzona druga rodzina kryptograficznych funkcji
 skrótu. Działanie funkcji z~tej rodziny polega ogólnie rzecz biorąc na
-dokonywaniu ogromnych ilości różnorodnych operacji na konkretnych bitach
+dokonywaniu ogromnych liczby różnorodnych operacji na konkretnych bitach
 wiadomości $m$ (takich jak przestawianie, dodawanie, odejmowanie i~inne).
 Komputery są przystosowane do tego typu obliczeń, dzięki czemu w~porównaniu do
 formalnie bezpiecznych funkcji skrótu haszowanie takimi funkcjami odbywa się
@@ -244,8 +244,8 @@ jedynie do wstępnej analizy jej słabości, \latin{de~facto} nie przedstawiają
 formalnego dowodu trudności jej złamania. Badania mające na celu znalezienie
 słabości przypominają w~swojej naturze szukanie igły w~stogu siana:
 nieznalezienie igły na daną chwilę nie oznacza jeszcze nieistnienia igły. Daje
-to pole do popisu kryptologom, którzy znajdują luki na długo po tym, jak dana
-funkcja została opisana po raz pierwszy.
+to pole do popisu kryptologom, którzy znajdują luki na długo po pierwszym
+opisaniu.
 
 
 
@@ -256,7 +256,7 @@ raz pierwszy przez Merkle w~roku 1979 w~jego pracy
 doktorskiej~\cite{merkle_damgard_construction}, stanowi rdzeń używanych po dziś
 dzień funkcji skrótu takich jak \texttt{SHA-1} czy \texttt{MD5} i~jest jedną
 z~najpopularniejszych metod konstrukcji funkcji haszujących. Konstrukcja ta nie
-specyfikuje kompletnego działania~-- wyszczególnione są w~niej natomiast
+specyfikuje kompletnego działania\renmich{źle brzmi}~-- wyszczególnione są w~niej natomiast
 wymienialne elementy, które muszą być zapewnione przez każdą konkretną
 implementację; spośród nich na szczególną uwagę zasługuje funkcja dopełnienia
 bitowego oraz funkcja kompresji.
@@ -277,15 +277,15 @@ Sama konstrukcja składa się z~kroków opisanych poniżej.
     wiadomości $m$ o~dowolnej liczbie bitów na wiadomość $M$ o~liczbie bitów
     podzielnej przez z~góry określoną wartość $c$. Trywialnym przykładem
     funkcji dopełnienia bitowego może być funkcja, która dopisuje zera z~prawej
-    strony wiadomości $m$.
+    strony wiadomości $m$.\renmich{Ta trywialna funkcja jest nieodwracalna.}
 
     \item Podziel $M$ na $n$ bloków, każdy o~stałej długości $c$, niezależnej
     od $m$. Robimy to, ponieważ funkcja kompresji, opisana w~następnych
     krokach, z~definicji może działać jedynie na blokach o~stałej długości $c$.
 
     \item Niech $h = \mathtt{IV}$, gdzie $\mathtt{IV}$ jest z~góry określonym
-    wektorem początkowym (\en{initialization vector}), zawierającą jakaś stałą
-    wartość. $h$ będzie się zmieniało wraz z~działaniem konstrukcji i~oznaczać
+    wektorem początkowym (\en{initialization vector}), zawierającym jakaś stałą
+    wartość. $h$ będzie się zmieniało podczas działania konstrukcji i~oznaczać
     będzie aktualnie obliczoną wartość skrótu. Długość $h$ jest przez cały czas
     stała.
 
@@ -320,13 +320,13 @@ Sama konstrukcja składa się z~kroków opisanych poniżej.
 \subsubsection{\texttt{MD5}}
 \texttt{MD5} jest pierwszą z~dwóch funkcji, na których się skupimy w~tej pracy.
 Jej wykorzystanie jest bardzo szerokie; znajduje zastosowanie w~systemach
-bezpieczeństwa oraz systemach weryfikacji integralności danych.
+bezpieczeństwa\renmich{Mam nadzieję, że już nie!} oraz systemach weryfikacji integralności danych.
 
 Oparta o~konstrukcję Merkle-Damg\r{a}rda, funkcja przekształca wiadomości
-o~dowolnej ilości bitów na skróty o~stałej długości 128~bitów. Jej
+o~dowolnej liczbie bitów na skróty o~stałej długości 128~bitów. Jej
 schemat~\cite{md5_definition} został przedstawiony poniżej (wszystkie operacje
-są dokonywane w~porządku bitowym \en{little endian}; znaczenie operatorów
-wprowadzonych w~tej sekcji zostało opisane
+są dokonywane w~porządku bitowym \en{little endian}; znaczenie tego terminu
+oraz operatorów wprowadzonych w~tej sekcji zostało opisane
 w~dodatku~\ref{app:bitwise_operations}.
 
 \begin{myenumerate}
@@ -341,7 +341,7 @@ w~dodatku~\ref{app:bitwise_operations}.
         długość $m$ była mniejsza o~64~bity od wielokrotności 512. Innymi
         słowy, dopisz $512 \cdot \ceil{\frac{|m|+64}{512}}-64-(|m| \mod{512})$
         bitów $0$, gdzie $|m|$ oznacza długość wiadomości $m$.
-        \footnote{Zawijamy wiadomość $m$ w~taki skomplikowany sposób dlatego,
+        \footnote{Dopełniamy wiadomość $m$ w~taki skomplikowany sposób dlatego,
         że za chwilę będziemy dopisywać do niej nową wartość $x$ (o~długości
         64~bitów). Gdybyśmy po prostu zawinęli $m$ do 512~bitów, a~następnie
         nadpisali ostatnie 64~bity bitami $x$, mogłoby się zdarzyć, że
@@ -367,7 +367,7 @@ w~dodatku~\ref{app:bitwise_operations}.
             \item gdy $m_1 \neq m_2$, to ostatni blok $\mathtt{Pad}(m_1)$ jest
             różny od ostatniego bloku $\mathtt{Pad}(m_2)$. (Długość bloku w~tym
             kontekście jest taka sama, jak długość bloku używanego przez całą
-            konstrukcję Merkle-Damg\r{a}rda.)
+            konstrukcję Merkle-Damg\r{a}rda.)\renmich{Ktoś się tu chyba pomylił; niewykluczone że~\cite{merkle_damgard_strengthening}. Chciałbym porozmawiać.}
 
         \end{itemize}
 
@@ -514,8 +514,8 @@ Funkcja \texttt{SHA-1}, podobnie jak funkcja \texttt{MD5}, oparta jest
 o~konstrukcję Merkle-Damg\r{a}rda. Została skonstruowana przez \enn{National
 Security Agency}; jej nazwa wywodzi się od \en{Secure Hash Algorithm}
 (bezpieczna funkcja haszująca). \texttt{SHA-1} jest jedną z~serii funkcji
-\texttt{SHA} i~choć po niej przyszły kolejne, bezpieczniejsze funkcje, to na
-obecną chwilę jest najpopularniejszą funkcją z~serii \texttt{SHA}.
+\texttt{SHA} i~choć po niej przyszły kolejne, bezpieczniejsze funkcje, to
+w~obecnej chwili jest najpopularniejszą funkcją z~serii \texttt{SHA}.
 \texttt{SHA-1} zwraca skróty o~długości 160~bitów. Konstrukcja
 funkcji~\cite{sha1_definition} została przedstawiona poniżej.
 

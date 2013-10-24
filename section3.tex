@@ -2,7 +2,7 @@
 \label{sec:universal_attacks}
 Wprawdzie kryptograficzne funkcje haszujące z~założenia są bezpieczne, nie
 oznacza to jednak, że nie da się ich złamać. Istnieje kilka ogólnych technik,
-które można stosować do znajdywania oryginalnych wiadomości $m$ niezależnie od
+które można stosować do znajdywania wejściowych wiadomości $m$ niezależnie od
 rodzaju użytej funkcji haszującej. Techniki te są stosowane wówczas, gdy nie są
 znane żadne inne wady danego systemu kryptograficznego. Opisane w~tym rozdziale
 metody w~większości opierają się na wypróbowywaniu kolejnych możliwych wejść
@@ -36,8 +36,8 @@ $H(m)$ istnieje w~lokalnej kopii wykradzionej bazy danych.
 
 
 \subsection{Atak brutalny}
-W~tym podejściu konsekwentnie wypróbowywane są wszystkie hasła, jakie się da
-utworzyć za pomocą danego alfabetu $A$, zwiększając długość wypróbowywanych
+W~tym podejściu atakujący konsekwentnie wypróbowuje wszystkie hasła, jakie się
+da utworzyć za pomocą danego alfabetu $A$, zwiększając długość sprawdzanych
 haseł \latin{ad infinitum}. Przykładowo, mając alfabet $A=(\mathtt{a},
 \mathtt{b}, \mathtt{c}, \ldots, \mathtt{z})$ atakujący będzie próbował znaleźć
 kolizje haszy dla kolejnych haseł: $\mathtt{a}, \mathtt{b}, \mathtt{c}, \ldots,
@@ -45,10 +45,10 @@ kolizje haszy dla kolejnych haseł: $\mathtt{a}, \mathtt{b}, \mathtt{c}, \ldots,
 
 Technika ta, zwana także czasem przeszukiwaniem pełnym, przy odpowiednim
 alfabecie sprawia, że pomyślne znalezienie kolizji jest jedynie kwestią czasu.
-Jest ona jednak wyjątkowo nieoptymalna z~uwagi na ilość zasobów, które są
-potrzebne do pomyślnego przeprowadzenia. Chcąc sprawdzić wszystkie hasła
-długości \mbox{$|m| \in (1, \ldots n)$} nad alfabetem długości $a=|A|$, musimy
-przeprowadzić następującą liczbę operacji haszowania:
+Jej działanie jest jednak wyjątkowo nieoptymalne z~uwagi na ilość zasobów,
+które są potrzebne do pomyślnego przeprowadzenia. Chcąc sprawdzić wszystkie
+hasła długości \mbox{$|m| \in (1, \ldots n)$} nad alfabetem długości $a=|A|$,
+musimy przeprowadzić następującą liczbę operacji haszowania:
     $$\sum_{i=1}^n a^i = \frac{a(a^n-1)}{a-1}$$
 Przykładowo, chcąc sprawdzić wszystkie hasła nad alfabetem składającym się
 z~cyfr oraz z~małych i~wielkich znaków alfabetu łacińskiego (a~więc $|A| =
@@ -110,8 +110,8 @@ istniejącymi w~jakimś języku (więcej w~sekcji~\ref{sec:dictionary_attacks}).
 \end{table}
 
 Można to wykorzystać układając alfabet w~kolejności zgodnej z~kolejnością
-występowania liter w~danym języku, tak by polepszyć prawdopodobieństwo
-wczesnego dobrego doboru literek. Przykładowo, domyślnie korzystalibyśmy
+występowania liter w~danym języku, tak by zwiększyć prawdopodobieństwo
+wczesnego dobrego ich doboru. Przykładowo, domyślnie korzystalibyśmy
 z~alfabetu ułożonego w~następujący sposób:
     $$A_1 = (
     \mathtt{a}, \mathtt{b}, \mathtt{c}, \mathtt{d}, \mathtt{e}, \mathtt{f},
@@ -322,7 +322,7 @@ tak naprawdę nawet gdy dany słownik zawiera kilkanaście milionów słów,
 sprawdzanie nimi metodą ``offline'' odbywa się bardzo szybko. Atakujący mogą
 także pójść krok dalej i~skorzystać z~publicznie dostępnych raportów
 o~najczęściej używanych hasłach~-- przykładem takiego raportu może być
-lista~\ref{wl:xato_passwords}.
+lista~\ref{wl:xato_passwords}.\renmich{Cenzura w tabeli?}
 
     \begin{table}[htb]
         \caption{Przybliżenie 15 najpopularniej stosowanych haseł przez
@@ -374,9 +374,8 @@ Przykładowe techniki zostały wymienione poniżej.
     \item
         Zmiana wielkości liter \\
         Liczba generowanych haseł: $2^n$, gdzie $n$ to długość hasła.
-
         \lstinputlisting[language=python,caption=Przykładowy kod
-        w~Pythonie]{code/mutate_alpha.py}
+        w~języku Python]{code/mutate_alpha.py}
 
         \lstinputlisting[language=python,tabsize=4,caption=Przykładowe
         użycie]{code/mutate_alpha.txt}
@@ -386,7 +385,7 @@ Przykładowe techniki zostały wymienione poniżej.
         Liczba generowanych haseł: $1+n$, gdzie $n$ to liczba sufiksów.
 
         \lstinputlisting[language=python,caption=Przykładowy kod
-        w~Pythonie]{code/mutate_suffix.py}
+        w~języku Python]{code/mutate_suffix.py}
 
         \lstinputlisting[language=python,tabsize=4,caption=Przykładowe
         użycie]{code/mutate_suffix.txt}
@@ -397,7 +396,7 @@ Przykładowe techniki zostały wymienione poniżej.
         hasła, $A$ to zbiór infiksów do dopisania.
 
         \lstinputlisting[language=python,caption=Przykładowy kod
-        w~Pythonie]{code/mutate_infix.py}
+        w~języku Python]{code/mutate_infix.py}
 
         \lstinputlisting[language=python,tabsize=4,caption=Przykładowe
         użycie]{code/mutate_infix.txt}
@@ -408,7 +407,7 @@ Przykładowe techniki zostały wymienione poniżej.
         liter w~słowniku, używanych przez tablicę podstawień.
 
         \lstinputlisting[language=python,caption=Przykładowy kod
-        w~Pythonie]{code/mutate_char_sub.py}
+        w~języku Python]{code/mutate_char_sub.py}
 
         \lstinputlisting[language=python,tabsize=4,caption=Przykładowe
         użycie]{code/mutate_char_sub.txt}
@@ -450,21 +449,21 @@ Naiwny atak słownikowy można zrealizować na dwa sposoby.
 
 \begin{myenumerate}
 
-    \item Dla każdego kandydata obliczać jego hasz w~ciągu trwania ataku.
+    \item Dla każdego kandydata obliczać jego hasz w~trakcie trwania ataku.
     Takie obliczanie haszy na bieżąco nosi ze sobą wysokie koszty obliczeniowe.
     Ma to szczególne znaczenie jeśli zamierza się łamać więcej niż jedną bazę
     lub hasło~-- dla każdego niezależnego ataku trzeba ponownie obliczać hasz
     dla danego kandydata.
 
     \item Skorzystać z~obliczonej wcześniej tablicy zapamiętującej dla pewnego
-    zbioru kandydatów $M$ ich wartości $H$. Wówczas mając dane $h$, sprawdzenie
-    jakie hasło $m \in M$ daje $H(m) = h$ przy pomocy takiej tablicy będzie
-    względnie szybkie bez względu na $|M|$ i~ilość niezależnych ataków. Jednak
-    aby przechować taką tablicę w~pamięci komputera, potrzebne są czasem nawet
+    zbioru kandydatów $M$ ich wartości $H$. Sprawdzenie dla danego $h$, jakie
+    hasło $m \in M$ daje $H(m) = h$ przy pomocy takiej tablicy będzie względnie
+    szybkie bez względu na $|M|$ i~ilość niezależnych ataków. Jednak aby
+    przechować taką tablicę w~pamięci komputera, potrzebne są czasem nawet
     i~tysiące gigabajtów. Chcąc przechować nieskompresowaną mapę skrótów
     długości $b$ bitów utworzoną z~haseł długości $n$ nad alfabetem $A$
-    potrzebujemy minimalnie $|A|^n \cdot (n + \ceil{\frac{b}{8}})$ bajtów
-    pamięci (8 oznacza ilość bitów przechowywaną przez pojedynczy bajt).
+    potrzebujemy co najmniej $|A|^n \cdot (n + \ceil{\frac{b}{8}})$ bajtów
+    pamięci (8 oznacza liczbę bitów przechowywaną przez pojedynczy bajt).
     Przykładowo, dla \texttt{MD5} i~haseł długości 8~utworzonych z~cyfr oraz
     małych i~wielkich znaków alfabetu łacińskiego potrzeba $62^8 \cdot (8 +
     \ceil{\frac{128}{8}})$ bajtów pamięci, czyli ok. 4765 eksabajtów.
@@ -476,11 +475,11 @@ przechowywania dużych tablic, zwany łańcuchami haszy. Ma on na celu zapewnien
 kompromisu między kosztem pamięciowym a~czasowym. Docelowo atakujący chce dla
 danego $h$ znaleźć w~swoim dużym zbiorze kandydatów $M$ wejście $m \in M : H(m)
 = h$ lub dowiedzieć się, że nie ma takiego $m$~-- im szybciej, tym lepiej.
-Podczas gdy normalnie sprawdzałby $\forall m \in M \; H(m) \stackrel{?}{=} h$,
-w podejściu korzystającym z~łańcuchów haszy atak będzie przebiegał nieco
-inaczej.
+Podczas gdy we wcześniej opisanych metodach sprawdzałby $\forall m \in M \;
+H(m) \stackrel{?}{=} h$, w~podejściu korzystającym z~łańcuchów haszy atak
+będzie przebiegał nieco inaczej.
 
-Kluczowym konceptem jest wprowadzenie funkcji redukcji $R$, która będzie
+Kluczowa koncepcja polega na wprowadzeniu funkcji redukcji $R$, która będzie
 dokonywać przekształcenia $H \to M$. Charakter tego przekształcenia nie polega
 na \emph{odwróceniu} $H$~-- chodzi tylko o~przekształcanie w~jakikolwiek
 względnie bezkolizyjny sposób danego $h$ na $m \in M$. Mając daną funkcję
@@ -524,8 +523,8 @@ przykładowy łańcuch długości $k=3$ mógłby wyglądać w~następujący spos
 \]
 
 Parametr $k$ oznaczający długość tworzonych łańcuchów jest dobierany przez
-atakującego i~służy do kontroli nad stosunkiem kosztu pamięci do ilości
-obliczeń wymaganych do odwracania $h$. Im większe $k$, tym mniej pamięci będzie
+atakującego i~służy do kontroli stosunku kosztu pamięci do ilości obliczeń
+wymaganych do odwracania $h$. Im większe $k$, tym mniej pamięci będzie
 potrzebne na przechowanie łańcuchów, ale też sprawdzanie będzie się odbywało
 wolniej i~\en{vice versa}.
 
@@ -556,8 +555,8 @@ $R$, $C_B = (\mathtt{aaaaa})$, $C_E = (\mathtt{zqjwc})$ i~hasz
 $h=\mathtt{9fb5cc35cd55717db41eec8dfb2b931c}$, oblicza $R(h)$ dostając
 $\mathtt{tojmd}$. Ponieważ $\mathtt{tojmd} \not\in C_E$, oblicza
 $R(H(\mathtt{tojmd}))$ i~dostaje $\mathtt{zqjwc}$. Tym razem $\mathtt{zqjwc}
-\in C_E$, zatem należy przyjrzeć się dokładniej łańcuchowi którego końcówka
-właśnie została natrafiona. Dzięki $C_B$ wiadomo, że zaczyna się on od
+\in C_E$, zatem należy przyjrzeć się dokładniej łańcuchowi, którego końcówkę
+właśnie natrafiono. Dzięki $C_B$ wiadomo, że zaczyna się on od
 $\mathtt{aaaaa}$. Atakujący oblicza zatem $H(\mathtt{aaaaa})$,
 $H(R(H(\mathtt{aaaaa})))$ itd. (maksymalnie $k$ razy) sprawdzając po każdym
 kroku, czy nie natrafił na $h$. Jeżeli tak się stało, oznacza to, że $h$
@@ -602,15 +601,15 @@ czyni powtarzające się fragmenty łańcuchów niepotrzebnymi.
 W~powyższym przykładzie $h = \mathtt{492ba685d856633d39ef7f868b5638a7}$ nie
 zostanie znalezione w~łańcuchu~1 mimo że atakujący będzie zmuszony go dokładnie
 sprawdzić z~racji trafienia na $\mathtt{zqjwc} \in C_E$ po 2~iteracjach.
-Dopiero łańcuch~2 jest w~stanie odwrócić $h$ (w 3~iteracji).
+Dopiero łańcuch~2 jest w~stanie odwrócić $h$ (w 3.~iteracji).
 
 
 
 \subsubsection{Tablice tęczowe}
-Wysoka nieodporność na kolizje opisanych wyżej prostych łańcuchów haszy
+Wysoka podatność na kolizje opisanych wyżej prostych łańcuchów haszy
 powoduje, że przy wystarczającej długości łańcuchów i~liczności zbioru
 kandydatów $M$ wyszukiwanie przy pomocy tej metody staje się stosunkowo
-długie (i~monotonne) z~uwagi na konieczność sprawdzania dużych ilości
+długie (i~monotonne) z~uwagi na konieczność sprawdzania dużych liczb
 powtarzających się fragmentów łańcuchów.
 
 Tablice tęczowe stanowią wariant łańcuchów haszy, które zamieniają pojedynczą
@@ -659,9 +658,9 @@ itd. Wydłuża to nieco czas wyszukiwania, jednak mimo tej niedogodności użyci
 tablic tęczowych jest dużo bardziej opłacalne z~racji na zminimalizowane
 kolizje.
 
-Wadą rozwiązań opartych o~łańcuchy haszy jest to, że stworzenie sensownej
-funkcji redukcji której przeciwdziedzina pokrywa 100\% haseł z~zadanego $M$
-i~która działa sensownie szybko jest względnie trudne. Dodatkową cechą, o~którą
+Wadą rozwiązań opartych o~łańcuchy haszy jest to, że stworzenie funkcji
+redukcji której przeciwdziedzina pokrywa 100\% haseł z~zadanego $M$ i~która
+działa zadowalająco szybko jest względnie trudne. Dodatkową cechą, o~którą
 należy zadbać przy konstruowaniu funkcji redukcji jest w~miarę równy rozkład
 prawdopodobieństwa otrzymania dowolnego $m \in M$ na podstawie $h$.
 Najprostszym przykładem funkcji redukcji może być $R(h) = M_{h \mod |M|}$,
@@ -675,7 +674,7 @@ chce przeszukać, może przedsięwziąć pewne kroki pozwalające na przyspiesze
 obliczeń. Tak naprawdę problem przeprowadzenia ataku brutalnego bądź
 słownikowego z~szerszego punktu widzenia nie różni się od dowolnego innego
 obliczeniowo kosztownego problemu. Współczesna informatyka wykształciła szereg
-technik racjonalizujących czas potrzebny na przeprowadzenie kosztownych
+technik racjonalizujących\renmich{Czyli jak tłumaczyć szefowi, że mimo wszystko trzeba to zrobić? Obawiam się, że może być dwuznaczne\ldots} czas potrzebny na przeprowadzenie kosztownych
 obliczeń.
 
 
@@ -685,14 +684,14 @@ obliczeń.
 Pierwsze rozwiązanie stanowi użycie procesorów GPU montowanych w~kartach
 graficznych, które okazują się być bardzo wydajne jeśli chodzi o~obliczenia
 wartości funkcji haszujących~-- dużo wydajniejsze od tradycyjnych procesorów
-CPU. Szybkość obliczania haszy przy użyciu GPU może osiągać do paru miliardów
+CPU. Szybkość obliczania haszy przy użyciu GPU może osiągać do miliardów
 haszy na sekundę~\cite{gpu_cracking_benchmarks}, co pozwala dokonywać
 niewiarygodnie szybkich ataków słownikowych oraz brutalnych.
 
 Pomysł ten można dalej rozwijać zastępując pojedynczą kartę graficzną wieloma
 kartami. Dotychczasowe ataki praktyczne korzystające z~takich macierzy kart
-graficznych potrafią atakującemu osiągać prędkości prędkości rzędu setek
-miliardów haszy na sekundę~\cite{gpu_cracking_parallel}.
+graficznych pozwalają atakującemu osiągać prędkości rzędu setek miliardów haszy
+na sekundę~\cite{gpu_cracking_parallel}.
 
 
 
@@ -700,37 +699,37 @@ miliardów haszy na sekundę~\cite{gpu_cracking_parallel}.
 
 Użycie kart graficznych do przeprowadzania ataków brutalnych oraz słownikowych
 wymaga wysoce wyspecjalizowanego oprogramowania, które nie zawsze jest dostępne
-oraz sprzętu, którego zakup lub wynajem nie zawsze jest korzystny finansowo.
+oraz sprzętu, którego zakup lub wynajem nie zawsze jest korzystny\renmich{?} finansowo.
 Natomiast przeciętne komputery klasy desktop z~użyciem odpowiedniego
 oprogramowania potrafią w~dzisiejszych czasach przetworzyć do kilku milionów
 haszy na sekundę~\cite{oclhashcat,john_the_ripper_benchmarks}, co w~porównaniu
-z~kartami graficznymi wydaje się niedużo. Jednak gdy atakujący sprzęgnie wiele
-takich komputerów w~jedną dużą macierz obliczeniową, może się okazać, że
-rozwiązanie takie jest bardziej opłacalne. Szczególną korzyścią płynącą ze
-stosowania tej metodologii jest łatwa do osiągnięcia skalowalność: aby jeszcze
-bardziej przyspieszyć obliczenia, wystarczy dołączyć do sieci dodatkowe
-komputery, co zazwyczaj jest stosunkowo proste w~wykonaniu. Nie trzeba się
-martwić o~sprawy takie jak chłodzenie, zwiększony pobór prądu itp., jako że
-wszystko to jest zapewnione w~każdej z~maszyn z~osobna).
+z~kartami graficznymi wydaje się niewielką liczbą. Jednak gdy atakujący
+sprzęgnie wiele takich komputerów w~jedną dużą macierz obliczeniową, może się
+okazać, że rozwiązanie takie jest bardziej opłacalne. Szczególną korzyścią
+płynącą ze stosowania tej metodologii jest łatwa do osiągnięcia skalowalność:
+aby jeszcze bardziej przyspieszyć obliczenia, wystarczy dołączyć do sieci
+dodatkowe komputery, wykonanie czego jest zazwyczaj stosunkowo proste.
+Nie trzeba się martwić o~sprawy takie jak chłodzenie, zwiększony pobór prądu
+itp., jako że wszystko to jest zapewnione w~każdej z~maszyn z~osobna).
 
-Z~pomocą w~praktycznej implementacji takiego ataku przychodzi parę rozwiązań.
+Z~pomocą w~praktycznej implementacji takiego ataku przychodzi kilka rozwiązań.
 
 \begin{itemize}
 
     \item Botnety, czyli sieci komputerów należących do nieświadomych
     użytkowników, zainfekowane złośliwym oprogramowaniem nielegalnie
-    udostępniającym osobom trzecim zasoby typu łącze sieciowe, cykle procesora
-    czy też pamięć. Atakujący chcący złamać daną listę haszy nie musi
+    udostępniającym osobom trzecim zasoby takie jak łącze sieciowe, cykle
+    procesora czy też pamięć. Atakujący chcący złamać daną listę haszy nie musi
     samodzielnie zajmować się tworzeniem takiej sieci: może wynająć już
     istniejącą sieć od innego podmiotu~\cite{botnet_rental,botnet_rental2}.
 
-    \item Legalne platformy chmurowe takie jak \enn{Windows Azure}, \enn{Amazon
-    Elastic Compute Cloud (EC2)} czy też \enn{Rackspace}. Stopień prywatności
-    którą powinny gwarantować takie usługi jest dopiero kształtującą się
-    kwestią; dlatego też usługodawcom tego typu trudno odróżnić klientów
-    chcących przeprowadzić legalne obliczenia (których szczegóły są np.
-    chronione tajemnicą przemysłową) od klientów chcących wykorzystać usługę do
-    nielegalnych celów~\cite{cloud_criminals}.
+    \item Legalne chmury obliczeniowe takie jak \enn{Windows Azure},
+    \enn{Amazon Elastic Compute Cloud (EC2)} czy też \enn{Rackspace}. Stopień
+    prywatności którą powinny gwarantować takie usługi jest dopiero
+    kształtującą się kwestią; dlatego też usługodawcom tego typu trudno
+    odróżnić klientów chcących przeprowadzić legalne obliczenia (których
+    szczegóły są np. chronione tajemnicą przemysłową) od klientów chcących
+    wykorzystać usługę do nielegalnych celów~\cite{cloud_criminals}.
 
     \item Rozwiązania do własnego użytku takie jak \enn{OpenStack}, które nie
     dostarczają infrastruktury sieciowej, a~zamiast tego umożliwiają łatwe
@@ -754,7 +753,7 @@ of Service}. W~przeciwieństwie do poprzednich ataków, atak ten nie ma na celu
 wykradzenia oryginalnych wejść do funkcji haszujących; jego celem jest
 natomiast tymczasowe utrudnienie lub wręcz całkowite uniemożliwienie dostępu do
 danej usługi. Opiera się on na wykorzystaniu słabości funkcji haszujących,
-którą mogą demonstrować nawet kryptograficznie bezpieczne funkcje skrótu.
+którą mogą przejawiać nawet kryptograficznie bezpieczne funkcje skrótu.
 Słabości te zostały wymienione poniżej.
 
 \begin{itemize}
@@ -776,11 +775,11 @@ Słabości te zostały wymienione poniżej.
     \en{collision resistance}, a~więc można znaleźć $m \neq m'$ takie że $H(m)
     = H(m')$, atakujący może wykorzystać tę słabość i~wysłać do serwera duże
     ilości zapytań odwołujących się do $m$~i~$m'$. Ponieważ struktury danych
-    zazwyczaj mają dobrą złożoność obliczeniową odwoływania się do elementów po
-    ich haszach tylko dopóki nie następuje kolizja tych skrótów, gdy taka
-    kolizja już nastąpi, obsłużenie jej zajmuje dużo więcej czasu. Dlatego też
-    tego typu atak również potencjalnie może doprowadzić do znacznego
-    przeciążenia serwera.
+    zazwyczaj zachowują dobrą złożoność obliczeniową odwoływania się do
+    elementów po ich haszach tylko dopóki nie następuje kolizja tych skrótów,
+    gdy taka kolizja już nastąpi, obsłużenie jej zajmuje dużo więcej czasu.
+    Dlatego też tego typu atak również potencjalnie może doprowadzić do
+    znacznego przeciążenia serwera.
 
 \end{itemize}
 

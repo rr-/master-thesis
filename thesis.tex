@@ -28,6 +28,7 @@
 \usepackage{censor} %cenzura wulgaryzmów w badaniach
 \usepackage{multicol} %środowisko dwukolumnowe
 \usepackage{tikz-cd} %środowisko tikzcd (fajne strzałki)
+\usepackage{datetime}
 
 \pgfplotsset{compat=1.5} %wersja biblioteki do wykresów; usuwa problemy
 \newcounter{wlcounter} %licznik list słów
@@ -52,6 +53,7 @@
 \newcommand{\en}[1]{\textit{\enn{#1}}}
 \newcommand{\enn}[1]{\foreignlanguage{english}{#1}}
 \newcommand{\abbr}[1]{\textit{#1}}
+\newcommand{\renmich}[1]{\textbullet{}\marginpar{\tiny \raggedright renmich{}: #1}}
 \newenvironment{myenumerate}
     {\begin{enumerate}[label*=\arabic*.]}
     {\end{enumerate}}
@@ -81,7 +83,7 @@
     \line(1,0){350}
 
     \vspace{1cm}
-    \includegraphics[width=2cm]{logo-uam/logo-uam.png}
+    \includegraphics[width=3cm]{img/logo_uam.eps}
     \vspace{1cm}
 
     \vspace{1cm}
@@ -96,7 +98,7 @@
 
     \begin{center}
     \vspace{4cm}
-    Poznań, maj 2013
+    Poznań, \today
     \end{center}
 \end{titlepage}
 
@@ -144,6 +146,7 @@ się nieprawdziwe, decyzja o~wydaniu mi dyplomu zostanie cofnięta.
 
 \newpage
 \section{Bibliografia}
+\renmich{US, nie Us}
 \begingroup
 \renewcommand{\section}[2]{}
 \bibliographystyle{plain}
@@ -186,7 +189,8 @@ się nieprawdziwe, decyzja o~wydaniu mi dyplomu zostanie cofnięta.
 
         \item $\ll$~-- operator przesunięcia bitowego w~lewo. $a \ll n$ oznacza
         $a$ przesunięte w~lewo o~$n$ bitów gdzie bity, które w~wyniku
-        przesunięcia wychodzą poza zakres $c$, są tracone.
+        przesunięcia wychodzą poza zakres $c$, są tracone, a~''nowe`` bity są
+        uzupełniane zerami.
 
         \item $\gg$~-- operator przesunięcia bitowego w~prawo. Działanie jest
         analogiczne do poprzedniego operatora.
@@ -202,8 +206,26 @@ się nieprawdziwe, decyzja o~wydaniu mi dyplomu zostanie cofnięta.
 
     \end{itemize}
 
+    \noindent Mówi się także o dwóch porządkach kolejności zapisu bitów w~pamięci
+    komputera:
+
+    \begin{itemize}
+
+        \item \en{little endian} -- najmniej znaczący bajt zapisywany jest jako
+        pierwszy,
+
+        \item \en{big endian} -- najbardziej znaczący bajt zapisywany jest jako
+        pierwszy.
+
+    \end{itemize}
+
+    Przykładowo, liczbę $397_{10}$ zapisuje się na dwóch bajtach i~jej
+    rozwinięcie bitowe ma postać ${00000001 \; 10001101}_2$. W~porządku \en{big
+    endian} będzie zapisana jako $(\mathtt{01 8D})_{16}$, natomiast w~porządku \en
+    {little endian} zapisana będzie jako $(\mathtt{8D 01})_{16}$.
+
 \pagebreak
-\section{Listy słów użyta do statystyk}
+\section{Listy słów użytych do statystyk}
 \label{app:wordlists}
 W~pracy w~testach statystycznych korzystano z~kilku list.
 
@@ -216,10 +238,10 @@ W~pracy w~testach statystycznych korzystano z~kilku list.
 
         \item \refstepcounter{wlcounter}\label{wl:wiki_wordlist} Lista słów
         wyciągnięta z~pliku \texttt{enwik8}, używanego w~konkursie o~Nagrodzę
-        Huttera, zawierającego pierwsze $10^8$ bajtów zrzutu XML artykułów
-        z~anglojęzycznej \mbox{Wikipedii}. Plik \texttt{enwik8} dostępny jest
-        pod następującym adresem:
-        \url{http://cs.fit.edu/~mmahoney/compression/enwik8.zip}. Ekstrakcja
+        Huttera, zawierającego pierwsze $10^8$ bajtów pliku XML zawierającego
+        wszystkie artykuły anglojęzycznej \mbox{Wikipedii}. Plik
+        \texttt{enwik8} dostępny jest pod następującym adresem:
+        \url{http://cs.fit.edu/~mmahoney/compression/enwik8.zip}. Wydobycie
         słów z~pliku dokonana przy użyciu skryptu \ref{sc:wiki_extractor}.
 
         \item \refstepcounter{wlcounter}\label{wl:xato_passwords} Lista
