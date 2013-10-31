@@ -28,7 +28,8 @@
 \usepackage{censor} %cenzura wulgaryzmów w badaniach
 \usepackage{multicol} %środowisko dwukolumnowe
 \usepackage{tikz-cd} %środowisko tikzcd (fajne strzałki)
-\usepackage{datetime}
+\usepackage{datetime} %\today
+\usepackage{multirow} %wiele wierszy w tabelkach
 
 \pgfplotsset{compat=1.5} %wersja biblioteki do wykresów; usuwa problemy
 \newcounter{wlcounter} %licznik list słów
@@ -146,7 +147,6 @@ się nieprawdziwe, decyzja o~wydaniu mi dyplomu zostanie cofnięta.
 
 \newpage
 \section{Bibliografia}
-\renmich{US, nie Us}
 \begingroup
 \renewcommand{\section}[2]{}
 \bibliographystyle{plain}

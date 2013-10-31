@@ -1,21 +1,21 @@
 @article{random_oracle,
 	author  = "Ran Canetti and Oded Goldreich and Shai Halevi",
 	title   = "The Random Oracle Methodology, Revisited",
-	journal = "Journal of the ACM",
+	journal = "Journal of the {ACM}",
 	year    = 2008
 }
 
 @article{merkle_damgard_security1,
 	author  = "Ralph Merkle",
 	title   = "A Certified Digital Signature",
-	journal = "CRYPTO '89 Proceedings on Advances in Cryptology",
+	journal = "{CRYPTO} '89 Proceedings on Advances in Cryptology",
 	year    = 1989
 }
 
 @article{merkle_damgard_security2,
 	author  = "Ivan Bjerre Damg\r{a}rd",
 	title   = "A design principle for hash functions",
-	journal = "CRYPTO '89 Proceedings on Advances in Cryptology",
+	journal = "{CRYPTO} '89 Proceedings on Advances in Cryptology",
 	year    = 1989
 }
 
@@ -72,17 +72,17 @@
 @techreport{md5_definition,
 	author      = "Ronald Linn Rivest",
 	year        = 1992,
-	institution = "MIT Laboratory for Computer Science, RSA Data Security, Inc.",
-	title       = "The MD5 Message-Digest Algorithm",
-	note        = "RFC 1321",
+	institution = "{MIT} Laboratory for Computer Science, {RSA} Data Security, Inc.",
+	title       = "The {MD5} Message-Digest Algorithm",
+	note        = "{RFC} 1321",
 }
 
 @techreport{sha1_definition,
 	author      = "Donald E. Eastlake 3rd, Paul E. Jones",
 	year        = 2001,
 	institution = "Motorola, Cisco Systems",
-	title       = "US Secure Hash Algorithm 1 (SHA1)",
-	note        = "RFC 3174",
+	title       = "{US} Secure Hash Algorithm 1 ({SHA1})",
+	note        = "{RFC} 3174",
 }
 
 @book{one_way_functions,
@@ -143,15 +143,85 @@
 }
 
 @misc{gpu_cracking_benchmarks,
-	title        = "IGHASHGPU benchmarks",
+	title        = "{IGHASHGPU} benchmarks",
 	author       = "Ivan Golubev",
 	howpublished = "\url{http://www.golubev.com/hashgpu.htm}",
 	note         = "[z dnia 17 października 2013]"
 }
 
 @misc{gpu_cracking_parallel,
-	title        = "New 25 GPU Monster Devours Passwords In Seconds",
+	title        = "New 25 {GPU} Monster Devours Passwords In Seconds",
 	key          = "gpu-cracking-parallel",
 	howpublished = "\url{https://securityledger.com/2012/12/new-25-gpu-monster-devours-passwords-in-seconds/}",
 	note         = "[z dnia 17 października 2013]"
+}
+
+@article{birthday,
+	author  = "Earl H. McKinney",
+	title   = "Generalized Birthday Problem",
+	journal = "American Mathematical Monthly",
+	pages   = "385–-387",
+	volume  = 73,
+	year    = 1996
+}
+
+@article{birthday2,
+	author  = "Mihir Bellare and Tadayoshi Kohno",
+	title   = "Hash Function Balance and Its Impact on Birthday Attacks",
+	journal = "{EUROCRYPT} 2004",
+	year    = "2004",
+	pages   = "401–-418"
+}
+
+@techreport{birthday3,
+	author      = "Jacques Patarin and Audrey Montreuil",
+	title       = "Benes and Butterfly schemes revisited",
+	institution = "Université de Versailles",
+	year        = "2005"
+}
+
+@article{best_sha1_collision_attack,
+	author    = {Manuel, St{\'e}phane},
+	title     = {Classification and generation of disturbance vectors for collision attacks against {SHA-1}},
+	journal   = {Des. Codes Cryptography},
+	volume    = {59},
+	number    = {1-3},
+	year      = {2011},
+	pages     = {247--263},
+	publisher = {Kluwer Academic Publishers},
+}
+
+@article{best_md5_collision_attack,
+	author  = {Tao Xie and Dengguo Feng},
+	journal = {IACR Cryptology ePrint Archive},
+	pages   = 223,
+	title   = {How To Find Weak Input Differences For {MD5} Collision Attacks.},
+	volume  = 2009,
+	year    = 2009
+}
+
+@misc{ps3_attack,
+	author       = "Alexander Sotirov and Marc Stevens and Jacob Appelbaum and Arjen Lenstra and David Molnar and Dag Arne Osvik and Benne de Weger",
+	title        = "{MD5} considered harmful today -- creating a rogue {CA} certificate",
+	howpublished = "\url{http://www.win.tue.nl/hashclash/rogue-ca/}",
+	note         = "[z dnia 31 października 2013]",
+}
+
+@techreport{flame_attack,
+	author      = "Marc Stevens",
+	title       = "{CWI} Cryptanalist Discovers New Cryptographic Attack Variant in Flame Spy Malware",
+	institution = "Centrum Wiskunde \& Informatica",
+	year        = 2012,
+}
+
+@incollection{best_md5_preimage_attack,
+	year      = {2009},
+	booktitle = {Advances in Cryptology - EUROCRYPT 2009},
+	volume    = {5479},
+	series    = {Lecture Notes in Computer Science},
+	editor    = {Joux, Antoine},
+	title     = {Finding Preimages in Full MD5 Faster Than Exhaustive Search},
+	publisher = {Springer Berlin Heidelberg},
+	author    = {Sasaki, Yu and Aoki, Kazumaro},
+	pages     = {134-152}
 }
