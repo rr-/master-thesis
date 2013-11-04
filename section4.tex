@@ -115,4 +115,23 @@ $O(2^{128})$ do $O(2^{123.4})$~\cite{best_md5_preimage_attack}.
 
 
 \subsection{\en{Length-extension attack}}
-%todo: http://en.wikipedia.org/wiki/Length_extension_attack
+Innym rodzajem ataku jest tzw. \en{length extension attack}. Dotyczy on jedynie
+kryptosystemów, które udostępniają publicznie oryginalną wiadomość $m$ oraz
+$H(s || m)$, gdzie $||$ jest operatorem konkatenacji, a~$s$ sekretem znanym
+jedynie oryginalnemu serwerowi. Takie systemy kryptograficzne mają na celu
+weryfikowanie autentyczności $m$ (czy nie pochodzi z~obcego źródła),
+sprawdzając, czy $H(s||m)=h$. Bezpieczeństwo opiera się głównie na sile sekretu
+$s$ -- znając $s$, można fałszować dowolne wiadomości.
+
+Okazuje się, że funkcje korzystające z~konstrukcji takich jak konstrukcja
+Merkle-Damg\r{a}rda, w~szczególności funkcje \texttt{MD5} oraz \texttt{SHA-1},
+umożliwiają atakującemu dopisanie do danej wiadomości $m$ własnego sufiksu $m'$
+i~wygenerowanie $h' : h' = H(s || m || m')$ (a zatem $h'$ potwierdzającego
+nieprawdziwą autentyczność $m||m'$) nawet w~sytuacji gdy atakujący nie zna $s$.
+Jest to możliwe dzięki temu, że funkcje tego rodzaju zwracają hasz w~postaci
+ostatnio obliczonego wewnętrznego stanu, dlatego do skonstruowania $h'$
+wystarczy kontynuować obliczenia tam, gdzie się wcześniej zakończyły, przy
+pomocy dodatkowych bitów z~$m'$. Ataki tego rodzaju są szczegółowo opisane
+w~\cite{md5_length_extension_attack}; przykładowa implementacja dla
+\texttt{MD5} może być z~kolei znaleziona
+w~\cite{md5_length_extension_attack_implementation}.
