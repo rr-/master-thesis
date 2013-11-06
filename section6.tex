@@ -1,1 +1,101 @@
 \section{Metody obrony}
+
+Z uwagi na naturę ataków, wyróżnia się dwie podstawowe uniwersalne linie obrony
+przed złamaniem haszy.
+
+\subsection{Ataki online}
+
+W przypadku ataków online tak naprawdę mamy do czynienia tylko z~jedną metodą
+obrony i~jest nią identyfikacja atakującego i~następujące po niej zablokowanie
+dostępu do danej usługi.
+
+Identyfikacja może następować na różne sposoby. Administrator mając do
+dyspozycji logi z~nieudanych prób uwierzytelnienia może szukać pewnych
+korelacji poprzez np.:
+
+\begin{itemize}
+
+\item porównywanie adresów IP z~których pochodziły kolejne nieudane próby,
+
+\item sprawdzanie obecności i~poprawności pewnych ustalonych informacji
+przechowywanych w~metadanych połączenia (np. ciasteczkach przeglądarki).
+
+\end{itemize}
+
+Kiedy atakujący zostanie zidentyfikowany jako osoba, która już wcześniej
+wielokrotnie podejmowała nieudane próby uwierzytelnienia, system może
+odpowiednio zareagować. Jedną z~najpopularniejszych metod reakcji jest
+ograniczenie liczby możliwości wypróbowania kolejnych kombinacji w~stosunku do
+ustalonego odcinka czasu. Przykładem może być formularz logowania, w~którym
+w~ciągu 10 minut nie można dokonać więcej niż 5~prób zalogowania. Jest to
+proste i~często spotykane zabezpieczenie, jednak tak naprawdę nie gwarantuje
+ono praktycznie żadnego bezpieczeństwa.
+
+Ataki online mogą być przeprowadzane z~jednego komputera. Atak tego typu jest
+wolny z~powodu ograniczeń przepustowości sieci, a~atakujący przeprowadzając
+kolejne próby uwierzytelnienia z~jednego adresu IP jest trywialny do
+zidentyfikowania. Odmowa dostępu działa więc tutaj bardzo dobrze. Należy jednak
+zwrócić uwagę, że atak brutalny przeprowadzany z~jednego komputera w~zasadzie
+nie różni się wiele pod względem technologicznym od ręcznego sprawdzania
+popularnych loginów i~haseł przez złośliwego użytkownika.
+
+Ataki online nabierają tak naprawdę znaczenia dopiero w~sytuacji, kiedy
+atakujący:
+
+\begin{itemize}
+
+\item korzysta z~wielu komputerów i/lub
+\item korzysta z~serwerów proxy i/lub
+\item korzysta z~sieci TOR.
+
+\end{itemize}
+
+Im lepiej wyposażony jest atakujący, tym identyfikacja źródła jest trudniejsza,
+a~więc nie coraz trudniejsze staje się efektywne odebranie dostępu atakującemu
+do danej usługi. Można bezpiecznie założyć, że poważny atakujący będzie
+dysponował wszystkimi tymi zasobami.
+
+Tak naprawdę problem zapobiegania atakom o~poważniejszej skali sprowadza się do
+zapobiegania atakowi offline, w~którym system nie ma możliwości efektywnej
+odmowy dostępu, a~atakujący nie jest ograniczony przepustowością sieci.
+Dodatkowo ataki tego typu cechują własności ataku DDoS, przed którego obroną
+należy się dodatkowo zabezpieczyć osobnymi sposobami.
+
+\subsection{Ataki offline}
+
+Atak offline ma miejsce wówczas, kiedy atakujący może wypróbowywać do woli
+kolejne kombinacje z~efektywną prędkością bez obawy przed wykryciem. Istnieje
+kilka metod, które pozwalają się zabezpieczyć przed tego typu atakami lub
+przynajmniej w~znacznym stopniu je utrudnić.
+
+\subsubsection{Konkatenacja haszy}
+
+Jednym z~pomysłów jest próba zwiększenia siły funkcji skrótu bez jej
+faktycznego zmieniania stosując konkatenację. Zamiast przechowywać w~bazie
+hasz postaci:
+    $$H(m)$$
+przechowywane są hasze postaci:
+    $$H_1(m)||H_2(m)||\ldots||H_n(m)$$
+gdzie $H_i$ to kolejne różne od siebie funkcje haszujące. Dawne protokoły
+SSL/TLS korzystały z~$\mathtt{MD5}(m)||\mathtt{SHA1}(m)$. Konstrukcja ma na
+celu sprawienie, że nawet jeżeli atakujący znajdzie $m' : H_i(m') = H_i(m)$, to
+wykorzystanie innych $H_{j \neq i}$ zagwarantuje że cały hasz i~tak będzie
+różny, gdyż prawdopodobieństwo $\forall_{j \neq i} \; H_j(m') = H_j(m)$ będzie
+minimalne.
+
+Okazuje się jednak, że konstrukcja tego typu dla haszy opartych o~konstrukcję
+Merkle-Damg\r{a}rda jest tak samo odporna na \en{collision attacks} jak
+najsilniejsza funkcja $H_i$ wykorzystana w ciągu~\cite{md5_concatenation}.
+Dodatkowo atakujący potrafiąc generować $m_1, m_2 : m_1 \neq m_2 \wedge
+\mathtt{MD5}(m_1) = \mathtt{MD5}(m_2)$, potrafi wygenerować łatwo $m_3, m_4,
+\ldots, m_n : \forall_{1 \leq i \leq n} \; H(m_i) =
+H(m_1)$~\cite{md5_multi_collision_attack}. Zabezpieczający system powinien
+zatem zrezygnować z~tego podejścia na rzecz lepszych metod.
+
+\subsubsection{Potęgowanie haszy}
+
+\subsubsection{Obrona przed atakami DDoS}
+
+\subsubsection{``Sól (metoda I)''}
+
+\subsubsection{``Sól (metoda II)''}
