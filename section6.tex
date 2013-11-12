@@ -1,11 +1,11 @@
 \section{Metody obrony}
 
-Z uwagi na naturę ataków, wyróżnia się dwie podstawowe uniwersalne linie obrony
+Z~uwagi na naturę ataków, wyróżnia się dwie podstawowe uniwersalne linie obrony
 przed złamaniem haszy.
 
 \subsection{Ataki online}
 
-W przypadku ataków online tak naprawdę mamy do czynienia tylko z~jedną metodą
+W~przypadku ataków online tak naprawdę mamy do czynienia tylko z~jedną metodą
 obrony i~jest nią identyfikacja atakującego i~następujące po niej zablokowanie
 dostępu do danej usługi.
 
@@ -85,7 +85,7 @@ minimalne.
 
 Okazuje się jednak, że konstrukcja tego typu dla haszy opartych o~konstrukcję
 Merkle-Damg\r{a}rda jest tak samo odporna na \en{collision attacks} jak
-najsilniejsza funkcja $H_i$ wykorzystana w ciągu~\cite{md5_concatenation}.
+najsilniejsza funkcja $H_i$ wykorzystana w~ciągu~\cite{md5_concatenation}.
 Dodatkowo atakujący potrafiąc generować $m_1, m_2 : m_1 \neq m_2 \wedge
 \mathtt{MD5}(m_1) = \mathtt{MD5}(m_2)$, potrafi wygenerować łatwo $m_3, m_4,
 \ldots, m_n : \forall_{1 \leq i \leq n} \; H(m_i) =
@@ -93,6 +93,41 @@ H(m_1)$~\cite{md5_multi_collision_attack}. Zabezpieczający system powinien
 zatem zrezygnować z~tego podejścia na rzecz lepszych metod.
 
 \subsubsection{Potęgowanie haszy}
+
+Inne rozwiązanie stanowi podejście, w~którym zamiast przechowywać w~bazie skrót
+postaci:
+    $$H(m)$$
+przechowywane są hasze postaci:
+    $$H(H(\ldots H(m) \ldots)) = H^{(n)}(m)$$
+Spowoduje to, że czas potrzebny na obliczenie pojedynczego skrótu wydłuży się
+nawet $n$-krotne~--~a tym samym spowoduje, że atakujący będzie musiał poświęcić
+więcej czasu na każdą wypróbowywaną kombinację. Prostą kontrolę nad czasem
+potrzebnym na obliczenie haszu stanowi liczba funkcji użytych do złożenia
+($n$).
+
+Podejście to, mimo że na pierwszy rzut oka atrakcyjne (przy $n = 20000$
+atakujący potrzebuje nawet 20000x więcej czasu na znalezienie kolizji!), ma
+duże wady z~następujących powodów:
+
+\begin{itemize}
+
+\item Większość funkcji haszujących takich jak \texttt{MD5} oraz \texttt{SHA-1}
+daje się obliczać błyskawicznie. Liczba $n$ musi być naprawdę wysoka, aby
+modyfikacja ta miała sens.
+
+\item Konstrukcja takich funkcji jest niezbadana. Przykładowo, nie wiadomo, czy
+$\mathtt{MD5}^{(n)}(m)$ nie jest zbieżne do wartości przejawiających przewidywalne
+cechy. Stosowanie niezbadanych konstrukcji w~zastosowaniach kryptograficznych
+jest stanowczo odradzane; historia pokazuje, że stosowanie mechanizmów, które
+nie zostały poddane dogłębnej kryptoanalizie może okazać się katastrofalne.
+Przykładem może być np.~\cite{untested_cryptography}.
+
+\item Znaczne wydłużanie czasu potrzebnego na obliczenie haszu powoduje, że
+zasób dokonujący uwierzytelniania, jeżeli jest umieszczony online, staje się
+podatny na ataki DDoS~-- przy wolno działającym mechanizmie uwierzytelniania
+potrzeba znacznie mniej zapytań, aby wyczerpać zasoby serwera.
+
+\end{itemize}
 
 \subsubsection{Obrona przed atakami DDoS}
 
