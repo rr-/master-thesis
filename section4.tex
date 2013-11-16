@@ -18,7 +18,7 @@ z~możliwych zastosowań tych technik.
 
 
 \subsection{Atak \en{online} a~\en{offline}}
-Atak online jest to taki atak, w~którym atakujący nie ma dostępu do
+Atak \en{online} jest to taki atak, w~którym atakujący nie ma dostępu do
 wewnętrznych informacji takich jak skróty haseł użytkowników i~dokonuje prób
 znalezienia \mbox{$m : H(m) = h$} poprzez publicznie dostępny zasób taki jak
 strona logowania lub zdalny terminal. Atak taki jest łatwo wykrywalny
@@ -319,8 +319,8 @@ o~skończonej wielkości (czyli tytułowego słownika). Słownik powinien się
 składać z~wyrazów, których użycie jako hasło przez użytkowników jest
 najbardziej prawdopodobne. Mogą to być słowa w~określonym języku, imiona itp.;
 tak naprawdę nawet gdy dany słownik zawiera kilkanaście milionów słów,
-sprawdzanie nimi metodą ``offline'' odbywa się bardzo szybko. Atakujący mogą
-także pójść krok dalej i~skorzystać z~publicznie dostępnych raportów
+sprawdzanie nimi metodą ``\en{offlin}e'' odbywa się bardzo szybko. Atakujący
+mogą także pójść krok dalej i~skorzystać z~publicznie dostępnych raportów
 o~najczęściej używanych hasłach~-- przykładem takiego raportu może być
 lista~\ref{wl:xato_passwords}.\renmich{Cenzura w tabeli?}
 
@@ -699,18 +699,18 @@ na sekundę~\cite{gpu_cracking_parallel}.
 
 Użycie kart graficznych do przeprowadzania ataków brutalnych oraz słownikowych
 wymaga wysoce wyspecjalizowanego oprogramowania, które nie zawsze jest dostępne
-oraz sprzętu, którego zakup lub wynajem nie zawsze jest korzystny\renmich{?} finansowo.
-Natomiast przeciętne komputery klasy desktop z~użyciem odpowiedniego
-oprogramowania potrafią w~dzisiejszych czasach przetworzyć do kilku milionów
-haszy na sekundę~\cite{oclhashcat,john_the_ripper_benchmarks}, co w~porównaniu
-z~kartami graficznymi wydaje się niewielką liczbą. Jednak gdy atakujący
-sprzęgnie wiele takich komputerów w~jedną dużą macierz obliczeniową, może się
-okazać, że rozwiązanie takie jest bardziej opłacalne. Szczególną korzyścią
-płynącą ze stosowania tej metodologii jest łatwa do osiągnięcia skalowalność:
-aby jeszcze bardziej przyspieszyć obliczenia, wystarczy dołączyć do sieci
-dodatkowe komputery, wykonanie czego jest zazwyczaj stosunkowo proste.
-Nie trzeba się martwić o~sprawy takie jak chłodzenie, zwiększony pobór prądu
-itp., jako że wszystko to jest zapewnione w~każdej z~maszyn z~osobna).
+oraz sprzętu, którego zakup lub wynajem nie zawsze jest opłacalny. Natomiast
+przeciętne komputery klasy desktop z~użyciem odpowiedniego oprogramowania
+potrafią w~dzisiejszych czasach przetworzyć do kilku milionów haszy na
+sekundę~\cite{oclhashcat,john_the_ripper_benchmarks}, co w~porównaniu z~kartami
+graficznymi wydaje się niewielką liczbą. Jednak gdy atakujący sprzęgnie wiele
+takich komputerów w~jedną dużą macierz obliczeniową, może się okazać, że
+rozwiązanie takie jest bardziej opłacalne. Szczególną korzyścią płynącą ze
+stosowania tej metodologii jest łatwa do osiągnięcia skalowalność: aby jeszcze
+bardziej przyspieszyć obliczenia, wystarczy dołączyć do sieci dodatkowe
+komputery, wykonanie czego jest zazwyczaj stosunkowo proste. Nie trzeba się
+martwić o~sprawy takie jak chłodzenie, zwiększony pobór prądu itp., jako że
+wszystko to jest zapewnione w~każdej z~maszyn z~osobna).
 
 Z~pomocą w~praktycznej implementacji takiego ataku przychodzi kilka rozwiązań.
 

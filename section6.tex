@@ -3,11 +3,11 @@
 Z~uwagi na naturę ataków, wyróżnia się dwie podstawowe uniwersalne linie obrony
 przed złamaniem haszy.
 
-\subsection{Ataki online}
+\subsection{Ataki \en{online}}
 
-W~przypadku ataków online tak naprawdę mamy do czynienia tylko z~jedną metodą
-obrony i~jest nią identyfikacja atakującego i~następujące po niej zablokowanie
-dostępu do danej usługi.
+W~przypadku ataków \en{online} tak naprawdę mamy do czynienia tylko z~jedną
+metodą obrony i~jest nią identyfikacja atakującego i~następujące po niej
+zablokowanie dostępu do danej usługi.
 
 Identyfikacja może następować na różne sposoby. Administrator mając do
 dyspozycji logi z~nieudanych prób uwierzytelnienia może szukać pewnych
@@ -31,15 +31,15 @@ w~ciągu 10 minut nie można dokonać więcej niż 5~prób zalogowania. Jest to
 proste i~często spotykane zabezpieczenie, jednak tak naprawdę nie gwarantuje
 ono praktycznie żadnego bezpieczeństwa.
 
-Ataki online mogą być przeprowadzane z~jednego komputera. Atak tego typu jest
-wolny z~powodu ograniczeń przepustowości sieci, a~atakujący przeprowadzając
-kolejne próby uwierzytelnienia z~jednego adresu IP jest trywialny do
-zidentyfikowania. Odmowa dostępu działa więc tutaj bardzo dobrze. Należy jednak
-zwrócić uwagę, że atak brutalny przeprowadzany z~jednego komputera w~zasadzie
-nie różni się wiele pod względem technologicznym od ręcznego sprawdzania
-popularnych loginów i~haseł przez złośliwego użytkownika.
+Ataki \en{online} mogą być przeprowadzane z~jednego komputera. Atak tego typu
+jest wolny z~powodu ograniczeń przepustowości sieci, a~atakujący
+przeprowadzając kolejne próby uwierzytelnienia z~jednego adresu IP jest
+trywialny do zidentyfikowania. Odmowa dostępu działa więc tutaj bardzo dobrze.
+Należy jednak zwrócić uwagę, że atak brutalny przeprowadzany z~jednego
+komputera w~zasadzie nie różni się wiele pod względem technologicznym od
+ręcznego sprawdzania popularnych loginów i~haseł przez złośliwego użytkownika.
 
-Ataki online nabierają tak naprawdę znaczenia dopiero w~sytuacji, kiedy
+Ataki \en{online} nabierają tak naprawdę znaczenia dopiero w~sytuacji, kiedy
 atakujący:
 
 \begin{itemize}
@@ -56,17 +56,76 @@ do danej usługi. Można bezpiecznie założyć, że poważny atakujący będzie
 dysponował wszystkimi tymi zasobami.
 
 Tak naprawdę problem zapobiegania atakom o~poważniejszej skali sprowadza się do
-zapobiegania atakowi offline, w~którym system nie ma możliwości efektywnej
+zapobiegania atakowi \en{offline}, w~którym system nie ma możliwości efektywnej
 odmowy dostępu, a~atakujący nie jest ograniczony przepustowością sieci.
 Dodatkowo ataki tego typu cechują własności ataku DDoS, przed którego obroną
 należy się dodatkowo zabezpieczyć osobnymi sposobami.
 
-\subsection{Ataki offline}
+\subsubsection{Obrona przed atakami DDoS}
+W~kontekście kryptograficznych funkcji skrótu istnieje kilka kontekstów,
+w~których można mówić o~ataku DDoS.
 
-Atak offline ma miejsce wówczas, kiedy atakujący może wypróbowywać do woli
+\begin{itemize}
+
+\item Funkcja haszująca jest wystarczająco wolno działająca, że nawet niewielka
+ilość zapytań potrafi wyczerpać zasoby serwera.
+
+\item ``Klasyczny'' atak DDoS~-- zasoby serwera są wyczerpane przez dużą ilość
+zapytań rozsyłanych z~wielu lokacji.
+
+\item Nieprzemyślane wykorzystanie funkcji haszujących: przykładem może być
+tablica mieszająca; w~przeciętnym przypadku pozwala ona wyszukiwać elementy
+w~czasie $O(1)$, ale w~najgorszym przypadku może działać w~czasie $O(n)$.
+Atakujący może znać sposób działania danego mechanizmu na serwerze
+i~przygotowywać specjalne zapytania, które będą powodować wolne działanie
+użytych struktur, co ułatwia wyczerpanie zasobów serwera~\cite{ddos_hashes}.
+Atak ten rzadko jest związany z~\emph{kryptograficznymi} funkcjami haszującymi,
+należy jednak zwrócić uwagę, że także one są czasem wykorzystywane w~tego typu
+zastosowaniach (np. system git używa \texttt{SHA-1} do identyfikacji
+konkretnych rewizji kodu).
+
+\end{itemize}
+
+Metod zabezpieczeń przed tego typu atakami w~zasadzie nie ma zbyt wiele.
+W~przypadku słabości wynikających z~(pośredniego lub bezpośredniego) wolnego
+działania funkcji haszujących można próbować zastąpić je szybszymi funkcjami
+lub polepszać algorytmy z~nich korzystające. Nie zawsze jest to jednak możliwe;
+wówczas można starać się zidentyfikować zapytania potencjalnie powodujące wolne
+działanie algorytmów i~przekształcać je na bezpieczne odpowiedniki. Także taka
+linia obrony nie zawsze jest możliwa do przeprowadzenia.
+
+W~sytuacji, kiedy dany zasób na serwerze zawsze będzie reagował wolno i~nie
+można z~tym nic zrobić, sytuacja sprowadza się w~zasadzie do zabezpieczenia
+serwera przed klasycznymi atakami DDoS. Jedyna metoda skutecznej obrony to
+stosowanie firewalli odcinających dostęp atakującym oraz load-balancing, czyli
+rozpraszanie przychodzącego ruchu na wiele serwerów. Przykładami zewnętrznych
+firm, które świadczą dedykowane usługi w~zakresie obrony przed atakami DDoS,
+mogą być \en{Incapsula} i~\en{Distil}~-- zasada ich działania sprowadza się do
+roli potężnego proxy pomiędzy użytkownikiem a~serwerem udostępniającym zasoby.
+
+\subsection{Ataki \en{offline}}
+
+Atak \en{offline} ma miejsce wówczas, kiedy atakujący może wypróbowywać do woli
 kolejne kombinacje z~efektywną prędkością bez obawy przed wykryciem. Istnieje
 kilka metod, które pozwalają się zabezpieczyć przed tego typu atakami lub
 przynajmniej w~znacznym stopniu je utrudnić.
+
+\subsubsection{Wymuszanie losowości tekstu wejściowego (serwisy internetowe)}
+Mnóstwo serwisów internetowych wymusza na użytkownikach stosowanie haseł
+spełniających jedną i/lub więcej poniższych cech:
+
+\begin{enumerate}
+\item hasło jest długie na co najmniej $n$ znaków,
+\item hasło ma przynajmniej jedną wielką literę,
+\item hasło ma przynajmniej jedną cyfrę,
+\item hasło ma przynajmniej jedną literę ``specjalną''.
+\end{enumerate}
+
+Podejście to jest niewygodne dla użytkowników. Tak naprawdę bezpieczeństwo
+serwisu nie powinno być zależne od tego, czy jakiś użytkownik będzie miał hasło
+postaci \texttt{qwerty}; co więcej, również sam użytkownik stosujący takie
+hasło powinien być względnie bezpieczny w~sytuacji, kiedy baza zostanie
+wykradziona.
 
 \subsubsection{Konkatenacja haszy}
 
@@ -123,14 +182,114 @@ nie zostały poddane dogłębnej kryptoanalizie może okazać się katastrofalne
 Przykładem może być np.~\cite{untested_cryptography}.
 
 \item Znaczne wydłużanie czasu potrzebnego na obliczenie haszu powoduje, że
-zasób dokonujący uwierzytelniania, jeżeli jest umieszczony online, staje się
+zasób dokonujący uwierzytelniania, jeżeli jest dostępny \en{online}, staje się
 podatny na ataki DDoS~-- przy wolno działającym mechanizmie uwierzytelniania
 potrzeba znacznie mniej zapytań, aby wyczerpać zasoby serwera.
 
 \end{itemize}
 
-\subsubsection{Obrona przed atakami DDoS}
+\label{salt_1}
+\subsubsection{``Sól'' (metoda I)}
 
-\subsubsection{``Sól (metoda I)''}
+Sól stanowi dobrą linię obrony przed atakami \en{offline}. Ma ona na celu
+zagwarantować nieskuteczność ataków przy pomocy tęczowych tablic oraz ataków na
+więcej niż 1~hasło naraz.
 
-\subsubsection{``Sól (metoda II)''}
+Wyobraźmy sobie scenariusz, w~którym w~bazie danych hasła użytkowników
+przechowywane są w~postaci $H(p_u)$, gdzie $p_u$ to hasło użytkownika $u$.
+Atakujący dysponując wiedzą o~zawartości takiej bazy danych może skonstruować
+tablice tęczowe, które pozwolą mu przeprowadzić szybki atak słownikowy oraz
+sprawdzać obecność popularnych skrótów, takich jak np. $H(\texttt{1234})$ czy
+$H(\texttt{qwerty}$). Techniki te bardzo szybko doprowadzą atakującego do
+odgadnięcia haseł potencjalnie wielu użytkowników.
+
+Aby zabezpieczyć się przed tego typu atakiem, można wprowadzić ``sól'', czyli
+unikalny ciąg losowych znaków. Zamiast przechowywać w~bazie $H(p)$,
+przechowywane są dwie wartości: $H(p_u || s_u)$ oraz niezaszyfrowane $s_u$,
+gdzie $p_u$ to hasło użytkownika $u$, a~$s_u$ to ``sól'' wygenerowana dla
+użytkownika $u$. Ważne jest, aby zachodziła poniższa własność:
+    $$\forall_{u_1, u_2 \in U} \; s_{u_1} \neq s_{u_2}$$
+Uwierzytelnienie hasła $p'$ będzie przebiegało następująco:
+
+\begin{itemize}
+\item pobierz z~bazy $s_u$ dla zadanego użytkownika $u$,
+\item oblicz $H(p'||s_u)$,
+\item sprawdź, czy $H(p'||s_u) = h_u$, gdzie $h_u$ to przechowywany w~bazie
+$H(p_u||s_u)$.
+\end{itemize}
+
+Atakujący wówczas chcąc złamać $h_{u_k}$ musiałby skonstruować specjalne
+tablice tęczowe dla funkcji haszującej $H(x||s_{u_k})$. Tak otrzymane tablice
+byłyby bezużyteczne w~przypadku sprawdzania każdego innego użytkownika,
+ponieważ
+    $$\forall_{j \neq k} \; s_{u_j} \neq s_{u_k} \rightarrow H(x||s_{u_j}) \neq
+    H(x||s_{u_k})$$
+Oczywiście jeżeli atakujący skupia się tylko na jednym użytkowniku, to
+wprowadzenie soli nie spowalnia takiego ataku~-- nabiera ona znaczenia jedynie
+kiedy atakujący stara się wykraść obojętnie jakie hasło.
+
+Dodatkową własnością wynikającą z~powyższego rozwiązania jest wydłużenie czasu
+potrzebnego na sprawdzenie obecności pojedynczego hasła w~bazie z~1 operacji
+haszowania do $n$ operacji haszowania, gdzie $n$ stanowi liczbę użytkowników
+w~bazie (np. chcąc sprawdzić, czy istnieje użytkownik z~hasłem \texttt{1234},
+trzeba dla każdego użytkownika $u$ obliczyć $H(\texttt{1234}||s_u)$). Należy
+jednak zwrócić uwagę że przyrost ten nie polepsza bezpieczeństwa;
+przetestowanie takich haseł nadal będzie się odbywało bardzo szybko.
+
+\label{salt_2}
+\subsubsection{``Sól'' (metoda II)}
+Drugim rodzajem zabezpieczenia korzystającego z~soli jest stosowanie utajnionej
+soli. Zabezpieczenie to w~przeciwieństwie do poprzedniej metody zakłada, że
+taka sól będzie wspólna dla wszystkich użytkowników, a~więc zamiast
+przechowywać $H(p_u)$ przechowywany jest $H(p_u||s)$. Podczas uwierzytelniania
+$p'$ sprawdzane jest, czy $H(p'||s) \stackrel{?}{=} H(p_u||s)$.
+
+Podstawową korzyścią jest bezpieczeństwo w~sytuacji, gdy baza została
+wykradziona. Ponieważ $s$ nie jest przechowywane w~bazie, atakujący nie może
+przeprowadzić żadnego sensownego ataku~-- tak naprawdę nie zna nawet $H$, na
+jakie mógłby przeprowadzić atak. Nawet dysponując wiedzą, że użyte zostało np.
+$\texttt{MD5}$, nie daje mu to znaczącej przewagi, gdyż do przeprowadzenia
+ataku brutalnego potrzebuje dodatkowo nieznanego $s$. Jeżeli $s$ jest
+wystarczająco długie, to jest ono bezpieczne przed atakiem brutalnym.
+
+Drugą korzyścią płynącą z~użycia tej linii obrony jest to, że jej zastosowania
+są nieco bardziej uniwersalne. Przykładowo można weryfikować, czy dane
+przesłane zewnętrznemu podmiotowi nie uległy zmianie, czyli np. czy ciastka
+które kazaliśmy pamiętać przeglądarce nie zmieniły się między kolejnymi
+zapytaniami (ciastko zawiera dane $x$ i~skrót $h = H(x||s)$, gdzie $s$ to
+sekretna sól; poprawność $h$ może później zostać zweryfikowana po stronie
+serwera).
+
+Bezpieczeństwo takiego systemu w~całości opiera się na tajności $s$. Wiąże się
+to niestety z~paroma wadami.
+\begin{enumerate}
+
+\item Należy zwrócić szczególną uwagę na sposób łączenia wejściowych danych
+z~solą. Jeżeli łączenie będzie się odbywało poprzez $s||m$, to wówczas nasza
+funkcja będzie podatna na \en{length extension
+attack}~(\ref{length_extension_attack}).
+
+\item System wymaga zaufania przynajmniej jednej osobie, w~szczególności
+każdemu, kto ma uprawnienia do czytania $s$ po stronie serwera (a więc np.
+administratorowi).
+
+\item W~sytuacji kiedy $s$ zostanie wykradzione osoba, która uzyskała dostęp do
+$s$, ma najprawdopodobniej dostęp także do wszystkich innych zasobów (takich
+jak np. baza danych zawierająca $h=H(m||s)$). Wówczas może ona bez problemu
+przeprowadzić atak brutalny konstruując tablice tęczowe dla funkcji $H(x||s)$.
+Dobrym zabezpieczeniem byłoby użycie hybrydowego rozwiązania, stosując
+$H(p_u||s||s_u)$, gdzie $s$ to tajna sól, $p_u$ to hasło użytkownika $u$
+a~$s_u$ to publiczna sól użytkownika $u$. Wówczas bezpieczeństwo systemu po
+wykradzeniu $s$ byłoby równoważne bezpieczeństwu systemu opisanego w~podejściu
+~\ref{salt_1}.
+
+\item Nie da się zmienić $s$ na $s'$ bez obliczania $\forall_{m \in M} \;
+H(m||s')$ na nowo. W~sytuacji kiedy nie dysponuje się oryginalnym $m$, nie jest
+to możliwe. Jeżeli przechowujemy hasła użytkowników jedynie za pomocą ich
+haszy, w~przypadku konieczności zmiany $s$ należy wymusić na użytkownikach
+zmianę hasła, a~to jest z~kolei niemile widziane.
+
+\end{enumerate}
+Jeżeli jednak jesteśmy zagwarantować bezpieczeństwo $s$ (np. poprzez
+zastosowanie w~tym celu osobnego systemu kryptograficznego), podejście to
+w~połączeniu z~zastosowaniem~\ref{salt_1} stanowi najlepsze z~przedstawionych.

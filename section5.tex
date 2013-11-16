@@ -66,7 +66,11 @@ Przykładowo, dla \texttt{SHA-1} teoretyczna granica wynosi $O(2^{80})$, lecz
 znany jest atak wymagający jedynie $O(2^{51})$ operacji
 haszowania~\cite{best_sha1_collision_attack}. Z~kolei dla \texttt{MD5} zamiast
 $O(2^{64})$ potrzeba jedynie $O(2^{20.96})$
-operacji~\cite{best_md5_collision_attack}.
+operacji~\cite{best_md5_collision_attack}. Oba te ataki polegają na generowaniu
+dwóch takich samych losowych ciągów $m_1$ i~$m_2$, a~następnie ciągłej
+modyfikacji jednego z~nich zgodnie z~pewnymi regułami dopóki nie uzyska się
+zbieżności $H(m_1) = H(m_2)$; w~sytuacji gdy zbieżności się nie uzyskuje po
+określonej liczbie iteracji, algorytm jest ponawiany na innych ciągach.
 
 Ataki tego typu są wykorzystywane głównie do fałszowania podpisów cyfrowych.
 Przykładem może być złamanie podpisu centrum certyfikacji przy pomocy macierzy
@@ -114,6 +118,7 @@ $O(2^{128})$ do $O(2^{123.4})$~\cite{best_md5_preimage_attack}.
 
 
 
+\label{length_extension_attack}
 \subsection{\en{Length-extension attack}}
 Innym rodzajem ataku jest tzw. \en{length extension attack}. Dotyczy on jedynie
 kryptosystemów, które udostępniają publicznie oryginalną wiadomość $m$ oraz
