@@ -66,11 +66,63 @@ Przykładowo, dla \texttt{SHA-1} teoretyczna granica wynosi $O(2^{80})$, lecz
 znany jest atak wymagający jedynie $O(2^{51})$ operacji
 haszowania~\cite{best_sha1_collision_attack}. Z~kolei dla \texttt{MD5} zamiast
 $O(2^{64})$ potrzeba jedynie $O(2^{20.96})$
-operacji~\cite{best_md5_collision_attack}. Oba te ataki polegają na generowaniu
-dwóch takich samych losowych ciągów $m_1$ i~$m_2$, a~następnie ciągłej
-modyfikacji jednego z~nich zgodnie z~pewnymi regułami dopóki nie uzyska się
-zbieżności $H(m_1) = H(m_2)$; w~sytuacji gdy zbieżności się nie uzyskuje po
-określonej liczbie iteracji, algorytm jest ponawiany na innych ciągach.
+operacji~\cite{best_md5_collision_attack}.
+
+Najskuteczniejsze ataki typu \en{collision} na kryptograficzne funkcje
+haszujące są atakami różnicowymi, w~których konstruowane są dwie wiadomości $M$
+i $M'$ różniące się w~pewien nieznaczny sposób. Najpopularniejsza konstrukcja
+ataku, przedstawiona poniżej, stosowana jest m.in. na \texttt{MD4},
+\texttt{MD5}, \texttt{RIPEMD}, \texttt{SHA-0} i~\texttt{SHA-1}. Zapoczątkowana
+została ona przez Wang Xiaoyun
+w~\cite{wang_collision_attack1,wang_collision_attack2,wang_collision_attack3}
+i~później rozwinięta przez innych kryptologów.
+
+\begin{enumerate}
+
+\item Wybierany jest pewien wektor różnic między dwoma wiadomościami $M$
+i~$M'$, oznaczony $\Delta M = M' - M$. Początkowo wektor ten był dobierany
+ręcznie, później jednak zaczęto znajdywać sposoby jego automatycznego
+doboru (przykładem może być \cite{sha1_disturbance_vector}).
+
+\item Po wybraniu $\Delta M$ analizowany jest sposób, w~jaki bity $\Delta M$
+wpływają na wynik działania funkcji haszującej. Proces ten polega na
+prześledzeniu propagacji początkowych różnic pomiędzy $M$ a~$M'$ na końcowe
+różnice pomiędzy $H$ a~$H'$.
+
+\item Analiza ta pozwala wyciągnąć pewne wnioski i~sformułować szereg warunków
+wystarczających, aby $M$ i~$M'$ dawały kolizję. Warunki te formułują, jakie
+cechy powinien spełniać stan wewnętrzny funkcji haszującej w~kolejnych krokach
+działania. Przekłada się to w~praktyce na to, że jeśli mając losową
+wiadomość $M$ stan wewnętrzny funkcji haszującej nie będzie zgadzał się ze
+sformułowanymi warunkami, należy szukać innej wiadomości -- takiej, dla której
+będą zachodziły wszystkie warunki.
+
+Warunki nie są zdefiniowane jednoznacznie -- możemy formułować różne,
+niezależne zbiory warunków wystarczających do zajścia kolizji. Im mniejszy
+zbiór warunków, tym lepiej: większa swoboda co do stanu wewnętrznego funkcji
+haszującej przekłada się na większe prawdopodobieństwo szybkiego znalezienia
+kolizji, a~zatem mniejszy koszt obliczeń.
+
+Warunki te na początku prawdopodobnie były znajdywane ręczne. Istnieją jednak
+propozycje automatyzacji ich szukania; przykładem może być algorytm
+zaproponowany przez Martina Schl{\"a}ffera~\cite{md4_differential_paths}.
+
+\item Mając sformułowane warunki wystarczające do zajścia kolizji, zazwyczaj
+okazuje się, że prawdopodobieństwo znalezienia $M$ dla którego są one spełnione
+jest niższe niż prawdopodobieństwo znalezienia kolizji wynikające z~paradoksu
+urodzinowego. W~związku z~tym wprowadzane są techniki modyfikacji wiadomości
+$M$, które wykonywane są w~zależności od cech jakie spełnia stan wewnętrzny na
+różnych etapach działania funkcji haszującej. Techniki te mają na celu
+zwiększenie prawdopodobieństwa, że dla danego $M$ stan wewnętrzny będzie się
+zgadzał ze sformułowanymi warunkami.
+
+\item Mając techniki modyfikacji wiadomości oraz warunki wystarczające do
+zajścia kolizji, można zacząć poszukiwania wiadomości $M$, która po
+zastosowaniu tych technik spełni wspomniane warunki.
+
+\item Znaleziona wiadomość $M$ oraz $M' = M +\Delta M$ daje kolizję.
+
+\end{enumerate}
 
 Ataki tego typu są wykorzystywane głównie do fałszowania podpisów cyfrowych.
 Przykładem może być złamanie podpisu centrum certyfikacji przy pomocy macierzy
@@ -100,6 +152,14 @@ własności \en{preimage resistance}, która jest atakowana.
     \end{itemize}
 Opisane w~poprzedniej sekcji ataki uniwersalne są przykładami
 brutalnych ataków \en{preimage}.
+
+Warto wspomnieć o tym, że jeśli funkcja nie jest odporna na \en{collision
+attack}, nie gwarantuje to jej kryptograficznej bezużyteczności. Gdy funkcja
+jest odporna na \en{preimage attack}, może być z~powodzeniem wykorzystywana
+we wszystkich zastosowaniach, których specyfika nie wymaga odporności na
+\en{collision attack}. Przykładem takiego zastosowania może być przechowywanie
+haszy w bazie danych: nawet gdy atakujący potrafi generować $m \neq m' : H(m) =
+H(m')$, nie przyda mu się to do złamania haseł istniejących użytkowników.
 
 Tego typu atak jest znacznie trudniejszy do przeprowadzenia w~stosunku do
 \en{collision attack} z~uwagi na to, że w~obu odmianach ataku mamy narzuconą
