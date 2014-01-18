@@ -1,0 +1,129 @@
+\begin{appendices}
+\section{Oznaczenia operacji bitowych}
+\label{app:bitwise_operations}
+
+    W~pracy używane są następujące oznaczenia operatorów:
+
+    \begin{itemize}
+        \item $\land$ lub $\&$~-- operator koniunkcji,
+        \item $\lor$ lub $|$~-- operator alternatywy,
+        \item $\oplus$~-- operator alternatywy wykluczającej.
+    \end{itemize}
+
+    \noindent Powyższe operatory przypisują dla każdej pary bitów $a$, $b$
+    w~wektorach $A$~i~$B$ wartości zgodnie z~poniższą tabelą:
+
+    \begin{center}
+        \begin{tabular}{ |c|c||c|c|c| }
+            \hline
+            $a$ & $b$ & $a \land b$ & $a \lor b$ & $a \oplus b$ \\
+            \hline
+            1 & 1 & 1 & 1 & 0 \\
+            1 & 0 & 0 & 1 & 1 \\
+            0 & 1 & 0 & 1 & 1 \\
+            0 & 0 & 0 & 0 & 0 \\
+            \hline
+        \end{tabular}
+    \end{center}
+
+    \noindent Ponadto wykorzystane są poniższe oznaczenia operatorów przesunięć
+    ($c$ oznacza ilość bitów, którą dana zmienna jest w~stanie pomieścić).
+
+    \begin{itemize}
+
+        \item $\ll$~-- operator przesunięcia bitowego w~lewo. $a \ll n$ oznacza
+        $a$ przesunięte w~lewo o~$n$ bitów gdzie bity, które w~wyniku
+        przesunięcia wychodzą poza zakres $c$, są tracone, a~''nowe`` bity są
+        uzupełniane zerami.
+
+        \item $\gg$~-- operator przesunięcia bitowego w~prawo. Działanie jest
+        analogiczne do poprzedniego operatora.
+
+        \item $\llless$~-- operator cyklicznego przesunięcia bitowego w~lewo.
+        $a \llless n$ oznacza $a$ przesunięcie w~lewo o~$n$ bitów gdzie bity,
+        które w~wyniku przesunięcia wychodzą poza zakres $c$, są dopisywane
+        z~powrotem z~prawej strony; $a \llless n =\break ((a \ll n) \land
+        \underbrace{111\ldots1}_{c\;\text{bitów}}) \;\lor\; (a \gg (c-n))$.
+
+        \item $\ggg$~-- operator cyklicznego przesunięcia bitowego w~prawo.
+        Działanie jest analogiczne do poprzedniego operatora.
+
+    \end{itemize}
+
+    \noindent Mówi się także o dwóch porządkach kolejności zapisu bitów w~pamięci
+    komputera:
+
+    \begin{itemize}
+
+        \item \en{little endian} -- najmniej znaczący bajt zapisywany jest jako
+        pierwszy,
+
+        \item \en{big endian} -- najbardziej znaczący bajt zapisywany jest jako
+        pierwszy.
+
+    \end{itemize}
+
+    Przykładowo, liczbę $397_{10}$ zapisuje się na dwóch bajtach i~jej
+    rozwinięcie bitowe ma postać ${00000001 \; 10001101}_2$. W~porządku \en{big
+    endian} będzie zapisana jako $(\mathtt{01 8D})_{16}$, natomiast w~porządku \en
+    {little endian} zapisana będzie jako $(\mathtt{8D 01})_{16}$.
+
+\pagebreak
+\section{Listy słów użytych do statystyk}
+\label{app:wordlists}
+W~pracy w~testach statystycznych korzystano z~kilku list.
+
+    \begin{myenumerate}
+
+        \item \refstepcounter{wlcounter}\label{wl:english_wordlist} Słownik
+        języka angielskiego zawierający 390516 niepowtarzających się wyrazów;
+        dostępny pod następującym adresem:
+        \url{http://download.openwall.net/pub/wordlists/languages/English/3-large/lower.gz}
+
+        \item \refstepcounter{wlcounter}\label{wl:wiki_wordlist} Lista słów
+        wyciągnięta z~pliku \texttt{enwik8}, używanego w~konkursie o~Nagrodzę
+        Huttera, zawierającego pierwsze $10^8$ bajtów pliku XML zawierającego
+        wszystkie artykuły anglojęzycznej \mbox{Wikipedii}. Plik
+        \texttt{enwik8} dostępny jest pod następującym adresem:
+        \url{http://cs.fit.edu/~mmahoney/compression/enwik8.zip}. Wydobycie
+        słów z~pliku dokonana przy użyciu skryptu \ref{sc:wiki_extractor}.
+
+        \item \refstepcounter{wlcounter}\label{wl:xato_passwords} Lista
+        \numprint{10000} najpopularniejszych haseł skompilowana przez Marka
+        Burnetta, dostępna pod adresem:
+        \url{http://xato.net/files/10k%20most%20common%20with%20frequency.zip}.
+
+    \end{myenumerate}
+
+\section{Kody źródłowe skryptów}
+W~pracy do zebrania wyników statystycznych korzystano z~kilku skryptów.
+
+\begin{myenumerate}
+
+    \item \refstepcounter{sccounter}\label{sc:wiki_extractor}
+    \texttt{WikiExtractor} \\
+    Skrypt do ekstrakcji słów z~zrzutów XML artykułów z~Wikipedii, usuwający
+    składnię mediawiki oraz tagi XML. Projekt dostępny pod następującym
+    \mbox{adresem}: \url{http://medialab.di.unipi.it/wiki/Wikipedia_Extractor}.
+
+    \item \refstepcounter{sccounter}\label{sc:ngrams_counter}
+    \texttt{ngrams.py} \\
+    Skrypt do analizy częstościowej występowania liter i~$n$-gramów w~tekście
+    źródłowym. Język: Python; użycie: \texttt{./ngrams.py WIELKOŚĆ <ŹRÓDŁO}
+    gdzie \texttt{WIELKOŚĆ} oznacza wielkość obliczanego $n$-gramu (czyli 1~dla
+    pojedynczych liter, 2~dla bigramów, 3~dla trigramów itd.),
+    a~\texttt{<ŹRÓDŁO} oznacza przekazanie do skryptu mechanizmem potoków
+    zawartości pliku \texttt{ŹRÓDŁO}.
+    \lstinputlisting[language=python,caption=ngrams.py]{code/ngrams.py}
+
+    \pagebreak
+    \item \refstepcounter{sccounter}\label{sc:freq_percentages}
+    \texttt{freq-percentages.py} \\
+    Skrypt służący do konwersji list w~formacie \texttt{slowo ilosc\_wystapien}
+    na wartości procentowe.
+    \lstinputlisting[language=python,caption=freq-percentages.py]{code/freq-percentages.py}
+
+\end{myenumerate}
+
+\end{appendices}
+
