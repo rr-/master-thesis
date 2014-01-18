@@ -58,7 +58,7 @@ losowe permutacje!), jest podejściem złym z~prostych przyczyn:
     z~\en{security through obscurity} (bezpieczeństwo poprzez niezrozumiałość),
     co jest bardzo negatywnym zjawiskiem w~kryptografii i~łamie tzw. zasadę
     Kerckhoffsa. Zasada ta jest jedną z~kilku reguł sformułowanych w~XIX w.
-    przez Kerckhoffsa, traktujących o bezpieczeństwie kryptosystemów. Mówi ona,
+    przez Kerckhoffsa, traktujących o~bezpieczeństwie kryptosystemów. Mówi ona,
     że każdy system kryptograficzny musi być bezpieczny nawet, gdy jego sposób
     działania wraz ze szczegółami implementacji jest jawny (za wyjątkiem
     klucza, który jest z~definicji tajny, z~tym że funkcje haszujące nie
@@ -144,12 +144,12 @@ jednokierunkowe.
 
 
 \subsubsection{Problem faktoryzacji}
-\renmich{Przydałyby się w tych podpunktach jakieś odnośniki. Skąd wiadomo te rzeczy? Gdzie udowodniono?}Niech $f(S) = \prod_{s \in S} s$, gdzie $S$ jest dowolnym zbiorem liczb
+Niech $f(S) = \prod_{s \in S} s$, gdzie $S$ jest dowolnym zbiorem liczb
 pierwszych oraz $x \in \mathbb{N}$. Obliczenie $f(S)$ jest trywialne. Natomiast
 obliczenie wartości odwróconej funkcji $f^{-1}(x)=S$, a~więc znalezienie dla
 danej liczby $x$ jej czynników pierwszych, jest trudne, tzn. nieznany jest
 żaden algorytm, który by to potrafił realizować w~czasie zależnym wielomianowo
-od rozmiaru $x$.
+od rozmiaru $x$~\cite{gregg2003factoring}.
 
 
 
@@ -159,7 +159,7 @@ $x < p$. Wyliczenie tej wartości jest trywialne; nie znamy natomiast algorytmu
 wielomianowego pozwalającego na zgadnięcie wartości odwróconej funkcji
 \mbox{$f^{-1}(y, p, g) = x : g^x \mod p = y$} na podstawie danego $y$. Nazwa
 problemu wynika z~charakteru $f$ (operacją odwrotną do potęgowania w~ciele
-modulo $p$ jest logarytm w~ciele modulo $p$).
+modulo $p$ jest logarytm w~ciele modulo $p$)~\cite{gregg2003factoring}.
 
 
 
@@ -167,7 +167,7 @@ modulo $p$ jest logarytm w~ciele modulo $p$).
 Niech $f(x,n) = x^2 \mod n$. Wykazano, że obliczenie $f^{-1}(y,n) = x : x^2
 \mod n = y$ na podstawie $y$ i~$n$ jest tak samo trudne, jak rozkład $n$ na
 czynniki pierwsze; co sprowadza się do problemu faktoryzacji, opisanego
-wcześniej.
+wcześniej~\cite{gregg2003factoring}.
 
 
 
@@ -189,10 +189,11 @@ Wracając na chwilę do zagadnienia $\textrm{P} \stackrel{?}{=} \textrm{NP}$~--
 wystarczy udowodnić, że którakolwiek z~powyższych funkcji jest faktycznie
 jednokierunkowa lub pokazać, że może zostać złamana, by móc stwierdzić to samo
 o~wszystkich pozostałych wymienionych funkcjach. Jest tak dlatego, ponieważ
-istnieją sposoby przekształcania jednego problemu w~drugi tak, że rozwiązanie
-jednego gwarantuje rozwiązanie drugiego. Zatem tak naprawdę bezpieczeństwo
-powyższych kryptosystemów jest do pewnego stopnia równoważne (na tyle, na ile
-kosztowne są przekształcenia problemów).
+istnieją sposoby przekształcania jednego problemu
+w~drugi~\cite{gregg2003factoring,bach1984discrete} tak, że rozwiązanie jednego
+gwarantuje rozwiązanie drugiego. Zatem tak naprawdę bezpieczeństwo powyższych
+kryptosystemów jest do pewnego stopnia równoważne (na tyle, na ile kosztowne są
+przekształcenia problemów).
 
 
 
@@ -255,11 +256,10 @@ oparte o~operacje bitowe, może być konstrukcja Merkle-Damg\r{a}rda. Opisana po
 raz pierwszy przez Merkle w~roku 1979 w~jego pracy
 doktorskiej~\cite{merkle_damgard_construction}, stanowi rdzeń używanych po dziś
 dzień funkcji skrótu takich jak \texttt{SHA-1} czy \texttt{MD5} i~jest jedną
-z~najpopularniejszych metod konstrukcji funkcji haszujących. Konstrukcja ta nie
-specyfikuje kompletnego działania\renmich{źle brzmi}~-- wyszczególnione są w~niej natomiast
-wymienialne elementy, które muszą być zapewnione przez każdą konkretną
-implementację; spośród nich na szczególną uwagę zasługuje funkcja dopełnienia
-bitowego oraz funkcja kompresji.
+z~najpopularniejszych metod konstrukcji funkcji haszujących. W~konstrukcji
+wyszczególnione są abstrakcyjne elementy, które muszą być zaimplementowane
+w~każdej konkretnej implementacji; spośród nich na szczególną uwagę zasługuje
+funkcja dopełnienia bitowego oraz funkcja kompresji.
 
 Nazwa wywodzi się stąd, że Merkle oraz Damg\r{a}rd, niezależnie od siebie,
 udowodnili~\cite{merkle_damgard_security1,merkle_damgard_security2} w~tym samym
@@ -276,8 +276,9 @@ Sama konstrukcja składa się z~kroków opisanych poniżej.
     to funkcja dopełnienia bitowego. Zadaniem tej funkcji jest przekształcenie
     wiadomości $m$ o~dowolnej liczbie bitów na wiadomość $M$ o~liczbie bitów
     podzielnej przez z~góry określoną wartość $c$. Trywialnym przykładem
-    funkcji dopełnienia bitowego może być funkcja, która dopisuje zera z~prawej
-    strony wiadomości $m$.\renmich{Ta trywialna funkcja jest nieodwracalna.}
+    funkcji dopełnienia bitowego może być funkcja, która dopisuje z~prawej
+    strony wiadomości $m$ pojedynczy bit 1, a~po nim $n$ bitów 0; dodatkowo
+    często dopisywana jest długość oryginalnej wiadomości $m$.
 
     \item Podziel $M$ na $n$ bloków, każdy o~stałej długości $c$, niezależnej
     od $m$. Robimy to, ponieważ funkcja kompresji, opisana w~następnych
@@ -319,15 +320,18 @@ Sama konstrukcja składa się z~kroków opisanych poniżej.
 
 \subsubsection{\texttt{MD5}}
 \texttt{MD5} jest pierwszą z~dwóch funkcji, na których się skupimy w~tej pracy.
-Jej wykorzystanie jest bardzo szerokie; znajduje zastosowanie w~systemach
-bezpieczeństwa\renmich{Mam nadzieję, że już nie!} oraz systemach weryfikacji integralności danych.
+Jej wykorzystanie jest bardzo szerokie: znajduje zastosowanie w~systemach
+bezpieczeństwa oraz systemach weryfikacji integralności danych (pomimo faktu,
+że już w~latach 90-tych wyraźnie odradzano jej wykorzystania z~powodu
+poważnych wątpliwości co do jej faktycznego bezpieczeństwa, które z~czasem
+okazały się uzasadnione~\cite{ps3_attack}).
 
 Oparta o~konstrukcję Merkle-Damg\r{a}rda, funkcja przekształca wiadomości
 o~dowolnej liczbie bitów na skróty o~stałej długości 128~bitów. Jej
 schemat~\cite{md5_definition} został przedstawiony poniżej (wszystkie operacje
 są dokonywane w~porządku bitowym \en{little endian}; znaczenie tego terminu
 oraz operatorów wprowadzonych w~tej sekcji zostało opisane
-w~dodatku~\ref{app:bitwise_operations}.
+w~dodatku~\ref{app:bitwise_operations}).
 
 \begin{myenumerate}
 
@@ -364,10 +368,10 @@ w~dodatku~\ref{app:bitwise_operations}.
             \item gdy $|m_1| = |m_2|$, to $|\mathtt{Pad}(m_1)| =
             |\mathtt{Pad}(m_2)|$,
 
-            \item gdy $m_1 \neq m_2$, to ostatni blok $\mathtt{Pad}(m_1)$ jest
-            różny od ostatniego bloku $\mathtt{Pad}(m_2)$. (Długość bloku w~tym
-            kontekście jest taka sama, jak długość bloku używanego przez całą
-            konstrukcję Merkle-Damg\r{a}rda.)\renmich{Ktoś się tu chyba pomylił; niewykluczone że~\cite{merkle_damgard_strengthening}. Chciałbym porozmawiać.}
+            \item gdy $|m_1| \neq |m_2|$, to $\mathtt{Pad}(m_1)_n \neq
+            \mathtt{Pad}(m_2)_n$, gdzie $X_n$ to ostatni blok $X$. (Długość
+            bloku w~tym kontekście jest taka sama, jak długość bloku używanego
+            przez całą konstrukcję Merkle-Damg\r{a}rda.)
 
         \end{itemize}
 

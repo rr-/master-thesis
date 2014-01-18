@@ -45,10 +45,10 @@ kolizje haszy dla kolejnych haseł: $\mathtt{a}, \mathtt{b}, \mathtt{c}, \ldots,
 
 Technika ta, zwana także czasem przeszukiwaniem pełnym, przy odpowiednim
 alfabecie sprawia, że pomyślne znalezienie kolizji jest jedynie kwestią czasu.
-Jej działanie jest jednak wyjątkowo nieoptymalne z~uwagi na ilość zasobów,
-które są potrzebne do pomyślnego przeprowadzenia. Chcąc sprawdzić wszystkie
-hasła długości \mbox{$|m| \in (1, \ldots n)$} nad alfabetem długości $a=|A|$,
-musimy przeprowadzić następującą liczbę operacji haszowania:
+Jej działanie jest jednak nieoptymalne z~uwagi na ilość zasobów, które są
+potrzebne do pomyślnego przeprowadzenia. Chcąc sprawdzić wszystkie hasła
+długości \mbox{$|m| \in (1, \ldots n)$} nad alfabetem długości $a=|A|$, musimy
+przeprowadzić następującą liczbę operacji haszowania:
     $$\sum_{i=1}^n a^i = \frac{a(a^n-1)}{a-1}$$
 Przykładowo, chcąc sprawdzić wszystkie hasła nad alfabetem składającym się
 z~cyfr oraz z~małych i~wielkich znaków alfabetu łacińskiego (a~więc $|A| =
@@ -322,7 +322,7 @@ tak naprawdę nawet gdy dany słownik zawiera kilkanaście milionów słów,
 sprawdzanie nimi metodą ``\en{offlin}e'' odbywa się bardzo szybko. Atakujący
 mogą także pójść krok dalej i~skorzystać z~publicznie dostępnych raportów
 o~najczęściej używanych hasłach~-- przykładem takiego raportu może być
-lista~\ref{wl:xato_passwords}.\renmich{Cenzura w tabeli?}
+lista~\ref{wl:xato_passwords}.
 
     \begin{table}[htb]
         \caption{Przybliżenie 15 najpopularniej stosowanych haseł przez
@@ -340,7 +340,7 @@ lista~\ref{wl:xato_passwords}.\renmich{Cenzura w tabeli?}
             5  & qwerty   & 0.29086\% \\
             6  & 12345    & 0.24117\% \\
             7  & dragon   & 0.23040\% \\
-            8  & p\censor{uss}y & 0.21035\% \\
+            8  & pussy & 0.21035\% \\
             9  & baseball & 0.19936\% \\
             10 & football & 0.19632\% \\
             11 & letmein  & 0.18854\% \\
@@ -699,9 +699,10 @@ na sekundę~\cite{gpu_cracking_parallel}.
 
 Użycie kart graficznych do przeprowadzania ataków brutalnych oraz słownikowych
 wymaga wysoce wyspecjalizowanego oprogramowania, które nie zawsze jest dostępne
-oraz sprzętu, którego zakup lub wynajem nie zawsze jest opłacalny. Natomiast
-przeciętne komputery klasy desktop z~użyciem odpowiedniego oprogramowania
-potrafią w~dzisiejszych czasach przetworzyć do kilku milionów haszy na
+oraz sprzętu, którego zakup lub wynajem bywa nieopłacalny z~powodu stosunku
+jego ceny do potencjalnych zysków. Natomiast przeciętne komputery klasy desktop
+z~użyciem odpowiedniego oprogramowania potrafią w~dzisiejszych czasach
+przetworzyć do kilku milionów haszy na
 sekundę~\cite{oclhashcat,john_the_ripper_benchmarks}, co w~porównaniu z~kartami
 graficznymi wydaje się niewielką liczbą. Jednak gdy atakujący sprzęgnie wiele
 takich komputerów w~jedną dużą macierz obliczeniową, może się okazać, że
