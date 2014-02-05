@@ -90,12 +90,15 @@ uint32_t md5_i(uint32_t x, uint32_t y, uint32_t z)
 	return y^(x|~z);
 }
 
+
+
 typedef struct
 {
 	const uint32_t diff;
 	const uint32_t zero;
 	const uint32_t one;
 	const uint32_t prev;
+	const uint32_t prev2;
 } sufficient_cond;
 
 
@@ -131,6 +134,9 @@ bool check_sc(uint32_t *state1, uint32_t *state2, size_t i, sufficient_cond *sc)
 	if ((state1[i] & sc[i - 1].prev) != (state1[i - 1] & sc[i - 1].prev))
 		return false;
 
+	if ((state1[i] ^ state1[i - 2]) & sc[i - 1].prev2)
+		return false;
+
 	if ((state1[i] & sc[i - 1].one) != sc[i - 1].one)
 		return false;
 
@@ -164,71 +170,71 @@ void block1(
 
 	sufficient_cond sc[64] =
 	{
-		/*  -- */ /* diff, zero, one, prev */
+		/*  -- */ /* diff, zero, one, prev, prev2 */
 		/*  a1 */ { 0, 0, 0, 0 },
 		/*  d1 */ { 0, 0, 0, 0 },
-		/*  c1 */ { 0x00000000, 0x00800040, 0x00000000, 0x00000000 },
-		/*  b1 */ { 0x00000000, 0x00800040, 0x80080800, 0x0077f780 },
-		/*  a2 */ { 0x00000040, 0x02bfffc0, 0x88400025, 0x00000000 },
-		/*  d2 */ { 0x7f800040, 0x888043a4, 0x027fbc41, 0x7500001a },
-		/*  c2 */ { 0x07800041, 0xfc0107df, 0x03fef820, 0x00000000 },
-		/*  b2 */ { 0x00827fff, 0xfe0eaabf, 0x01910540, 0x00000000 },
-		/*  a3 */ { 0x8000003f, 0x040f80c2, 0xfb102f3d, 0x00001000 },
-		/*  d3 */ { 0x7ffff000, 0x80802183, 0x401f9040, 0x00000000 },
-		/*  c3 */ { 0x40000000, 0xc00e3101, 0x000180c2, 0x00004000 },
-		/*  b3 */ { 0x80002080, 0xc007e080, 0x00081100, 0x03000000 },
-		/*  a4 */ { 0x7f000000, 0x82000180, 0x410fe008, 0x00000000 },
-		/*  d4 */ { 0x80000000, 0xa3040000, 0x000be188, 0x00000000 },
-		/*  c4 */ { 0x80007ff8, 0x82000008, 0x21008000, 0x00000000 },
-		/*  b4 */ { 0xa0000000, 0x80000000, 0x20000000, 0x00000000 },
-		/*  a5 */ { 0x80000000, 0x80020000, 0x00000000, 0x00008008 },
-		/*  d5 */ { 0, 0, 0, 0 },
-		/*  c5 */ { 0x7ffe0000, 0x80020000, 0x00000000, 0x00000000 },
-		/*  b5 */ { 0x80000000, 0x00000000, 0x00000000, 0x00000000 },
-		/*  a6 */ { 0x80000000, 0x00000000, 0x00000000, 0x00000000 },
-		/*  d6 */ { 0x80000000, 0x00000000, 0x00000000, 0x00000000 },
-		/*  c6 */ { 0x00000000, 0x00000000, 0x00000000, 0x00000000 },
-		/*  b6 */ { 0x00000000, 0x00000000, 0x00000000, 0x00000000 },
-		/*  a7 */ { 0x00000000, 0x00000000, 0x00000000, 0x00000000 },
-		/*  d7 */ { 0x00000000, 0x00000000, 0x00000000, 0x00000000 },
-		/*  c7 */ { 0x00000000, 0x00000000, 0x00000000, 0x00000000 },
-		/*  b7 */ { 0x00000000, 0x00000000, 0x00000000, 0x00000000 },
-		/*  a8 */ { 0x00000000, 0x00000000, 0x00000000, 0x00000000 },
-		/*  d8 */ { 0x00000000, 0x00000000, 0x00000000, 0x00000000 },
-		/*  c8 */ { 0x00000000, 0x00000000, 0x00000000, 0x00000000 },
-		/*  b8 */ { 0x00000000, 0x00000000, 0x00000000, 0x00000000 },
-		/*  a9 */ { 0x00000000, 0x00000000, 0x00000000, 0x00000000 },
-		/*  d9 */ { 0x00000000, 0x00000000, 0x00000000, 0x00000000 },
-		/*  c9 */ { 0x80000000, 0x00000000, 0x00000000, 0x00000000 },
-		/*  b9 */ { 0x80000000, 0x00000000, 0x00000000, 0x00000000 },
-		/* a10 */ { 0x80000000, 0x00000000, 0x00000000, 0x00000000 },
-		/* d10 */ { 0x80000000, 0x00000000, 0x00000000, 0x00000000 },
-		/* c10 */ { 0x80000000, 0x00000000, 0x00000000, 0x00000000 },
-		/* b10 */ { 0x80000000, 0x00000000, 0x00000000, 0x00000000 },
-		/* a11 */ { 0x80000000, 0x00000000, 0x00000000, 0x00000000 },
-		/* d11 */ { 0x80000000, 0x00000000, 0x00000000, 0x00000000 },
-		/* c11 */ { 0x80000000, 0x00000000, 0x00000000, 0x00000000 },
-		/* b11 */ { 0x80000000, 0x00000000, 0x00000000, 0x00000000 },
-		/* a12 */ { 0x80000000, 0x00000000, 0x00000000, 0x00000000 },
-		/* d12 */ { 0x80000000, 0x00000000, 0x00000000, 0x00000000 },
-		/* c12 */ { 0x80000000, 0x00000000, 0x00000000, 0x00000000 },
-		/* b12 */ { 0x80000000, 0, 0, 0 },
-		/* a13 */ { 0x80000000, 0, 0, 0 },
-		/* d13 */ { 0x80000000, 0, 0, 0 },
-		/* c13 */ { 0x80000000, 0, 0, 0 },
-		/* b13 */ { 0x80000000, 0, 0, 0 },
-		/* a14 */ { 0x80000000, 0, 0, 0 },
-		/* d14 */ { 0x80000000, 0, 0, 0 },
-		/* c14 */ { 0x80000000, 0, 0, 0 },
-		/* b14 */ { 0x80000000, 0, 0, 0 },
-		/* a15 */ { 0x80000000, 0, 0, 0 },
-		/* d15 */ { 0x80000000, 0, 0, 0 },
-		/* c15 */ { 0x80000000, 0, 0, 0 },
-		/* b15 */ { 0x80000000, 0, 0, 0 },
-		/* a16 */ { 0x80000000, 0, 0, 0 },
-		/* d16 */ { 0x00000000, 0, 0, 0 },
-		/* c16 */ { 0x00000000, 0, 0, 0 },
-		/* b16 */ { 0x00000000, 0, 0, 0 },
+		/*  c1 */ { 0x00000000, 0x00800040, 0x00000000, 0x00000000, 0x00000000 },
+		/*  b1 */ { 0x00000000, 0x00800040, 0x80080800, 0x0077f780, 0x00000000 },
+		/*  a2 */ { 0x00000040, 0x02bfffc0, 0x88400025, 0x00000000, 0x00000000 },
+		/*  d2 */ { 0x7f800040, 0x888043a4, 0x027fbc41, 0x7500001a, 0x00000000 },
+		/*  c2 */ { 0x07800041, 0xfc0107df, 0x03fef820, 0x00000000, 0x00000000 },
+		/*  b2 */ { 0x00827fff, 0xfe0eaabf, 0x01910540, 0x00000000, 0x00000000 },
+		/*  a3 */ { 0x8000003f, 0x040f80c2, 0xfb102f3d, 0x00001000, 0x00000000 },
+		/*  d3 */ { 0x7ffff000, 0x80802183, 0x401f9040, 0x00000000, 0x00000000 },
+		/*  c3 */ { 0x40000000, 0xc00e3101, 0x000180c2, 0x00004000, 0x00000000 },
+		/*  b3 */ { 0x80002080, 0xc007e080, 0x00081100, 0x03000000, 0x00000000 },
+		/*  a4 */ { 0x7f000000, 0x82000180, 0x410fe008, 0x00000000, 0x00000000 },
+		/*  d4 */ { 0x80000000, 0xa3040000, 0x000be188, 0x00000000, 0x00000000 },
+		/*  c4 */ { 0x80007ff8, 0x82000008, 0x21008000, 0x00000000, 0x00000000 },
+		/*  b4 */ { 0xa0000000, 0x80000000, 0x20000000, 0x00000000, 0x00000000 },
+		/*  a5 */ { 0x80000000, 0x80020000, 0x00000000, 0x00008008, 0x00000000 },
+		/*  d5 */ { 0, 0, 0, 0, 0 },
+		/*  c5 */ { 0x7ffe0000, 0x80020000, 0x00000000, 0x00000000, 0x00000000 },
+		/*  b5 */ { 0x80000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000 },
+		/*  a6 */ { 0x80000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000 },
+		/*  d6 */ { 0x80000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000 },
+		/*  c6 */ { 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000 },
+		/*  b6 */ { 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000 },
+		/*  a7 */ { 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000 },
+		/*  d7 */ { 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000 },
+		/*  c7 */ { 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000 },
+		/*  b7 */ { 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000 },
+		/*  a8 */ { 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000 },
+		/*  d8 */ { 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000 },
+		/*  c8 */ { 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000 },
+		/*  b8 */ { 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000 },
+		/*  a9 */ { 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000 },
+		/*  d9 */ { 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000 },
+		/*  c9 */ { 0x80000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000 },
+		/*  b9 */ { 0x80000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000 },
+		/* a10 */ { 0x80000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000 },
+		/* d10 */ { 0x80000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000 },
+		/* c10 */ { 0x80000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000 },
+		/* b10 */ { 0x80000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000 },
+		/* a11 */ { 0x80000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000 },
+		/* d11 */ { 0x80000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000 },
+		/* c11 */ { 0x80000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000 },
+		/* b11 */ { 0x80000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000 },
+		/* a12 */ { 0x80000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000 },
+		/* d12 */ { 0x80000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000 },
+		/* c12 */ { 0x80000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000 },
+		/* b12 */ { 0x80000000, 0x00000000, 0x00000000, 0x00000000, 0x80000000 },
+		/* a13 */ { 0x80000000, 0x00000000, 0x00000000, 0x00000000, 0x80000000 },
+		/* d13 */ { 0x80000000, 0x00000000, 0x00000000, 0x00000000, 0x80000000 },
+		/* c13 */ { 0x80000000, 0x00000000, 0x00000000, 0x00000000, 0x80000000 },
+		/* b13 */ { 0x80000000, 0x00000000, 0x00000000, 0x00000000, 0x80000000 },
+		/* a14 */ { 0x80000000, 0x00000000, 0x00000000, 0x00000000, 0x80000000 },
+		/* d14 */ { 0x80000000, 0x00000000, 0x00000000, 0x00000000, 0x80000000 },
+		/* c14 */ { 0x80000000, 0x00000000, 0x00000000, 0x00000000, 0x80000000 },
+		/* b14 */ { 0x80000000, 0x00000000, 0x00000000, 0x00000000, 0x80000000 },
+		/* a15 */ { 0x80000000, 0x00000000, 0x00000000, 0x00000000, 0x80000000 },
+		/* d15 */ { 0x80000000, 0x00000000, 0x00000000, 0x00000000, 0x80000000 },
+		/* c15 */ { 0x80000000, 0x00000000, 0x00000000, 0x00000000, 0x80000000 },
+		/* b15 */ { 0x80000000, 0x02000000, 0x00000000, 0x00000000, 0x00000000 },
+		/* a16 */ { 0x80000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000 },
+		/* d16 */ { 0x7e000000, 0x02000000, 0x00000000, 0x00000000, 0x00000000 },
+		/* c16 */ { 0x7e000000, 0, 0, 0 },
+		/* b16 */ { 0x7e000000, 0, 0, 0 },
 	};
 
 	while (true)
@@ -323,8 +329,8 @@ void block1(
 		if (!ok)
 			continue;
 
-		/* A9 to C12 */
-		for (i = 33; i <= 47; i ++)
+		/* A9 to B12 */
+		for (i = 33; i <= 48; i ++)
 		{
 			state1[i] = rot_left(md5_h(state1[i - 1], state1[i - 2], state1[i - 3]) + state1[i - 4] + msg1[md5_msg_index[i - 1]] + md5_add[i - 1], md5_shift[i - 1]) + state1[i - 1];
 			state2[i] = rot_left(md5_h(state2[i - 1], state2[i - 2], state2[i - 3]) + state2[i - 4] + msg2[md5_msg_index[i - 1]] + md5_add[i - 1], md5_shift[i - 1]) + state2[i - 1];
@@ -338,122 +344,115 @@ void block1(
 		if (!ok)
 			continue;
 
-		/* B12 */
-		state1[48] = rot_left(md5_h(state1[47], state1[46], state1[45]) + state1[44] + msg1[md5_msg_index[47]] + md5_add[47], 23) + state1[47];
-		state2[48] = rot_left(md5_h(state2[47], state2[46], state2[45]) + state2[44] + msg2[md5_msg_index[47]] + md5_add[47], 23) + state2[47];
-		if ((state1[48] ^ state1[46]) & 0x80000000)
-			continue;
-		if ((state1[48] ^ state2[48]) != 0x80000000)
-			continue;
-
 		/* A13 */
 		state1[49] = rot_left(md5_i(state1[48], state1[47], state1[46]) + state1[45] + msg1[md5_msg_index[48]] + md5_add[48], 6) + state1[48];
 		state2[49] = rot_left(md5_i(state2[48], state2[47], state2[46]) + state2[45] + msg2[md5_msg_index[48]] + md5_add[48], 6) + state2[48];
-		if ((state1[49] ^ state1[47]) & 0x80000000)
+		if ((state1[49] ^ state1[47]) & sc[48].prev2)
 			continue;
-		if ((state1[49] ^ state2[49]) != 0x80000000)
+		if ((state1[49] - state2[49]) != sc[48].diff)
 			continue;
+
 
 		/* D13 */
 		state1[50] = rot_left(md5_i(state1[49], state1[48], state1[47]) + state1[46] + msg1[md5_msg_index[49]] + md5_add[49], 10) + state1[49];
 		state2[50] = rot_left(md5_i(state2[49], state2[48], state2[47]) + state2[46] + msg2[md5_msg_index[49]] + md5_add[49], 10) + state2[49];
-		if (!((state1[50] ^ state1[48]) & 0x80000000))
+		if (!((state1[50] ^ state1[48]) & sc[49].prev2))
 			continue;
-		if ((state1[50] ^ state2[50]) != 0x80000000)
+		if ((state1[50] ^ state2[50]) != sc[49].diff)
 			continue;
 
 		/* C13 */
 		state1[51] = rot_left(md5_i(state1[50], state1[49], state1[48]) + state1[47] + msg1[md5_msg_index[50]] + md5_add[50], 15) + state1[50];
 		state2[51] = rot_left(md5_i(state2[50], state2[49], state2[48]) + state2[47] + msg2[md5_msg_index[50]] + md5_add[50], 15) + state2[50];
-		if ((state1[51] ^ state1[49]) & 0x80000000)
+		if ((state1[51] ^ state1[49]) & sc[50].prev2)
 			continue;
-		if ((state1[51] ^ state2[51]) != 0x80000000)
+		if ((state1[51] ^ state2[51]) != sc[50].diff)
 			continue;
 
 		/* B13 */
 		state1[52] = rot_left(md5_i(state1[51], state1[50], state1[49]) + state1[48] + msg1[md5_msg_index[51]] + md5_add[51], 21) + state1[51];
 		state2[52] = rot_left(md5_i(state2[51], state2[50], state2[49]) + state2[48] + msg2[md5_msg_index[51]] + md5_add[51], 21) + state2[51];
-		if ((state1[52] ^ state1[50]) & 0x80000000)
+		if ((state1[52] ^ state1[50]) & sc[51].prev2)
 			continue;
-		if ((state1[52] ^ state2[52]) != 0x80000000)
+		if ((state1[52] ^ state2[52]) != sc[51].diff)
 			continue;
 
 		/* A14 */
 		state1[53] = rot_left(md5_i(state1[52], state1[51], state1[50]) + state1[49] + msg1[md5_msg_index[52]] + md5_add[52], 6) + state1[52];
 		state2[53] = rot_left(md5_i(state2[52], state2[51], state2[50]) + state2[49] + msg2[md5_msg_index[52]] + md5_add[52], 6) + state2[52];
-		if ((state1[53] ^ state1[51]) & 0x80000000)
+		if ((state1[53] ^ state1[51]) & sc[52].prev2)
 			continue;
-		if ((state1[53] ^ state2[53]) != 0x80000000)
+		if ((state1[53] ^ state2[53]) != sc[52].diff)
 			continue;
 
 		/* D14 */
 		state1[54] = rot_left(md5_i(state1[53], state1[52], state1[51]) + state1[50] + msg1[md5_msg_index[53]] + md5_add[53], 10) + state1[53];
 		state2[54] = rot_left(md5_i(state2[53], state2[52], state2[51]) + state2[50] + msg2[md5_msg_index[53]] + md5_add[53], 10) + state2[53];
-		if ((state1[54] ^ state1[52]) & 0x80000000)
+		if ((state1[54] ^ state1[52]) & sc[53].prev2)
 			continue;
-		if ((state1[54] ^ state2[54]) != 0x80000000)
+		if ((state1[54] ^ state2[54]) != sc[53].diff)
 			continue;
 
 		/* C14 */
 		state1[55] = rot_left(md5_i(state1[54], state1[53], state1[52]) + state1[51] + msg1[md5_msg_index[54]] + md5_add[54], 15) + state1[54];
 		state2[55] = rot_left(md5_i(state2[54], state2[53], state2[52]) + state2[51] + msg2[md5_msg_index[54]] + md5_add[54], 15) + state2[54];
-		if ((state1[55] ^ state1[53]) & 0x80000000)
+		if ((state1[55] ^ state1[53]) & sc[54].prev2)
 			continue;
-		if ((state1[55] ^ state2[55]) != 0x80000000)
+		if ((state1[55] ^ state2[55]) != sc[54].diff)
 			continue;
 
 		/* B14 */
 		state1[56] = rot_left(md5_i(state1[55], state1[54], state1[53]) + state1[52] + msg1[md5_msg_index[55]] + md5_add[55], 21) + state1[55];
 		state2[56] = rot_left(md5_i(state2[55], state2[54], state2[53]) + state2[52] + msg2[md5_msg_index[55]] + md5_add[55], 21) + state2[55];
-		if ((state1[56] ^ state1[54]) & 0x80000000)
+		if ((state1[56] ^ state1[54]) & sc[55].prev2)
 			continue;
-		if ((state1[56] ^ state2[56]) != 0x80000000)
+		if ((state1[56] ^ state2[56]) != sc[55].diff)
 			continue;
 
 		/* A15 */
 		state1[57] = rot_left(md5_i(state1[56], state1[55], state1[54]) + state1[53] + msg1[md5_msg_index[56]] + md5_add[56], 6) + state1[56];
 		state2[57] = rot_left(md5_i(state2[56], state2[55], state2[54]) + state2[53] + msg2[md5_msg_index[56]] + md5_add[56], 6) + state2[56];
-		if ((state1[57] ^ state1[55]) & 0x80000000)
+		if ((state1[57] ^ state1[55]) & sc[56].prev2)
 			continue;
-		if ((state1[57] ^ state2[57]) != 0x80000000)
+		if ((state1[57] ^ state2[57]) != sc[56].diff)
 			continue;
 
 		/* D15 */
 		state1[58] = rot_left(md5_i(state1[57], state1[56], state1[55]) + state1[54] + msg1[md5_msg_index[57]] + md5_add[57], 10) + state1[57];
 		state2[58] = rot_left(md5_i(state2[57], state2[56], state2[55]) + state2[54] + msg2[md5_msg_index[57]] + md5_add[57], 10) + state2[57];
-		if ((state1[58] ^ state1[56]) & 0x80000000)
+		if ((state1[58] ^ state1[56]) & sc[57].prev2)
 			continue;
-		if ((state1[58] ^ state2[58]) != 0x80000000)
+		if ((state1[58] ^ state2[58]) != sc[57].diff)
 			continue;
 
 		/* C15 */
 		state1[59] = rot_left(md5_i(state1[58], state1[57], state1[56]) + state1[55] + msg1[md5_msg_index[58]] + md5_add[58], 15) + state1[58];
 		state2[59] = rot_left(md5_i(state2[58], state2[57], state2[56]) + state2[55] + msg2[md5_msg_index[58]] + md5_add[58], 15) + state2[58];
-		if ((state1[59] ^ state1[57]) & 0x80000000)
+		if ((state1[59] ^ state1[57]) & sc[58].prev2)
 			continue;
-		if ((state1[59] ^ state2[59]) != 0x80000000)
+		if ((state1[59] ^ state2[59]) != sc[58].diff)
 			continue;
 
 		/* B15 */
 		state1[60] = rot_left(md5_i(state1[59], state1[58], state1[57]) + state1[56] + msg1[md5_msg_index[59]] + md5_add[59], 21) + state1[59];
 		state2[60] = rot_left(md5_i(state2[59], state2[58], state2[57]) + state2[56] + msg2[md5_msg_index[59]] + md5_add[59], 21) + state2[59];
-		if (state1[60] & 0x02000000)
+		if (state1[60] & sc[59].zero)
 			continue;
-		if ((state1[60] ^ state2[60]) != 0x80000000)
+		if ((state1[60] ^ state2[60]) != sc[59].diff)
 			continue;
 
 		/* A16 */
 		state1[61] = rot_left(md5_i(state1[60], state1[59], state1[58]) + state1[57] + msg1[md5_msg_index[60]] + md5_add[60], 6) + state1[60];
 		state2[61] = rot_left(md5_i(state2[60], state2[59], state2[58]) + state2[57] + msg2[md5_msg_index[60]] + md5_add[60], 6) + state2[60];
-		if ((state1[61] ^ state2[61]) != 0x80000000)
+		if ((state1[61] ^ state2[61]) != sc[60].diff)
 			continue;
 
 		/* D16 */
 		state1[62] = rot_left(md5_i(state1[61], state1[60], state1[59]) + state1[58] + msg1[md5_msg_index[61]] + md5_add[61], 10) + state1[61];
 		state2[62] = rot_left(md5_i(state2[61], state2[60], state2[59]) + state2[58] + msg2[md5_msg_index[61]] + md5_add[61], 10) + state2[61];
-		if (state1[62] & 0x02000000)
+		if (state1[62] & sc[61].zero)
 			continue;
-		if ((state1[62] - state2[62]) != 0x7e000000)
+		if ((state1[62] - state2[62]) != sc[61].diff)
 			continue;
 
 		/* C16 */
@@ -461,7 +460,7 @@ void block1(
 		state2[63] = rot_left(md5_i(state2[62], state2[61], state2[60]) + state2[59] + msg2[md5_msg_index[62]] + md5_add[62], 15) + state2[62];
 		if (((state1[63] + md5_iv[2]) & 0x86000000) != (((state1[62] + md5_iv[3]) & 0x80000000) | 0x02000000))
 			continue;
-		if ((state1[63] - state2[63]) != 0x7e000000)
+		if ((state1[63] - state2[63]) != sc[62].diff)
 			continue;
 
 		/* B16 */
@@ -469,7 +468,7 @@ void block1(
 		state2[64] = rot_left(md5_i(state2[63], state2[62], state2[61]) + state2[60] + msg2[md5_msg_index[63]] + md5_add[63], 21) + state2[63];
 		if (((state1[64] + md5_iv[1]) & 0x86000020) != ((state1[63] + md5_iv[2]) & 0x80000000))
 			continue;
-		if ((state1[64] - state2[64]) != 0x7e000000)
+		if ((state1[64] - state2[64]) != sc[63].diff)
 			continue;
 
 		return;
@@ -488,7 +487,7 @@ void block2(
 
 	sufficient_cond sc[64] =
 	{
-		/*  -- */ /* diff, zero, one, prev */
+		/*  -- */ /* diff, zero, one, prev, prev2 */
 		/*  a1 */ { 0x7e000000, 0x0a000820, 0x84200000, 0x00000000 },
 		/*  d1 */ { 0x7dffffe0, 0x02208026, 0x8c000800, 0x701f10c0 },
 		/*  c1 */ { 0x7dfef7e0, 0x40201080, 0xbe1f0966, 0x00000018 },
