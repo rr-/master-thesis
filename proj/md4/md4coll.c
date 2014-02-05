@@ -32,7 +32,7 @@ const uint32_t md4_shift[48] =
 	3, 9, 11, 15,
 	3, 9, 11, 15,
 	3, 9, 11, 15,
-	3, 9, 11, 15
+	3, 9, 11, 15,
 };
 
 const uint32_t md4_msg_index[48] =
@@ -44,9 +44,9 @@ const uint32_t md4_msg_index[48] =
 
 const uint32_t md4_add[3] =
 {
-	0x00000000,
-	0x5a827999,
-	0x6ed9eba1
+	/* round 1 */ 0x00000000,
+	/* round 2 */ 0x5a827999,
+	/* round 3 */ 0x6ed9eba1,
 };
 
 uint32_t md4_f(uint32_t x, uint32_t y, uint32_t z)
