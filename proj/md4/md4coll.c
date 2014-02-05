@@ -66,17 +66,127 @@ uint32_t md4_h(uint32_t x, uint32_t y, uint32_t z)
 
 
 
+typedef struct
+{
+	uint32_t diff;
+	uint32_t zero;
+	uint32_t one;
+	uint32_t prev1;
+	uint32_t prev2;
+} sufficient_cond;
+
+/* message delta as in wang's paper */
+const uint32_t message_delta[16] =
+{
+	/* 0 */ 0,
+	/* 1 */ (1 << 31),
+	/* 2 */ (1 << 31) | (1 << 28),
+	/* 3 */ 0,
+	/* 4 */ 0,
+	/* 5 */ 0,
+	/* 6 */ 0,
+	/* 7 */ 0,
+	/* 8 */ 0,
+	/* 9 */ 0,
+	/* 10 */ 0,
+	/* 11 */ 0,
+	/* 12 */ 1 << 16,
+	/* 13 */ 0,
+	/* 14 */ 0,
+	/* 15 */ 0,
+};
+
+bool check_sc(
+	uint32_t *state1,
+	uint32_t *state2,
+	size_t i,
+	sufficient_cond *sc)
+{
+	if ((state1[i] - state2[i]) != sc[i].diff)
+		return false;
+
+	return true;
+}
+
+void fix_sc(
+	uint32_t *state1,
+	uint32_t *state2,
+	size_t i,
+	sufficient_cond *sc)
+{
+	state1[i] |= sc[i].one;
+
+	state1[i] &= ~sc[i].zero;
+
+	state1[i] &= ~sc[i].prev1;
+	state1[i] |= (state1[i - 1] & sc[i].prev1);
+
+	state1[i] &= ~sc[i].prev2;
+	state1[i] |= (state1[i - 1] & sc[i].prev2);
+
+	state2[i] = state1[i] - sc[i].diff;
+}
+
 /* prepare bitmasks for sufficient conditions based on human-readable table */
-void fill_sufficient_conditions(
-	uint32_t sc_zero[48],
-	uint32_t sc_one[48],
-	uint32_t sc_prev1[48],
-	uint32_t sc_prev2[48])
+void fill_sufficient_conditions(sufficient_cond *sc)
 {
 	size_t i, j;
 	size_t bit;
 	char c;
 	uint32_t *dest;
+
+	/* differences as in wang's paper */
+	const uint32_t differences[48] =
+	{
+		/* a1 */ 0,
+		/* d1 */ 0xffffffc0, /* 2^6 */
+		/* c1 */ 0xfffffc80, /* -2^7 + 2^10 */
+		/* b1 */ 0xfe000000, /* 2^25 */
+		/* a2 */ 0,
+		/* d2 */ 0xffffe000, /* 2^13 */
+		/* c2 */ 0xffe40000, /* -2^18 + 2^21 */
+		/* b2 */ 0xfffff000, /* 2^12 */
+		/* a3 */ 0xffff0000, /* 2^16 */
+		/* d3 */ 0x01e80000, /* 2^19 + 2^20 - 2^25 */
+		/* c3 */ (1 << 29), /* -2^29 */
+		/* b3 */ (1 << 31), /* 2^31 */
+		/* a4 */ 0xfdc00000, /* 2^22 + 2^25 */
+		/* d4 */ 0xf4000000, /* -2^26 + 2^28 */
+		/* c4 */ 0,
+		/* b4 */ 0xfffc0000, /* 2^18 */
+		/* a5 */ ((1 << 25) | (1 << 26) | (1 << 27) | (1 << 31)), /* 2^25 - 2^28 - 2^31 */
+		/* d5 */ 0,
+		/* c5 */ 0,
+		/* b5 */ ((1 << 29) | (1 << 31)), /* -2^29 + 2^31 */
+		/* a6 */ ((1 << 28) | (1 << 29) | (1 << 30)), /* 2^28 - 2^31 */
+		/* d6 */ 0,
+		/* c6 */ 0,
+		/* b6 */ 0,
+		/* a7 */ 0,
+		/* d7 */ 0,
+		/* c7 */ 0,
+		/* b7 */ 0,
+		/* a8 */ 0,
+		/* d8 */ 0,
+		/* c8 */ 0,
+		/* b8 */ 0,
+		/* a9 */ 0,
+		/* d9 */ 0,
+		/* c9 */ 0,
+		/* b9 */ (1 << 31), /* 2^31 */
+		/* a10*/ (1 << 31), /* 2^31 */
+		/* d10*/ 0,
+		/* c10*/ 0,
+		/* b10*/ 0,
+		/* a11*/ 0,
+		/* d11*/ 0,
+		/* c11*/ 0,
+		/* b11*/ 0,
+		/* a12*/ 0,
+		/* d12*/ 0,
+		/* c12*/ 0,
+		/* b12*/ 0,
+	};
 
 	/*
 		sufficient conditions for each chaining variable.
@@ -140,10 +250,12 @@ void fill_sufficient_conditions(
 
 	for (i = 0; i < 48; i ++)
 	{
-		sc_one[i] = 0;
-		sc_zero[i] = 0;
-		sc_prev1[i] = 0;
-		sc_prev2[i] = 0;
+		sc[i].one = 0;
+		sc[i].zero = 0;
+		sc[i].prev1 = 0;
+		sc[i].prev2 = 0;
+		sc[i].diff = differences[i];
+
 		bit = 31;
 		/* read left-to-right, starting with 31th bit, end with 0th bit */
 		for (j = 0; j < strlen(sufficient_conditions[i]); j ++)
@@ -154,13 +266,13 @@ void fill_sufficient_conditions(
 
 			dest = NULL;
 			if (c == '1')
-				dest = &sc_one[i];
+				dest = &sc[i].one;
 			else if (c == '0')
-				dest = &sc_zero[i];
+				dest = &sc[i].zero;
 			else if (c == 'p')
-				dest = &sc_prev1[i];
+				dest = &sc[i].prev1;
 			else if (c == 'f')
-				dest = &sc_prev2[i];
+				dest = &sc[i].prev2;
 			if (dest != NULL)
 				*dest |= (1 << bit);
 
@@ -170,108 +282,16 @@ void fill_sufficient_conditions(
 }
 
 
-
-void gen_collisions(uint32_t msg1[16], uint32_t msg2[16])
+void block1(uint32_t *msg1, uint32_t *msg2, uint32_t *state1, uint32_t *state2)
 {
 	size_t i;
 	size_t attempts;
 	bool ok;
 
-	uint32_t state1real[52], state2real[52];
-	uint32_t *state1, *state2;
-
-	/* message delta as in wang's paper */
-	const uint32_t message_delta[16] =
-	{
-		/* 0 */ 0,
-		/* 1 */ (1 << 31),
-		/* 2 */ (1 << 31) | (1 << 28),
-		/* 3 */ 0,
-		/* 4 */ 0,
-		/* 5 */ 0,
-		/* 6 */ 0,
-		/* 7 */ 0,
-		/* 8 */ 0,
-		/* 9 */ 0,
-		/* 10 */ 0,
-		/* 11 */ 0,
-		/* 12 */ 1 << 16,
-		/* 13 */ 0,
-		/* 14 */ 0,
-		/* 15 */ 0,
-	};
-
-	/* differences as in wang's paper */
-	const uint32_t differences[48] =
-	{
-		/* a1 */ 0,
-		/* d1 */ 0xffffffc0, /* 2^6 */
-		/* c1 */ 0xfffffc80, /* -2^7 + 2^10 */
-		/* b1 */ 0xfe000000, /* 2^25 */
-		/* a2 */ 0,
-		/* d2 */ 0xffffe000, /* 2^13 */
-		/* c2 */ 0xffe40000, /* -2^18 + 2^21 */
-		/* b2 */ 0xfffff000, /* 2^12 */
-		/* a3 */ 0xffff0000, /* 2^16 */
-		/* d3 */ 0x01e80000, /* 2^19 + 2^20 - 2^25 */
-		/* c3 */ (1 << 29), /* -2^29 */
-		/* b3 */ (1 << 31), /* 2^31 */
-		/* a4 */ 0xfdc00000, /* 2^22 + 2^25 */
-		/* d4 */ 0xf4000000, /* -2^26 + 2^28 */
-		/* c4 */ 0,
-		/* b4 */ 0xfffc0000, /* 2^18 */
-		/* a5 */ ((1 << 25) | (1 << 26) | (1 << 27) | (1 << 31)), /* 2^25 - 2^28 - 2^31 */
-		/* d5 */ 0,
-		/* c5 */ 0,
-		/* b5 */ ((1 << 29) | (1 << 31)), /* -2^29 + 2^31 */
-		/* a6 */ ((1 << 28) | (1 << 29) | (1 << 30)), /* 2^28 - 2^31 */
-		/* d6 */ 0,
-		/* c6 */ 0,
-		/* b6 */ 0,
-		/* a7 */ 0,
-		/* d7 */ 0,
-		/* c7 */ 0,
-		/* b7 */ 0,
-		/* a8 */ 0,
-		/* d8 */ 0,
-		/* c8 */ 0,
-		/* b8 */ 0,
-		/* a9 */ 0,
-		/* d9 */ 0,
-		/* c9 */ 0,
-		/* b9 */ (1 << 31), /* 2^31 */
-		/* a10*/ (1 << 31), /* 2^31 */
-		/* d10*/ 0,
-		/* c10*/ 0,
-		/* b10*/ 0,
-		/* a11*/ 0,
-		/* d11*/ 0,
-		/* c11*/ 0,
-		/* b11*/ 0,
-		/* a12*/ 0,
-		/* d12*/ 0,
-		/* c12*/ 0,
-		/* b12*/ 0,
-	};
-
-	uint32_t sc_zero[48];
-	uint32_t sc_one[48];
-	uint32_t sc_prev1[48];
-	uint32_t sc_prev2[48];
-
-	/*
-		simple hack to conveniently make array indexing easier:
-		arr[-1] <=> (arr+(-1))
-	*/
-	state1 = state1real+4;
-	state2 = state2real+4;
-	state1[-4] = state2[-4] = md4_iv[0]; /* A0 */
-	state1[-3] = state2[-3] = md4_iv[3]; /* D0 */
-	state1[-2] = state2[-2] = md4_iv[2]; /* C0 */
-	state1[-1] = state2[-1] = md4_iv[1]; /* B0 */
+	sufficient_cond sc[48];
 
 	/* compile sufficient conditions into bitmasks */
-	fill_sufficient_conditions(sc_zero, sc_one, sc_prev1, sc_prev2);
+	fill_sufficient_conditions(sc);
 
 	attempts = 0;
 	while (true)
@@ -289,21 +309,7 @@ void gen_collisions(uint32_t msg1[16], uint32_t msg2[16])
 			state1[i] = random();
 
 			/* do simple message modification */
-			state1[i] |= sc_one[i];
-			state1[i] &= ~sc_zero[i];
-			if (sc_prev1[i])
-			{
-				state1[i] &= ~sc_prev1[i];
-				state1[i] |= (state1[i-1] & sc_prev1[i]);
-			}
-			if (sc_prev2[i])
-			{
-				state1[i] &= ~sc_prev2[i];
-				state1[i] |= (state1[i-1] & sc_prev2[i]);
-			}
-
-			/* prepare second state */
-			state2[i] = state1[i] - differences[i];
+			fix_sc(state1, state2, i, sc);
 		}
 
 		/* recover messages from internal state */
@@ -311,6 +317,7 @@ void gen_collisions(uint32_t msg1[16], uint32_t msg2[16])
 		{
 			msg1[i] = rot_right(state1[i], md4_shift[i]) - md4_f(state1[i - 1], state1[i - 2], state1[i - 3]) - md4_add[0] - state1[i - 4];
 			msg2[i] = rot_right(state2[i], md4_shift[i]) - md4_f(state2[i - 1], state2[i - 2], state2[i - 3]) - md4_add[0] - state2[i - 4];
+
 			/* simple checks for message delta */
 			if ((msg1[i] ^ msg2[i]) != message_delta[i])
 			{
@@ -326,7 +333,8 @@ void gen_collisions(uint32_t msg1[16], uint32_t msg2[16])
 		{
 			state1[i] = rot_left(md4_g(state1[i - 1], state1[i - 2], state1[i - 3]) + state1[i - 4] + msg1[md4_msg_index[i]] + md4_add[1], md4_shift[i]);
 			state2[i] = rot_left(md4_g(state2[i - 1], state2[i - 2], state2[i - 3]) + state2[i - 4] + msg2[md4_msg_index[i]] + md4_add[1], md4_shift[i]);
-			if ((state1[i] - state2[i]) != differences[i])
+
+			if (!check_sc(state1, state2, i, sc))
 			{
 				ok = false;
 				break;
@@ -340,7 +348,8 @@ void gen_collisions(uint32_t msg1[16], uint32_t msg2[16])
 		{
 			state1[i] = rot_left(md4_h(state1[i - 1], state1[i - 2], state1[i - 3]) + state1[i - 4] + msg1[md4_msg_index[i]] + md4_add[2], md4_shift[i]);
 			state2[i] = rot_left(md4_h(state2[i - 1], state2[i - 2], state2[i - 3]) + state2[i - 4] + msg2[md4_msg_index[i]] + md4_add[2], md4_shift[i]);
-			if ((state1[i] - state2[i]) != differences[i])
+
+			if (!check_sc(state1, state2, i, sc))
 			{
 				ok = false;
 				break;
@@ -351,6 +360,25 @@ void gen_collisions(uint32_t msg1[16], uint32_t msg2[16])
 
 		return;
 	}
+}
+
+void gen_collisions(uint32_t msg1[16], uint32_t msg2[16])
+{
+	uint32_t state1real[52], state2real[52];
+	uint32_t *state1, *state2;
+
+	/*
+		simple hack to conveniently make array indexing easier:
+		arr[-1] <=> (arr+(-1))
+	*/
+	state1 = state1real + 4;
+	state2 = state2real + 4;
+	state1[-4] = state2[-4] = md4_iv[0]; /* A0 */
+	state1[-3] = state2[-3] = md4_iv[3]; /* D0 */
+	state1[-2] = state2[-2] = md4_iv[2]; /* C0 */
+	state1[-1] = state2[-1] = md4_iv[1]; /* B0 */
+
+	block1(msg1, msg2, state1, state2);
 }
 
 int main(void)

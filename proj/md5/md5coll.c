@@ -94,11 +94,11 @@ uint32_t md5_i(uint32_t x, uint32_t y, uint32_t z)
 
 typedef struct
 {
-	const uint32_t diff;
-	const uint32_t zero;
-	const uint32_t one;
-	const uint32_t prev;
-	const uint32_t prev2;
+	uint32_t diff;
+	uint32_t zero;
+	uint32_t one;
+	uint32_t prev1;
+	uint32_t prev2;
 } sufficient_cond;
 
 
@@ -129,9 +129,13 @@ uint32_t myrandom(size_t index)
 	return randoms[index];
 }
 
-bool check_sc(uint32_t *state1, uint32_t *state2, size_t i, sufficient_cond *sc)
+bool check_sc(
+	uint32_t *state1,
+	uint32_t *state2,
+	size_t i,
+	sufficient_cond *sc)
 {
-	if ((state1[i] & sc[i - 1].prev) != (state1[i - 1] & sc[i - 1].prev))
+	if ((state1[i] & sc[i - 1].prev1) != (state1[i - 1] & sc[i - 1].prev1))
 		return false;
 
 	if ((state1[i] ^ state1[i - 2]) & sc[i - 1].prev2)
@@ -149,12 +153,19 @@ bool check_sc(uint32_t *state1, uint32_t *state2, size_t i, sufficient_cond *sc)
 	return true;
 }
 
-void fix_sc(uint32_t *state1, uint32_t *state2, size_t i, sufficient_cond *sc)
+void fix_sc(
+	uint32_t *state1,
+	uint32_t *state2,
+	size_t i,
+	sufficient_cond *sc)
 {
 	state1[i] |= sc[i - 1].one;
+
 	state1[i] &= ~sc[i - 1].zero;
-	state1[i] &= ~sc[i - 1].prev;
-	state1[i] |= (state1[i - 1] & sc[i - 1].prev);
+
+	state1[i] &= ~sc[i - 1].prev1;
+	state1[i] |= (state1[i - 1] & sc[i - 1].prev1);
+
 	state2[i] = state1[i] - sc[i - 1].diff;
 }
 
@@ -170,7 +181,7 @@ void block1(
 
 	sufficient_cond sc[64] =
 	{
-		/*  -- */ /* diff, zero, one, prev, prev2 */
+		/*  -- */ /* diff, zero, one, prev1, prev2 */
 		/*  a1 */ { 0, 0, 0, 0 },
 		/*  d1 */ { 0, 0, 0, 0 },
 		/*  c1 */ { 0x00000000, 0x00800040, 0x00000000, 0x00000000, 0x00000000 },
@@ -487,7 +498,7 @@ void block2(
 
 	sufficient_cond sc[64] =
 	{
-		/*  -- */ /* diff, zero, one, prev, prev2 */
+		/*  -- */ /* diff, zero, one, prev1, prev2 */
 		/*  a1 */ { 0x7e000000, 0x0a000820, 0x84200000, 0x00000000 },
 		/*  d1 */ { 0x7dffffe0, 0x02208026, 0x8c000800, 0x701f10c0 },
 		/*  c1 */ { 0x7dfef7e0, 0x40201080, 0xbe1f0966, 0x00000018 },
@@ -564,7 +575,10 @@ void block2(
 		/* A1 to B4 */
 		for (i = 0; i < 16; i ++)
 		{
+			/* generate random state */
 			state1[i + 1] = myrandom(i + 16);
+
+			/* do simple message modification */
 			fix_sc(state1, state2, i + 1, sc);
 		}
 
@@ -759,11 +773,11 @@ void block2(
 
 void gen_collisions(uint32_t msg1[32], uint32_t msg2[32])
 {
-	uint32_t state1real[65+4], state2real[65+4];
+	uint32_t state1real[69], state2real[69];
 	uint32_t *state1, *state2;
 
-	state1 = state1real+4;
-	state2 = state2real+4;
+	state1 = state1real + 4;
+	state2 = state2real + 4;
 	state1[-3] = state2[-3] = md5_iv[0];
 	state1[-2] = state2[-2] = md5_iv[3];
 	state1[-1] = state2[-1] = md5_iv[2];
