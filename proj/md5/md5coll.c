@@ -84,7 +84,7 @@ uint32_t md5_i(uint32_t x, uint32_t y, uint32_t z)
 
 
 
-uint32_t randoms[40];
+uint32_t randoms[32];
 uint32_t myrandom(size_t index)
 {
 	return randoms[index];
@@ -225,7 +225,7 @@ void block1(
 			continue;
 
 		/* B5 */
-		state1[20] = myrandom(16);
+		state1[20] = myrandom(15);
 		state2[20] = state1[20] - 0x80000000;
 
 		state1[1] = rot_left(md5_f(state1[0], state1[-1], state1[-2]) + state1[-3] + msg1[0] + md5_add[0], 7) + state1[0];
@@ -593,83 +593,146 @@ void block2(
 		/* 15 */ 0,
 	};
 
+	const uint32_t differences[64] =
+	{
+		/* a1 */ 0x7e000000,
+		/* d1 */ 0x7dffffe0,
+		/* c1 */ 0x7dfef7e0,
+		/* b1 */ 0x7dffffe2,
+		/* a2 */ 0x7ffffcbf,
+		/* d2 */ 0x80110000,
+		/* c2 */ 0x88000040,
+		/* b2 */ 0x80818000,
+		/* a3 */ 0x7fffffbf,
+		/* d3 */ 0x7ffff000,
+		/* c3 */ 1 << 31,
+		/* b3 */ 0x80002080,
+		/* a4 */ 0x7f000000,
+		/* d4 */ 1 << 31,
+		/* c4 */ 0x7fff7ff8,
+		/* b4 */ 0xa0000000,
+		/* a5 */ 1 << 31,
+		/* d5 */ 1 << 31,
+		/* c5 */ 0x7ffe0000,
+		/* b5 */ 1 << 31,
+		/* a6 */ 1 << 31,
+		/* d6 */ 1 << 31,
+		/* c6 */ 0,
+		/* b6 */ 0,
+		/* a7 */ 0,
+		/* d7 */ 0,
+		/* c7 */ 0,
+		/* b7 */ 0,
+		/* a8 */ 0,
+		/* d8 */ 0,
+		/* c8 */ 0,
+		/* b8 */ 0,
+		/* a9 */ 0,
+		/* d9 */ 0,
+		/* c9 */ 1 << 31,
+		/* b9 */ 1 << 31,
+		/* a10 */ 1 << 31,
+		/* d10 */ 1 << 31,
+		/* c10 */ 1 << 31,
+		/* b10 */ 1 << 31,
+		/* a11 */ 1 << 31,
+		/* d11 */ 1 << 31,
+		/* c11 */ 1 << 31,
+		/* b11 */ 1 << 31,
+		/* a12 */ 1 << 31,
+		/* d12 */ 1 << 31,
+		/* c12 */ 1 << 31,
+		/* b12 */ 1 << 31,
+		/* a13 */ 1 << 31,
+		/* d13 */ 1 << 31,
+		/* c13 */ 1 << 31,
+		/* b13 */ 1 << 31,
+		/* a14 */ 1 << 31,
+		/* d14 */ 1 << 31,
+		/* c14 */ 1 << 31,
+		/* b14 */ 1 << 31,
+		/* a15 */ 1 << 31,
+		/* d15 */ 1 << 31,
+		/* c15 */ 1 << 31,
+		/* b15 */ 1 << 31,
+		/* a16 */ 1 << 31,
+		/* d16 */ 0,
+		/* c16 */ 0,
+		/* b16 */ 0,
+	};
+
+	const uint32_t sc_zero[16] =
+	{
+		/* a1 */ 0x0a000820,
+		/* d1 */ 0x02208026 | 0x701f10c0,
+		/* c1 */ 0x40201080 | 0x00000018,
+		/* b1 */ 0x443b19ee | 0x00000601,
+		/* a2 */ 0xb41011af,
+		/* d2 */ 0x9a1113a9,
+		/* c2 */ 0x083201c0 | 0x01808000,
+		/* b2 */ 0x1b810001 | 0x00000002,
+		/* a3 */ 0x03828202 | 0x00001000,
+		/* d3 */ 0x00041003,
+		/* c3 */ 0x00021000 | 0x00086000,
+		/* b3 */ 0x0007e000 | 0x7f000000,
+		/* a4 */ 0x80000080,
+		/* d4 */ 0xbf040000,
+		/* c4 */ 0x82008008,
+		/* b4 */ 0,
+	};
+
+	const uint32_t sc_one[16] =
+	{
+		/* a1 */ 0x84200000,
+		/* d1 */ 0x8c000800,
+		/* c1 */ 0xbe1f0966,
+		/* b1 */ 0xba040010,
+		/* a2 */ 0x482f0e50,
+		/* d2 */ 0x04220c56,
+		/* c2 */ 0x96011e01,
+		/* b2 */ 0x843283c0,
+		/* a3 */ 0x9c0101c1,
+		/* d3 */ 0x878383c0,
+		/* c3 */ 0x800583c3,
+		/* b3 */ 0x80081080,
+		/* a4 */ 0x3f0fe008,
+		/* d4 */ 0x400be088,
+		/* c4 */ 0x7d000000,
+		/* b4 */ 0x00000000,
+	};
+
+	const uint32_t sc_prev[16] =
+	{
+		/* a1 */ 0x00000000,
+		/* d1 */ 0x701f10c0,
+		/* c1 */ 0x00000018,
+		/* b1 */ 0x00000601,
+		/* a2 */ 0x00000000,
+		/* d2 */ 0x00000000,
+		/* c2 */ 0x01808000,
+		/* b2 */ 0x00000002,
+		/* a3 */ 0x00001000,
+		/* d3 */ 0x00000000,
+		/* c3 */ 0x00086000,
+		/* b3 */ 0x7f000000,
+		/* a4 */ 0x00000000,
+		/* d4 */ 0x00000000,
+		/* c4 */ 0x00000000,
+		/* b4 */ 0x00000000,
+	};
+
 	for (;;)
 	{
 		++ attempts;
 		if (attempts % 1000000 == 0)
 			fprintf(stderr, "attempt (2) %d\n", attempts);
 
-		/* A1 */
-		state1[1] = (myrandom(17) | 0x84200000) & ~0x0a000820;
-		state2[1] = state1[1] - 0x7e000000;
-
-		/* D1 */
-		state1[2] = (myrandom(18) | 0x8c000800) & ~(0x02208026 | 0x701f10c0);
-		state1[2] |= (state1[1] & 0x701f10c0);
-		state2[2] = state1[2] - 0x7dffffe0;
-
-		/* C1 */
-		state1[3] = (myrandom(19) | 0xbe1f0966) & ~(0x40201080 | 0x00000018);
-		state1[3] |= (state1[2] & 0x00000018);
-		state2[3] = state1[3] - 0x7dfef7e0;
-
-		/* B1 */
-		state1[4] = (myrandom(20) | 0xba040010) & ~(0x443b19ee | 0x00000601);
-		state1[4] |= (state1[3] & 0x00000601);
-		state2[4] = state1[4] - 0x7dffffe2;
-
-		/* A2 */
-		state1[5] = (myrandom(21) | 0x482f0e50) & ~0xb41011af;
-		state2[5] = state1[5] - 0x7ffffcbf;
-
-		/* D2 */
-		state1[6] = (myrandom(22) | 0x04220c56) & ~0x9a1113a9;
-		state2[6] = state1[6] - 0x80110000;
-
-		/* C2 */
-		state1[7] = (myrandom(23) | 0x96011e01) & ~(0x083201c0 | 0x01808000);
-		state1[7] |= (state1[6] & 0x01808000);
-		state2[7] = state1[7] - 0x88000040;
-
-		/* B2 */
-		state1[8] = (myrandom(24) | 0x843283c0) & ~(0x1b810001 | 0x00000002);
-		state1[8] |= (state1[7] & 0x00000002);
-		state2[8] = state1[8] - 0x80818000;
-
-		/* A3 */
-		state1[9] = (myrandom(25) | 0x9c0101c1) & ~(0x03828202 | 0x00001000);
-		state1[9] |= (state1[8] & 0x00001000);
-		state2[9] = state1[9] - 0x7fffffbf;
-
-		/* D3 */
-		state1[10] = (myrandom(26) | 0x878383c0) & ~0x00041003;
-		state2[10] = state1[10] - 0x7ffff000;
-
-		/* C3 */
-		state1[11] = (myrandom(27) | 0x800583c3) & ~(0x00021000 | 0x00086000);
-		state1[11] |= (state1[10] & 0x00086000);
-		state2[11] = state1[11] - 0x80000000;
-
-		/* B3 */
-		state1[12] = (myrandom(28) | 0x80081080) & ~(0x0007e000 | 0x7f000000);
-		state1[12] |= (state1[11] & 0x7f000000);
-		state2[12] = state1[12] - 0x80002080;
-
-		/* A4 */
-		state1[13] = (myrandom(29) | 0x3f0fe008) & ~0x80000080;
-		state2[13] = state1[13] - 0x7f000000;
-
-		/* D4 */
-		state1[14] = (myrandom(30) | 0x400be088) & ~0xbf040000;
-		state2[14] = state1[14] - 0x80000000;
-
-		/* C4 */
-		state1[15] = (myrandom(31) | 0x7d000000) & ~0x82008008;
-		state2[15] = state1[15] - 0x7fff7ff8;
-
-		/* B4 */
-		state1[16] = myrandom(33);
-		state2[16] = state1[16] - 0xa0000000;
+		for (i = 0; i < 16; i ++)
+		{
+			state1[i + 1] = (myrandom(i + 16) | sc_one[i]) & ~sc_zero[i];
+			state1[i + 1] |= (state1[i] & sc_prev[i]);
+			state2[i + 1] = state1[i + 1] - differences[i];
+		}
 
 		for (i = 0; i < 16; i ++)
 		{
@@ -684,7 +747,7 @@ void block2(
 		state2[17] = rot_left(md5_g(state2[16], state2[15], state2[14]) + state2[13] + msg2[17] + md5_add[16], 5) + state2[16];
 		if ((state1[17] & 0x80028008) != (state1[16] & 0x00008008))
 			continue;
-		if ((state1[17] ^ state2[17]) != 0x80000000)
+		if ((state1[17] ^ state2[17]) != differences[16])
 			continue;
 
 		/* D5 */
@@ -692,7 +755,7 @@ void block2(
 		state2[18] = rot_left(md5_g(state2[17], state2[16], state2[15]) + state2[14] + msg2[22] + md5_add[17], 9) + state2[17];
 		if ((state1[18] & 0xa0020000) != ((state1[17] & 0x20000000) | 0x00020000))
 			continue;
-		if ((state1[18] ^ state2[18]) != 0x80000000)
+		if ((state1[18] ^ state2[18]) != differences[17])
 			continue;
 
 		/* C5 */
@@ -700,7 +763,7 @@ void block2(
 		state2[19] = rot_left(md5_g(state2[18], state2[17], state2[16]) + state2[15] + msg2[27] + md5_add[18], 14) + state2[18];
 		if (state1[19] & 0x80020000)
 			continue;
-		if ((state1[19] - state2[19]) != 0x7ffe0000)
+		if ((state1[19] - state2[19]) != differences[18])
 			continue;
 
 		/* B5 */
@@ -708,7 +771,7 @@ void block2(
 		state2[20] = rot_left(md5_g(state2[19], state2[18], state2[17]) + state2[16] + msg2[16] + md5_add[19], 20) + state2[19];
 		if (state1[20] & 0x80000000)
 			continue;
-		if ((state1[20] ^ state2[20]) != 0x80000000)
+		if ((state1[20] ^ state2[20]) != differences[19])
 			continue;
 
 		/* A6 */
@@ -716,7 +779,7 @@ void block2(
 		state2[21] = rot_left(md5_g(state2[20], state2[19], state2[18]) + state2[17] + msg2[21] + md5_add[20], 5) + state2[20];
 		if ((state1[21] & 0x80020000) != (state1[20] & 0x00020000))
 			continue;
-		if ((state1[21] ^ state2[21]) != 0x80000000)
+		if ((state1[21] ^ state2[21]) != differences[20])
 			continue;
 
 		/* D6 */
@@ -724,7 +787,7 @@ void block2(
 		state2[22] = rot_left(md5_g(state2[21], state2[20], state2[19]) + state2[18] + msg2[26] + md5_add[21], 9) + state2[21];
 		if (state1[22] & 0x80000000)
 			continue;
-		if ((state1[22] ^ state2[22]) != 0x80000000)
+		if ((state1[22] ^ state2[22]) != differences[21])
 			continue;
 
 		/* C6 */
@@ -732,151 +795,151 @@ void block2(
 		state2[23] = rot_left(md5_g(state2[22], state2[21], state2[20]) + state2[19] + msg2[31] + md5_add[22], 14) + state2[22];
 		if (state1[23] & 0x80000000)
 			continue;
-		if (state1[23] != state2[23])
+		if ((state1[23] ^ state2[23]) != differences[22])
 			continue;
 
 		/* B6 */
 		state1[24] = rot_left(md5_g(state1[23], state1[22], state1[21]) + state1[20] + msg1[20] + md5_add[23], 20) + state1[23];
 		state2[24] = rot_left(md5_g(state2[23], state2[22], state2[21]) + state2[20] + msg2[20] + md5_add[23], 20) + state2[23];
-		if (state1[24] != state2[24])
+		if ((state1[24] ^ state2[24]) != differences[23])
 			continue;
 
 		/* A7 */
 		state1[25] = rot_left(md5_g(state1[24], state1[23], state1[22]) + state1[21] + msg1[25] + md5_add[24], 5) + state1[24];
 		state2[25] = rot_left(md5_g(state2[24], state2[23], state2[22]) + state2[21] + msg2[25] + md5_add[24], 5) + state2[24];
-		if (state1[25] != state2[25])
+		if ((state1[25] ^ state2[25]) != differences[24])
 			continue;
 
 		/* D7 */
 		state1[26] = rot_left(md5_g(state1[25], state1[24], state1[23]) + state1[22] + msg1[30] + md5_add[25], 9) + state1[25];
 		state2[26] = rot_left(md5_g(state2[25], state2[24], state2[23]) + state2[22] + msg2[30] + md5_add[25], 9) + state2[25];
-		if (state1[26] != state2[26])
+		if ((state1[26] ^ state2[26]) != differences[25])
 			continue;
 
 		/* C7 */
 		state1[27] = rot_left(md5_g(state1[26], state1[25], state1[24]) + state1[23] + msg1[19] + md5_add[26], 14) + state1[26];
 		state2[27] = rot_left(md5_g(state2[26], state2[25], state2[24]) + state2[23] + msg2[19] + md5_add[26], 14) + state2[26];
-		if (state1[27] != state2[27])
+		if ((state1[27] ^ state2[27]) != differences[26])
 			continue;
 
 		/* B7 */
 		state1[28] = rot_left(md5_g(state1[27], state1[26], state1[25]) + state1[24] + msg1[24] + md5_add[27], 20) + state1[27];
 		state2[28] = rot_left(md5_g(state2[27], state2[26], state2[25]) + state2[24] + msg2[24] + md5_add[27], 20) + state2[27];
-		if (state1[28] != state2[28])
+		if ((state1[28] ^ state2[28]) != differences[27])
 			continue;
 
 		/* A8 */
 		state1[29] = rot_left(md5_g(state1[28], state1[27], state1[26]) + state1[25] + msg1[29] + md5_add[28], 5) + state1[28];
 		state2[29] = rot_left(md5_g(state2[28], state2[27], state2[26]) + state2[25] + msg2[29] + md5_add[28], 5) + state2[28];
-		if (state1[29] != state2[29])
+		if ((state1[29] ^ state2[29]) != differences[28])
 			continue;
 
 		/* D8 */
 		state1[30] = rot_left(md5_g(state1[29], state1[28], state1[27]) + state1[26] + msg1[18] + md5_add[29], 9) + state1[29];
 		state2[30] = rot_left(md5_g(state2[29], state2[28], state2[27]) + state2[26] + msg2[18] + md5_add[29], 9) + state2[29];
-		if (state1[30] != state2[30])
+		if ((state1[30] ^ state2[30]) != differences[29])
 			continue;
 
 		/* C8 */
 		state1[31] = rot_left(md5_g(state1[30], state1[29], state1[28]) + state1[27] + msg1[23] + md5_add[30], 14) + state1[30];
 		state2[31] = rot_left(md5_g(state2[30], state2[29], state2[28]) + state2[27] + msg2[23] + md5_add[30], 14) + state2[30];
-		if (state1[31] != state2[31])
+		if ((state1[31] ^ state2[31]) != differences[30])
 			continue;
 
 		/* B8 */
 		state1[32] = rot_left(md5_g(state1[31], state1[30], state1[29]) + state1[28] + msg1[28] + md5_add[31], 20) + state1[31];
 		state2[32] = rot_left(md5_g(state2[31], state2[30], state2[29]) + state2[28] + msg2[28] + md5_add[31], 20) + state2[31];
-		if (state1[32] != state2[32])
+		if ((state1[32] ^ state2[32]) != differences[31])
 			continue;
 
 		/* A9 */
 		state1[33] = rot_left(md5_h(state1[32], state1[31], state1[30]) + state1[29] + msg1[21] + md5_add[32], 4) + state1[32];
 		state2[33] = rot_left(md5_h(state2[32], state2[31], state2[30]) + state2[29] + msg2[21] + md5_add[32], 4) + state2[32];
-		if (state1[33] != state2[33])
+		if ((state1[33] ^ state2[33]) != differences[32])
 			continue;
 
 		/* D9 */
 		state1[34] = rot_left(md5_h(state1[33], state1[32], state1[31]) + state1[30] + msg1[24] + md5_add[33], 11) + state1[33];
 		state2[34] = rot_left(md5_h(state2[33], state2[32], state2[31]) + state2[30] + msg2[24] + md5_add[33], 11) + state2[33];
-		if (state1[34] != state2[34])
+		if ((state1[34] ^ state2[34]) != differences[33])
 			continue;
 
 		/* C9 */
 		state1[35] = rot_left(md5_h(state1[34], state1[33], state1[32]) + state1[31] + msg1[27] + md5_add[34], 16) + state1[34];
 		state2[35] = rot_left(md5_h(state2[34], state2[33], state2[32]) + state2[31] + msg2[27] + md5_add[34], 16) + state2[34];
-		if ((state1[35] ^ state2[35]) != 0x80000000)
+		if ((state1[35] ^ state2[35]) != differences[34])
 			continue;
 
 		/* B9 */
 		state1[36] = rot_left(md5_h(state1[35], state1[34], state1[33]) + state1[32] + msg1[30] + md5_add[35], 23) + state1[35];
 		state2[36] = rot_left(md5_h(state2[35], state2[34], state2[33]) + state2[32] + msg2[30] + md5_add[35], 23) + state2[35];
-		if ((state1[36] ^ state2[36]) != 0x80000000)
+		if ((state1[36] ^ state2[36]) != differences[35])
 			continue;
 
 		/* A10 */
 		state1[37] = rot_left(md5_h(state1[36], state1[35], state1[34]) + state1[33] + msg1[17] + md5_add[36], 4) + state1[36];
 		state2[37] = rot_left(md5_h(state2[36], state2[35], state2[34]) + state2[33] + msg2[17] + md5_add[36], 4) + state2[36];
-		if ((state1[37] ^ state2[37]) != 0x80000000)
+		if ((state1[37] ^ state2[37]) != differences[36])
 			continue;
 
 		/* D10 */
 		state1[38] = rot_left(md5_h(state1[37], state1[36], state1[35]) + state1[34] + msg1[20] + md5_add[37], 11) + state1[37];
 		state2[38] = rot_left(md5_h(state2[37], state2[36], state2[35]) + state2[34] + msg2[20] + md5_add[37], 11) + state2[37];
-		if ((state1[38] ^ state2[38]) != 0x80000000)
+		if ((state1[38] ^ state2[38]) != differences[37])
 			continue;
 
 		/* C10 */
 		state1[39] = rot_left(md5_h(state1[38], state1[37], state1[36]) + state1[35] + msg1[23] + md5_add[38], 16) + state1[38];
 		state2[39] = rot_left(md5_h(state2[38], state2[37], state2[36]) + state2[35] + msg2[23] + md5_add[38], 16) + state2[38];
-		if ((state1[39] ^ state2[39]) != 0x80000000)
+		if ((state1[39] ^ state2[39]) != differences[38])
 			continue;
 
 		/* B10 */
 		state1[40] = rot_left(md5_h(state1[39], state1[38], state1[37]) + state1[36] + msg1[26] + md5_add[39], 23) + state1[39];
 		state2[40] = rot_left(md5_h(state2[39], state2[38], state2[37]) + state2[36] + msg2[26] + md5_add[39], 23) + state2[39];
-		if ((state1[40] ^ state2[40]) != 0x80000000)
+		if ((state1[40] ^ state2[40]) != differences[39])
 			continue;
 
 		/* A11 */
 		state1[41] = rot_left(md5_h(state1[40], state1[39], state1[38]) + state1[37] + msg1[29] + md5_add[40], 4) + state1[40];
 		state2[41] = rot_left(md5_h(state2[40], state2[39], state2[38]) + state2[37] + msg2[29] + md5_add[40], 4) + state2[40];
-		if ((state1[41] ^ state2[41]) != 0x80000000)
+		if ((state1[41] ^ state2[41]) != differences[40])
 			continue;
 
 		/* D11 */
 		state1[42] = rot_left(md5_h(state1[41], state1[40], state1[39]) + state1[38] + msg1[16] + md5_add[41], 11) + state1[41];
 		state2[42] = rot_left(md5_h(state2[41], state2[40], state2[39]) + state2[38] + msg2[16] + md5_add[41], 11) + state2[41];
-		if ((state1[42] ^ state2[42]) != 0x80000000)
+		if ((state1[42] ^ state2[42]) != differences[41])
 			continue;
 
 		/* C11 */
 		state1[43] = rot_left(md5_h(state1[42], state1[41], state1[40]) + state1[39] + msg1[19] + md5_add[42], 16) + state1[42];
 		state2[43] = rot_left(md5_h(state2[42], state2[41], state2[40]) + state2[39] + msg2[19] + md5_add[42], 16) + state2[42];
-		if ((state1[43] ^ state2[43]) != 0x80000000)
+		if ((state1[43] ^ state2[43]) != differences[42])
 			continue;
 
 		/* B11 */
 		state1[44] = rot_left(md5_h(state1[43], state1[42], state1[41]) + state1[40] + msg1[22] + md5_add[43], 23) + state1[43];
 		state2[44] = rot_left(md5_h(state2[43], state2[42], state2[41]) + state2[40] + msg2[22] + md5_add[43], 23) + state2[43];
-		if ((state1[44] ^ state2[44]) != 0x80000000)
+		if ((state1[44] ^ state2[44]) != differences[43])
 			continue;
 
 		/* A12 */
 		state1[45] = rot_left(md5_h(state1[44], state1[43], state1[42]) + state1[41] + msg1[25] + md5_add[44], 4) + state1[44];
 		state2[45] = rot_left(md5_h(state2[44], state2[43], state2[42]) + state2[41] + msg2[25] + md5_add[44], 4) + state2[44];
-		if ((state1[45] ^ state2[45]) != 0x80000000)
+		if ((state1[45] ^ state2[45]) != differences[44])
 			continue;
 
 		/* D12 */
 		state1[46] = rot_left(md5_h(state1[45], state1[44], state1[43]) + state1[42] + msg1[28] + md5_add[45], 11) + state1[45];
 		state2[46] = rot_left(md5_h(state2[45], state2[44], state2[43]) + state2[42] + msg2[28] + md5_add[45], 11) + state2[45];
-		if ((state1[46] ^ state2[46]) != 0x80000000)
+		if ((state1[46] ^ state2[46]) != differences[45])
 			continue;
 
 		/* C12 */
 		state1[47] = rot_left(md5_h(state1[46], state1[45], state1[44]) + state1[43] + msg1[31] + md5_add[46], 16) + state1[46];
 		state2[47] = rot_left(md5_h(state2[46], state2[45], state2[44]) + state2[43] + msg2[31] + md5_add[46], 16) + state2[46];
-		if ((state1[47] ^ state2[47]) != 0x80000000)
+		if ((state1[47] ^ state2[47]) != differences[46])
 			continue;
 
 		/* B12 */
@@ -884,7 +947,7 @@ void block2(
 		state2[48] = rot_left(md5_h(state2[47], state2[46], state2[45]) + state2[44] + msg2[18] + md5_add[47], 23) + state2[47];
 		if ((state1[48] & 0x80000000) != (state1[46] & 0x80000000))
 			continue;
-		if ((state1[48] ^ state2[48]) != 0x80000000)
+		if ((state1[48] ^ state2[48]) != differences[47])
 			continue;
 
 		/* A13 */
@@ -892,13 +955,13 @@ void block2(
 		state2[49] = rot_left(md5_i(state2[48], state2[47], state2[46]) + state2[45] + msg2[16] + md5_add[48], 6) + state2[48];
 		if ((state1[49] & 0x80000000) != (state1[47] & 0x80000000))
 			continue;
-		if ((state1[49] ^ state2[49]) != 0x80000000)
+		if ((state1[49] ^ state2[49]) != differences[48])
 			continue;
 
 		/* D13 */
 		state1[50] = rot_left(md5_i(state1[49], state1[48], state1[47]) + state1[46] + msg1[23] + md5_add[49], 10) + state1[49];
 		state2[50] = rot_left(md5_i(state2[49], state2[48], state2[47]) + state2[46] + msg2[23] + md5_add[49], 10) + state2[49];
-		if ((state1[50] ^ state2[50]) != 0x80000000)
+		if ((state1[50] ^ state2[50]) != differences[49])
 			continue;
 
 		/* C13 */
@@ -906,7 +969,7 @@ void block2(
 		state2[51] = rot_left(md5_i(state2[50], state2[49], state2[48]) + state2[47] + msg2[30] + md5_add[50], 15) + state2[50];
 		if ((state1[51] & 0x80000000) != (state1[49] & 0x80000000))
 			continue;
-		if ((state1[51] ^ state2[51]) != 0x80000000)
+		if ((state1[51] ^ state2[51]) != differences[50])
 			continue;
 
 		/* B13 */
@@ -914,7 +977,7 @@ void block2(
 		state2[52] = rot_left(md5_i(state2[51], state2[50], state2[49]) + state2[48] + msg2[21] + md5_add[51], 21) + state2[51];
 		if ((state1[52] & 0x80000000) != (state1[50] & 0x80000000))
 			continue;
-		if ((state1[52] ^ state2[52]) != 0x80000000)
+		if ((state1[52] ^ state2[52]) != differences[51])
 			continue;
 
 		/* A14 */
@@ -922,7 +985,7 @@ void block2(
 		state2[53] = rot_left(md5_i(state2[52], state2[51], state2[50]) + state2[49] + msg2[28] + md5_add[52], 6) + state2[52];
 		if ((state1[53] & 0x80000000) != (state1[51] & 0x80000000))
 			continue;
-		if ((state1[53] ^ state2[53]) != 0x80000000)
+		if ((state1[53] ^ state2[53]) != differences[52])
 			continue;
 
 		/* D14 */
@@ -930,7 +993,7 @@ void block2(
 		state2[54] = rot_left(md5_i(state2[53], state2[52], state2[51]) + state2[50] + msg2[19] + md5_add[53], 10) + state2[53];
 		if ((state1[54] & 0x80000000) != (state1[52] & 0x80000000))
 			continue;
-		if ((state1[54] ^ state2[54]) != 0x80000000)
+		if ((state1[54] ^ state2[54]) != differences[53])
 			continue;
 
 		/* C14 */
@@ -938,7 +1001,7 @@ void block2(
 		state2[55] = rot_left(md5_i(state2[54], state2[53], state2[52]) + state2[51] + msg2[26] + md5_add[54], 15) + state2[54];
 		if ((state1[55] & 0x80000000) != (state1[53] & 0x80000000))
 			continue;
-		if ((state1[55] ^ state2[55]) != 0x80000000)
+		if ((state1[55] ^ state2[55]) != differences[54])
 			continue;
 
 		/* B14 */
@@ -946,7 +1009,7 @@ void block2(
 		state2[56] = rot_left(md5_i(state2[55], state2[54], state2[53]) + state2[52] + msg2[17] + md5_add[55], 21) + state2[55];
 		if ((state1[56] & 0x80000000) != (state1[54] & 0x80000000))
 			continue;
-		if ((state1[56] ^ state2[56]) != 0x80000000)
+		if ((state1[56] ^ state2[56]) != differences[55])
 			continue;
 
 		/* A15 */
@@ -954,7 +1017,7 @@ void block2(
 		state2[57] = rot_left(md5_i(state2[56], state2[55], state2[54]) + state2[53] + msg2[24] + md5_add[56], 6) + state2[56];
 		if ((state1[57] & 0x80000000) != (state1[55] & 0x80000000))
 			continue;
-		if ((state1[57] ^ state2[57]) != 0x80000000)
+		if ((state1[57] ^ state2[57]) != differences[56])
 			continue;
 
 		/* D15 */
@@ -962,7 +1025,7 @@ void block2(
 		state2[58] = rot_left(md5_i(state2[57], state2[56], state2[55]) + state2[54] + msg2[31] + md5_add[57], 10) + state2[57];
 		if ((state1[58] & 0x80000000) != (state1[56] & 0x80000000))
 			continue;
-		if ((state1[58] ^ state2[58]) != 0x80000000)
+		if ((state1[58] ^ state2[58]) != differences[57])
 			continue;
 
 		/* C15 */
@@ -970,19 +1033,19 @@ void block2(
 		state2[59] = rot_left(md5_i(state2[58], state2[57], state2[56]) + state2[55] + msg2[22] + md5_add[58], 15) + state2[58];
 		if ((state1[59] & 0x80000000) != (state1[57] & 0x80000000))
 			continue;
-		if ((state1[59] ^ state2[59]) != 0x80000000)
+		if ((state1[59] ^ state2[59]) != differences[58])
 			continue;
 
 		/* B15 */
 		state1[60] = rot_left(md5_i(state1[59], state1[58], state1[57]) + state1[56] + msg1[29] + md5_add[59], 21) + state1[59];
 		state2[60] = rot_left(md5_i(state2[59], state2[58], state2[57]) + state2[56] + msg2[29] + md5_add[59], 21) + state2[59];
-		if ((state1[60] ^ state2[60]) != 0x80000000)
+		if ((state1[60] ^ state2[60]) != differences[59])
 			continue;
 
 		/* A16 */
 		state1[61] = rot_left(md5_i(state1[60], state1[59], state1[58]) + state1[57] + msg1[20] + md5_add[60], 6) + state1[60];
 		state2[61] = rot_left(md5_i(state2[60], state2[59], state2[58]) + state2[57] + msg2[20] + md5_add[60], 6) + state2[60];
-		if ((state1[61] ^ state2[61]) != 0x80000000)
+		if ((state1[61] ^ state2[61]) != differences[60])
 			continue;
 		if ((state1[-3] + state1[61]) != (state2[-3] + state2[61]))
 			continue;
@@ -1056,31 +1119,23 @@ int main(int argc, char *argv[])
 	randoms[12] = 0x556e2d59;
 	randoms[13] = 0x0e3bf852;
 	randoms[14] = 0x45c4ad14;
-	randoms[15] = 0x52e532e8;
-	randoms[16] = 0x3560958c;
-	randoms[17] = 0x3b73fe0a;
-	randoms[18] = 0x61a9629c;
-	randoms[19] = 0x625cb56d;
-	randoms[20] = 0x5a7b7873;
-	randoms[21] = 0x6f5212c1;
-	randoms[22] = 0x1221ccd4;
-	randoms[23] = 0x0f8a220f;
-	randoms[24] = 0x22ad66e4;
-	randoms[25] = 0x10093f5e;
-	randoms[26] = 0x62fe2069;
-	randoms[27] = 0x71b49060;
-	randoms[28] = 0x4aa7106c;
-	randoms[29] = 0x27394180;
-	randoms[30] = 0x6d50766b;
-	randoms[31] = 0x31d459ed;
-	randoms[32] = 0x0d585cde;
-	randoms[33] = 0x624e6371;
-	randoms[34] = 0x00000000;
-	randoms[35] = 0x00000000;
-	randoms[36] = 0x00000000;
-	randoms[37] = 0x00000000;
-	randoms[38] = 0x00000000;
-	randoms[39] = 0x00000000;
+	randoms[15] = 0x3560958c;
+	randoms[16] = 0x3b73fe0a;
+	randoms[17] = 0x61a9629c;
+	randoms[18] = 0x625cb56d;
+	randoms[19] = 0x5a7b7873;
+	randoms[20] = 0x6f5212c1;
+	randoms[21] = 0x1221ccd4;
+	randoms[22] = 0x0f8a220f;
+	randoms[23] = 0x22ad66e4;
+	randoms[24] = 0x10093f5e;
+	randoms[25] = 0x62fe2069;
+	randoms[26] = 0x71b49060;
+	randoms[27] = 0x4aa7106c;
+	randoms[28] = 0x27394180;
+	randoms[29] = 0x6d50766b;
+	randoms[30] = 0x31d459ed;
+	randoms[31] = 0x624e6371;
 
 	srandom(time(NULL));
 	gen_collisions(msg1, msg2);
