@@ -92,6 +92,27 @@ uint32_t md5_i(uint32_t x, uint32_t y, uint32_t z)
 
 
 
+/* message delta as in wang's paper */
+const uint32_t message_delta[16] =
+{
+	/* 0 */ 0,
+	/* 1 */ 0,
+	/* 2 */ 0,
+	/* 3 */ 0,
+	/* 4 */ 0x80000000,
+	/* 5 */ 0,
+	/* 6 */ 0,
+	/* 7 */ 0,
+	/* 8 */ 0,
+	/* 9 */ 0,
+	/* 10 */ 0,
+	/* 11 */ 0x00008000,
+	/* 12 */ 0,
+	/* 13 */ 0,
+	/* 14 */ 0x80000000,
+	/* 15 */ 0,
+};
+
 const uint32_t differences[64] =
 {
 	/* a1 */ 0x7e000000,
@@ -160,10 +181,106 @@ const uint32_t differences[64] =
 	/* b16 */ 0,
 };
 
+const uint32_t sc_zero[64] =
+{
+	/* a1 */ 0x0a000820,
+	/* d1 */ 0x02208026 | 0x701f10c0,
+	/* c1 */ 0x40201080 | 0x00000018,
+	/* b1 */ 0x443b19ee | 0x00000601,
+	/* a2 */ 0xb41011af,
+	/* d2 */ 0x9a1113a9,
+	/* c2 */ 0x083201c0 | 0x01808000,
+	/* b2 */ 0x1b810001 | 0x00000002,
+	/* a3 */ 0x03828202 | 0x00001000,
+	/* d3 */ 0x00041003,
+	/* c3 */ 0x00021000 | 0x00086000,
+	/* b3 */ 0x0007e000 | 0x7f000000,
+	/* a4 */ 0x80000080,
+	/* d4 */ 0xbf040000,
+	/* c4 */ 0x82008008,
+	/* b4 */ 0,
+	/* a5 */ 0,
+	/* d5 */ 0,
+	/* c5 */ 0x80020000,
+	/* b5 */ 0x80000000,
+	/* a6 */ 0,
+	/* d6 */ 0x80000000,
+	/* c6 */ 0x80000000,
+};
+
+const uint32_t sc_one[64] =
+{
+	/* a1 */ 0x84200000,
+	/* d1 */ 0x8c000800,
+	/* c1 */ 0xbe1f0966,
+	/* b1 */ 0xba040010,
+	/* a2 */ 0x482f0e50,
+	/* d2 */ 0x04220c56,
+	/* c2 */ 0x96011e01,
+	/* b2 */ 0x843283c0,
+	/* a3 */ 0x9c0101c1,
+	/* d3 */ 0x878383c0,
+	/* c3 */ 0x800583c3,
+	/* b3 */ 0x80081080,
+	/* a4 */ 0x3f0fe008,
+	/* d4 */ 0x400be088,
+	/* c4 */ 0x7d000000,
+	/* b4 */ 0x00000000,
+	/* a5 */ 0,
+	/* d5 */ 0,
+	/* c5 */ 0,
+	/* b5 */ 0,
+};
+
+const uint32_t sc_prev[64] =
+{
+	/* a1 */ 0x00000000,
+	/* d1 */ 0x701f10c0,
+	/* c1 */ 0x00000018,
+	/* b1 */ 0x00000601,
+	/* a2 */ 0x00000000,
+	/* d2 */ 0x00000000,
+	/* c2 */ 0x01808000,
+	/* b2 */ 0x00000002,
+	/* a3 */ 0x00001000,
+	/* d3 */ 0x00000000,
+	/* c3 */ 0x00086000,
+	/* b3 */ 0x7f000000,
+	/* a4 */ 0x00000000,
+	/* d4 */ 0x00000000,
+	/* c4 */ 0x00000000,
+	/* b4 */ 0x00000000,
+	/* a5 */ 0,
+	/* d5 */ 0,
+	/* c5 */ 0,
+	/* b5 */ 0,
+	/* a6 */ 0x80020000,
+	/* d6 */ 0,
+	/* c6 */ 0,
+	/* b6 */ 0,
+};
+
 uint32_t randoms[32];
 uint32_t myrandom(size_t index)
 {
 	return randoms[index];
+}
+
+bool check_sc(uint32_t *state1, uint32_t *state2, size_t i)
+{
+	if ((state1[i] & sc_prev[i - 1]) != (state1[i - 1] & sc_prev[i - 1]))
+		return false;
+
+	if ((state1[i] & sc_one[i - 1]) != sc_one[i - 1])
+		return false;
+
+	if (state1[i] & sc_zero[i - 1])
+		return false;
+
+	if ((state1[i] - state2[i]) != differences[i - 1])
+		return false;
+
+	return true;
 }
 
 void block1(
@@ -175,27 +292,6 @@ void block1(
 	bool ok;
 	size_t i;
 	size_t attempts = 0;
-
-	/* message delta as in wang's paper */
-	const uint32_t message_delta[16] =
-	{
-		/* 0 */ 0,
-		/* 1 */ 0,
-		/* 2 */ 0,
-		/* 3 */ 0,
-		/* 4 */ 0x80000000,
-		/* 5 */ 0,
-		/* 6 */ 0,
-		/* 7 */ 0,
-		/* 8 */ 0,
-		/* 9 */ 0,
-		/* 10 */ 0,
-		/* 11 */ 0x00008000,
-		/* 12 */ 0,
-		/* 13 */ 0,
-		/* 14 */ 0x80000000,
-		/* 15 */ 0,
-	};
 
 	while (true)
 	{
@@ -333,36 +429,13 @@ void block1(
 		if (!ok)
 			continue;
 
-		/* A6 */
-		state1[21] = rot_left(md5_g(state1[20], state1[19], state1[18]) + state1[17] + msg1[md5_msg_index[20]] + md5_add[20], 5) + state1[20];
-		state2[21] = rot_left(md5_g(state2[20], state2[19], state2[18]) + state2[17] + msg2[md5_msg_index[20]] + md5_add[20], 5) + state2[20];
-		if ((state1[21] & 0x80020000) != (state1[20] & 0x00020000))
-			continue;
-		if ((state1[21] ^ state2[21]) != 0x80000000)
-			continue;
-
-		/* D6 */
-		state1[22] = rot_left(md5_g(state1[21], state1[20], state1[19]) + state1[18] + msg1[md5_msg_index[21]] + md5_add[21], 9) + state1[21];
-		state2[22] = rot_left(md5_g(state2[21], state2[20], state2[19]) + state2[18] + msg2[md5_msg_index[21]] + md5_add[21], 9) + state2[21];
-		if (state1[22] & 0x80000000)
-			continue;
-		if ((state1[22] ^ state2[22]) != 0x80000000)
-			continue;
-
-		/* C6 */
-		state1[23] = rot_left(md5_g(state1[22], state1[21], state1[20]) + state1[19] + msg1[md5_msg_index[22]] + md5_add[22], 14) + state1[22];
-		state2[23] = rot_left(md5_g(state2[22], state2[21], state2[20]) + state2[19] + msg2[md5_msg_index[22]] + md5_add[22], 14) + state2[22];
-		if (state1[23] & 0x80000000)
-			continue;
-		if (state1[23] != state2[23])
-			continue;
-
-		/* B6 to B8 */
-		for (i = 24; i <= 32; i ++)
+		/* A6 to B8 */
+		for (i = 21; i <= 32; i ++)
 		{
 			state1[i] = rot_left(md5_g(state1[i - 1], state1[i - 2], state1[i - 3]) + state1[i - 4] + msg1[md5_msg_index[i - 1]] + md5_add[i - 1], md5_shift[i - 1]) + state1[i - 1];
 			state2[i] = rot_left(md5_g(state2[i - 1], state2[i - 2], state2[i - 3]) + state2[i - 4] + msg2[md5_msg_index[i - 1]] + md5_add[i - 1], md5_shift[i - 1]) + state2[i - 1];
-			if ((state1[i] ^ state2[i]) != differences[i - 1])
+
+			if (!check_sc(state1, state2, i))
 			{
 				ok = false;
 				break;
@@ -376,7 +449,8 @@ void block1(
 		{
 			state1[i] = rot_left(md5_h(state1[i - 1], state1[i - 2], state1[i - 3]) + state1[i - 4] + msg1[md5_msg_index[i - 1]] + md5_add[i - 1], md5_shift[i - 1]) + state1[i - 1];
 			state2[i] = rot_left(md5_h(state2[i - 1], state2[i - 2], state2[i - 3]) + state2[i - 4] + msg2[md5_msg_index[i - 1]] + md5_add[i - 1], md5_shift[i - 1]) + state2[i - 1];
-			if ((state1[i] ^ state2[i]) != differences[i - 1])
+
+			if (!check_sc(state1, state2, i))
 			{
 				ok = false;
 				break;
@@ -533,87 +607,6 @@ void block2(
 	size_t attempts = 0;
 	bool ok;
 
-	/* message delta as in wang's paper */
-	const uint32_t message_delta[16] =
-	{
-		/* 0 */ 0,
-		/* 1 */ 0,
-		/* 2 */ 0,
-		/* 3 */ 0,
-		/* 4 */ 0x80000000,
-		/* 5 */ 0,
-		/* 6 */ 0,
-		/* 7 */ 0,
-		/* 8 */ 0,
-		/* 9 */ 0,
-		/* 10 */ 0,
-		/* 11 */ 0x00008000,
-		/* 12 */ 0,
-		/* 13 */ 0,
-		/* 14 */ 0x80000000,
-		/* 15 */ 0,
-	};
-
-	const uint32_t sc_zero[16] =
-	{
-		/* a1 */ 0x0a000820,
-		/* d1 */ 0x02208026 | 0x701f10c0,
-		/* c1 */ 0x40201080 | 0x00000018,
-		/* b1 */ 0x443b19ee | 0x00000601,
-		/* a2 */ 0xb41011af,
-		/* d2 */ 0x9a1113a9,
-		/* c2 */ 0x083201c0 | 0x01808000,
-		/* b2 */ 0x1b810001 | 0x00000002,
-		/* a3 */ 0x03828202 | 0x00001000,
-		/* d3 */ 0x00041003,
-		/* c3 */ 0x00021000 | 0x00086000,
-		/* b3 */ 0x0007e000 | 0x7f000000,
-		/* a4 */ 0x80000080,
-		/* d4 */ 0xbf040000,
-		/* c4 */ 0x82008008,
-		/* b4 */ 0,
-	};
-
-	const uint32_t sc_one[16] =
-	{
-		/* a1 */ 0x84200000,
-		/* d1 */ 0x8c000800,
-		/* c1 */ 0xbe1f0966,
-		/* b1 */ 0xba040010,
-		/* a2 */ 0x482f0e50,
-		/* d2 */ 0x04220c56,
-		/* c2 */ 0x96011e01,
-		/* b2 */ 0x843283c0,
-		/* a3 */ 0x9c0101c1,
-		/* d3 */ 0x878383c0,
-		/* c3 */ 0x800583c3,
-		/* b3 */ 0x80081080,
-		/* a4 */ 0x3f0fe008,
-		/* d4 */ 0x400be088,
-		/* c4 */ 0x7d000000,
-		/* b4 */ 0x00000000,
-	};
-
-	const uint32_t sc_prev[16] =
-	{
-		/* a1 */ 0x00000000,
-		/* d1 */ 0x701f10c0,
-		/* c1 */ 0x00000018,
-		/* b1 */ 0x00000601,
-		/* a2 */ 0x00000000,
-		/* d2 */ 0x00000000,
-		/* c2 */ 0x01808000,
-		/* b2 */ 0x00000002,
-		/* a3 */ 0x00001000,
-		/* d3 */ 0x00000000,
-		/* c3 */ 0x00086000,
-		/* b3 */ 0x7f000000,
-		/* a4 */ 0x00000000,
-		/* d4 */ 0x00000000,
-		/* c4 */ 0x00000000,
-		/* b4 */ 0x00000000,
-	};
-
 	while (true)
 	{
 		ok = true;
@@ -657,52 +650,13 @@ void block2(
 		if ((state1[18] ^ state2[18]) != differences[17])
 			continue;
 
-		/* C5 */
-		state1[19] = rot_left(md5_g(state1[18], state1[17], state1[16]) + state1[15] + msg1[27] + md5_add[18], md5_shift[18]) + state1[18];
-		state2[19] = rot_left(md5_g(state2[18], state2[17], state2[16]) + state2[15] + msg2[27] + md5_add[18], md5_shift[18]) + state2[18];
-		if (state1[19] & 0x80020000)
-			continue;
-		if ((state1[19] - state2[19]) != differences[18])
-			continue;
-
-		/* B5 */
-		state1[20] = rot_left(md5_g(state1[19], state1[18], state1[17]) + state1[16] + msg1[16] + md5_add[19], md5_shift[19]) + state1[19];
-		state2[20] = rot_left(md5_g(state2[19], state2[18], state2[17]) + state2[16] + msg2[16] + md5_add[19], md5_shift[19]) + state2[19];
-		if (state1[20] & 0x80000000)
-			continue;
-		if ((state1[20] ^ state2[20]) != differences[19])
-			continue;
-
-		/* A6 */
-		state1[21] = rot_left(md5_g(state1[20], state1[19], state1[18]) + state1[17] + msg1[21] + md5_add[20], md5_shift[20]) + state1[20];
-		state2[21] = rot_left(md5_g(state2[20], state2[19], state2[18]) + state2[17] + msg2[21] + md5_add[20], md5_shift[20]) + state2[20];
-		if ((state1[21] & 0x80020000) != (state1[20] & 0x00020000))
-			continue;
-		if ((state1[21] ^ state2[21]) != differences[20])
-			continue;
-
-		/* D6 */
-		state1[22] = rot_left(md5_g(state1[21], state1[20], state1[19]) + state1[18] + msg1[26] + md5_add[21], md5_shift[21]) + state1[21];
-		state2[22] = rot_left(md5_g(state2[21], state2[20], state2[19]) + state2[18] + msg2[26] + md5_add[21], md5_shift[21]) + state2[21];
-		if (state1[22] & 0x80000000)
-			continue;
-		if ((state1[22] ^ state2[22]) != differences[21])
-			continue;
-
-		/* C6 */
-		state1[23] = rot_left(md5_g(state1[22], state1[21], state1[20]) + state1[19] + msg1[31] + md5_add[22], md5_shift[22]) + state1[22];
-		state2[23] = rot_left(md5_g(state2[22], state2[21], state2[20]) + state2[19] + msg2[31] + md5_add[22], md5_shift[22]) + state2[22];
-		if (state1[23] & 0x80000000)
-			continue;
-		if ((state1[23] ^ state2[23]) != differences[22])
-			continue;
-
-		/* B6 to B8 */
-		for (i = 24; i <= 32; i ++)
+		/* C5 to B8 */
+		for (i = 19; i <= 32; i ++)
 		{
 			state1[i] = rot_left(md5_g(state1[i - 1], state1[i - 2], state1[i - 3]) + state1[i - 4] + msg1[16 + md5_msg_index[i - 1]] + md5_add[i - 1], md5_shift[i - 1]) + state1[i - 1];
 			state2[i] = rot_left(md5_g(state2[i - 1], state2[i - 2], state2[i - 3]) + state2[i - 4] + msg2[16 + md5_msg_index[i - 1]] + md5_add[i - 1], md5_shift[i - 1]) + state2[i - 1];
-			if ((state1[i] ^ state2[i]) != differences[i - 1])
+
+			if (!check_sc(state1, state2, i))
 			{
 				ok = false;
 				break;
@@ -716,7 +670,8 @@ void block2(
 		{
 			state1[i] = rot_left(md5_h(state1[i - 1], state1[i - 2], state1[i - 3]) + state1[i - 4] + msg1[16 + md5_msg_index[i - 1]] + md5_add[i - 1], md5_shift[i - 1]) + state1[i - 1];
 			state2[i] = rot_left(md5_h(state2[i - 1], state2[i - 2], state2[i - 3]) + state2[i - 4] + msg2[16 + md5_msg_index[i - 1]] + md5_add[i - 1], md5_shift[i - 1]) + state2[i - 1];
-			if ((state1[i] ^ state2[i]) != differences[i - 1])
+
+			if (!check_sc(state1, state2, i))
 			{
 				ok = false;
 				break;
