@@ -135,19 +135,19 @@ bool check_sc(
 	size_t i,
 	sufficient_cond *sc)
 {
-	if ((state1[i] & sc[i - 1].prev1) != (state1[i - 1] & sc[i - 1].prev1))
+	if ((state1[i] & sc[i].prev1) != (state1[i - 1] & sc[i].prev1))
 		return false;
 
-	if ((state1[i] ^ state1[i - 2]) & sc[i - 1].prev2)
+	if ((state1[i] ^ state1[i - 2]) & sc[i].prev2)
 		return false;
 
-	if ((state1[i] & sc[i - 1].one) != sc[i - 1].one)
+	if ((state1[i] & sc[i].one) != sc[i].one)
 		return false;
 
-	if (state1[i] & sc[i - 1].zero)
+	if (state1[i] & sc[i].zero)
 		return false;
 
-	if ((state1[i] - state2[i]) != sc[i - 1].diff)
+	if ((state1[i] - state2[i]) != sc[i].diff)
 		return false;
 
 	return true;
@@ -159,14 +159,14 @@ void fix_sc(
 	size_t i,
 	sufficient_cond *sc)
 {
-	state1[i] |= sc[i - 1].one;
+	state1[i] |= sc[i].one;
 
-	state1[i] &= ~sc[i - 1].zero;
+	state1[i] &= ~sc[i].zero;
 
-	state1[i] &= ~sc[i - 1].prev1;
-	state1[i] |= (state1[i - 1] & sc[i - 1].prev1);
+	state1[i] &= ~sc[i].prev1;
+	state1[i] |= (state1[i - 1] & sc[i].prev1);
 
-	state2[i] = state1[i] - sc[i - 1].diff;
+	state2[i] = state1[i] - sc[i].diff;
 }
 
 void block1(
@@ -257,16 +257,17 @@ void block1(
 			fprintf(stderr, "attempt (1) %d\n", attempts);
 
 		/* C1 to A5 */
-		for (i = 3; i <= 17; i ++)
+		for (i = 2; i < 17; i ++)
 		{
-			state1[i] = myrandom(i - 3);
+			state1[i] = myrandom(i - 2);
 			fix_sc(state1, state2, i, sc);
 		}
 
 		for (i = 6; i < 16; i ++)
 		{
-			msg1[i] = rot_right(state1[i + 1] - state1[i], md5_shift[i]) - md5_f(state1[i], state1[i - 1], state1[i - 2]) - state1[i - 3] - md5_add[i];
-			msg2[i] = rot_right(state2[i + 1] - state2[i], md5_shift[i]) - md5_f(state2[i], state2[i - 1], state2[i - 2]) - state2[i - 3] - md5_add[i];
+			msg1[i] = rot_right(state1[i] - state1[i - 1], md5_shift[i]) - md5_f(state1[i - 1], state1[i - 2], state1[i - 3]) - state1[i - 4] - md5_add[i];
+			msg2[i] = rot_right(state2[i] - state2[i - 1], md5_shift[i]) - md5_f(state2[i - 1], state2[i - 2], state2[i - 3]) - state2[i - 4] - md5_add[i];
+
 			if ((msg1[i] ^ msg2[i]) != message_delta[i])
 			{
 				ok = false;
@@ -277,45 +278,46 @@ void block1(
 			continue;
 
 		/* D5 */
-		state1[18] = rot_left(md5_g(state1[17], state1[16], state1[15]) + state1[14] + msg1[6] + md5_add[17], 9) + state1[17];
-		state2[18] = rot_left(md5_g(state2[17], state2[16], state2[15]) + state2[14] + msg2[6] + md5_add[17], 9) + state2[17];
-		if ((state1[18] & 0xa0020000) != (0x00020000 | (state1[17] & 0x20000000)))
+		state1[17] = rot_left(md5_g(state1[16], state1[15], state1[14]) + state1[13] + msg1[6] + md5_add[17], 9) + state1[16];
+		state2[17] = rot_left(md5_g(state2[16], state2[15], state2[14]) + state2[13] + msg2[6] + md5_add[17], 9) + state2[16];
+		if ((state1[17] & 0xa0020000) != (0x00020000 | (state1[16] & 0x20000000)))
 			continue;
-		if ((state1[18] ^ state2[18]) != 0x80000000)
+		if ((state1[17] ^ state2[17]) != 0x80000000)
 			continue;
 
 		/* C5 */
-		state1[19] = rot_left(md5_g(state1[18], state1[17], state1[16]) + state1[15] + msg1[11] + md5_add[18], 14) + state1[18];
-		state2[19] = rot_left(md5_g(state2[18], state2[17], state2[16]) + state2[15] + msg2[11] + md5_add[18], 14) + state2[18];
-		if (state1[19] & sc[18].zero)
+		state1[18] = rot_left(md5_g(state1[17], state1[16], state1[15]) + state1[14] + msg1[11] + md5_add[18], 14) + state1[17];
+		state2[18] = rot_left(md5_g(state2[17], state2[16], state2[15]) + state2[14] + msg2[11] + md5_add[18], 14) + state2[17];
+		if (state1[18] & sc[18].zero)
 			continue;
-		if (state1[19] - state2[19] != sc[18].diff)
+		if (state1[18] - state2[18] != sc[18].diff)
 			continue;
 
 		/* B5 */
-		state1[20] = myrandom(15);
-		state2[20] = state1[20] - 0x80000000;
+		state1[19] = myrandom(15);
+		state2[19] = state1[19] - 0x80000000;
 
-		state1[1] = rot_left(md5_f(state1[0], state1[-1], state1[-2]) + state1[-3] + msg1[0] + md5_add[0], 7) + state1[0];
+		state1[0] = rot_left(md5_f(state1[-1], state1[-2], state1[-3]) + state1[-4] + msg1[0] + md5_add[0], 7) + state1[-1];
+		state2[0] = state1[0];
+
+		state1[1] = rot_left(md5_f(state1[0], state1[-1], state1[-2]) + state1[-3] + msg1[1] + md5_add[1], 12) + state1[0];
 		state2[1] = state1[1];
 
-		state1[2] = rot_left(md5_f(state1[1], state1[0], state1[-1]) + state1[-2] + msg1[1] + md5_add[1], 12) + state1[1];
-		state2[2] = state1[2];
-
-		msg1[0] = rot_right(state1[20] - state1[19], 20) - md5_g(state1[19], state1[18], state1[17]) - state1[16] - md5_add[19];
-		msg2[0] = rot_right(state2[20] - state2[19], 20) - md5_g(state2[19], state2[18], state2[17]) - state2[16] - md5_add[19];
+		msg1[0] = rot_right(state1[19] - state1[18], 20) - md5_g(state1[18], state1[17], state1[16]) - state1[15] - md5_add[19];
+		msg2[0] = rot_right(state2[19] - state2[18], 20) - md5_g(state2[18], state2[17], state2[16]) - state2[15] - md5_add[19];
 		if ((msg1[0] ^ msg2[0]) != message_delta[0])
 			continue;
 
-		msg1[1] = rot_right(state1[17] - state1[16], md5_shift[16]) - md5_g(state1[16], state1[15], state1[14]) - state1[13] - md5_add[16];
-		msg2[1] = rot_right(state2[17] - state2[16], md5_shift[16]) - md5_g(state2[16], state2[15], state2[14]) - state2[13] - md5_add[16];
+		msg1[1] = rot_right(state1[16] - state1[15], md5_shift[16]) - md5_g(state1[15], state1[14], state1[13]) - state1[12] - md5_add[16];
+		msg2[1] = rot_right(state2[16] - state2[15], md5_shift[16]) - md5_g(state2[15], state2[14], state2[13]) - state2[12] - md5_add[16];
 		if ((msg1[1] ^ msg2[1]) != message_delta[1])
 			continue;
 
 		for (i = 2; i < 6; i ++)
 		{
-			msg1[i] = rot_right(state1[i + 1] - state1[i], md5_shift[i]) - md5_f(state1[i], state1[i - 1], state1[i - 2]) - state1[i - 3] - md5_add[i];
-			msg2[i] = rot_right(state2[i + 1] - state2[i], md5_shift[i]) - md5_f(state2[i], state2[i - 1], state2[i - 2]) - state2[i - 3] - md5_add[i];
+			msg1[i] = rot_right(state1[i] - state1[i - 1], md5_shift[i]) - md5_f(state1[i - 1], state1[i - 2], state1[i - 3]) - state1[i - 4] - md5_add[i];
+			msg2[i] = rot_right(state2[i] - state2[i - 1], md5_shift[i]) - md5_f(state2[i - 1], state2[i - 2], state2[i - 3]) - state2[i - 4] - md5_add[i];
+
 			if ((msg1[i] ^ msg2[i]) != message_delta[i])
 			{
 				ok = false;
@@ -326,10 +328,10 @@ void block1(
 			continue;
 
 		/* A6 to B8 */
-		for (i = 21; i <= 32; i ++)
+		for (i = 20; i < 32; i ++)
 		{
-			state1[i] = rot_left(md5_g(state1[i - 1], state1[i - 2], state1[i - 3]) + state1[i - 4] + msg1[md5_msg_index[i - 1]] + md5_add[i - 1], md5_shift[i - 1]) + state1[i - 1];
-			state2[i] = rot_left(md5_g(state2[i - 1], state2[i - 2], state2[i - 3]) + state2[i - 4] + msg2[md5_msg_index[i - 1]] + md5_add[i - 1], md5_shift[i - 1]) + state2[i - 1];
+			state1[i] = rot_left(md5_g(state1[i - 1], state1[i - 2], state1[i - 3]) + state1[i - 4] + msg1[md5_msg_index[i]] + md5_add[i], md5_shift[i]) + state1[i - 1];
+			state2[i] = rot_left(md5_g(state2[i - 1], state2[i - 2], state2[i - 3]) + state2[i - 4] + msg2[md5_msg_index[i]] + md5_add[i], md5_shift[i]) + state2[i - 1];
 
 			if (!check_sc(state1, state2, i, sc))
 			{
@@ -341,10 +343,10 @@ void block1(
 			continue;
 
 		/* A9 to B12 */
-		for (i = 33; i <= 48; i ++)
+		for (i = 32; i < 48; i ++)
 		{
-			state1[i] = rot_left(md5_h(state1[i - 1], state1[i - 2], state1[i - 3]) + state1[i - 4] + msg1[md5_msg_index[i - 1]] + md5_add[i - 1], md5_shift[i - 1]) + state1[i - 1];
-			state2[i] = rot_left(md5_h(state2[i - 1], state2[i - 2], state2[i - 3]) + state2[i - 4] + msg2[md5_msg_index[i - 1]] + md5_add[i - 1], md5_shift[i - 1]) + state2[i - 1];
+			state1[i] = rot_left(md5_h(state1[i - 1], state1[i - 2], state1[i - 3]) + state1[i - 4] + msg1[md5_msg_index[i]] + md5_add[i], md5_shift[i]) + state1[i - 1];
+			state2[i] = rot_left(md5_h(state2[i - 1], state2[i - 2], state2[i - 3]) + state2[i - 4] + msg2[md5_msg_index[i]] + md5_add[i], md5_shift[i]) + state2[i - 1];
 
 			if (!check_sc(state1, state2, i, sc))
 			{
@@ -356,130 +358,130 @@ void block1(
 			continue;
 
 		/* A13 */
-		state1[49] = rot_left(md5_i(state1[48], state1[47], state1[46]) + state1[45] + msg1[md5_msg_index[48]] + md5_add[48], 6) + state1[48];
-		state2[49] = rot_left(md5_i(state2[48], state2[47], state2[46]) + state2[45] + msg2[md5_msg_index[48]] + md5_add[48], 6) + state2[48];
-		if ((state1[49] ^ state1[47]) & sc[48].prev2)
+		state1[48] = rot_left(md5_i(state1[47], state1[46], state1[45]) + state1[44] + msg1[md5_msg_index[48]] + md5_add[48], 6) + state1[47];
+		state2[48] = rot_left(md5_i(state2[47], state2[46], state2[45]) + state2[44] + msg2[md5_msg_index[48]] + md5_add[48], 6) + state2[47];
+		if ((state1[48] ^ state1[46]) & sc[48].prev2)
 			continue;
-		if ((state1[49] - state2[49]) != sc[48].diff)
+		if ((state1[48] - state2[48]) != sc[48].diff)
 			continue;
 
 
 		/* D13 */
-		state1[50] = rot_left(md5_i(state1[49], state1[48], state1[47]) + state1[46] + msg1[md5_msg_index[49]] + md5_add[49], 10) + state1[49];
-		state2[50] = rot_left(md5_i(state2[49], state2[48], state2[47]) + state2[46] + msg2[md5_msg_index[49]] + md5_add[49], 10) + state2[49];
-		if (!((state1[50] ^ state1[48]) & sc[49].prev2))
+		state1[49] = rot_left(md5_i(state1[48], state1[47], state1[46]) + state1[45] + msg1[md5_msg_index[49]] + md5_add[49], 10) + state1[48];
+		state2[49] = rot_left(md5_i(state2[48], state2[47], state2[46]) + state2[45] + msg2[md5_msg_index[49]] + md5_add[49], 10) + state2[48];
+		if (!((state1[49] ^ state1[47]) & sc[49].prev2))
 			continue;
-		if ((state1[50] ^ state2[50]) != sc[49].diff)
+		if ((state1[49] ^ state2[49]) != sc[49].diff)
 			continue;
 
 		/* C13 */
-		state1[51] = rot_left(md5_i(state1[50], state1[49], state1[48]) + state1[47] + msg1[md5_msg_index[50]] + md5_add[50], 15) + state1[50];
-		state2[51] = rot_left(md5_i(state2[50], state2[49], state2[48]) + state2[47] + msg2[md5_msg_index[50]] + md5_add[50], 15) + state2[50];
-		if ((state1[51] ^ state1[49]) & sc[50].prev2)
+		state1[50] = rot_left(md5_i(state1[49], state1[48], state1[47]) + state1[46] + msg1[md5_msg_index[50]] + md5_add[50], 15) + state1[49];
+		state2[50] = rot_left(md5_i(state2[49], state2[48], state2[47]) + state2[46] + msg2[md5_msg_index[50]] + md5_add[50], 15) + state2[49];
+		if ((state1[50] ^ state1[48]) & sc[50].prev2)
 			continue;
-		if ((state1[51] ^ state2[51]) != sc[50].diff)
+		if ((state1[50] ^ state2[50]) != sc[50].diff)
 			continue;
 
 		/* B13 */
-		state1[52] = rot_left(md5_i(state1[51], state1[50], state1[49]) + state1[48] + msg1[md5_msg_index[51]] + md5_add[51], 21) + state1[51];
-		state2[52] = rot_left(md5_i(state2[51], state2[50], state2[49]) + state2[48] + msg2[md5_msg_index[51]] + md5_add[51], 21) + state2[51];
-		if ((state1[52] ^ state1[50]) & sc[51].prev2)
+		state1[51] = rot_left(md5_i(state1[50], state1[49], state1[48]) + state1[47] + msg1[md5_msg_index[51]] + md5_add[51], 21) + state1[50];
+		state2[51] = rot_left(md5_i(state2[50], state2[49], state2[48]) + state2[47] + msg2[md5_msg_index[51]] + md5_add[51], 21) + state2[50];
+		if ((state1[51] ^ state1[49]) & sc[51].prev2)
 			continue;
-		if ((state1[52] ^ state2[52]) != sc[51].diff)
+		if ((state1[51] ^ state2[51]) != sc[51].diff)
 			continue;
 
 		/* A14 */
-		state1[53] = rot_left(md5_i(state1[52], state1[51], state1[50]) + state1[49] + msg1[md5_msg_index[52]] + md5_add[52], 6) + state1[52];
-		state2[53] = rot_left(md5_i(state2[52], state2[51], state2[50]) + state2[49] + msg2[md5_msg_index[52]] + md5_add[52], 6) + state2[52];
-		if ((state1[53] ^ state1[51]) & sc[52].prev2)
+		state1[52] = rot_left(md5_i(state1[51], state1[50], state1[49]) + state1[48] + msg1[md5_msg_index[52]] + md5_add[52], 6) + state1[51];
+		state2[52] = rot_left(md5_i(state2[51], state2[50], state2[49]) + state2[48] + msg2[md5_msg_index[52]] + md5_add[52], 6) + state2[51];
+		if ((state1[52] ^ state1[50]) & sc[52].prev2)
 			continue;
-		if ((state1[53] ^ state2[53]) != sc[52].diff)
+		if ((state1[52] ^ state2[52]) != sc[52].diff)
 			continue;
 
 		/* D14 */
-		state1[54] = rot_left(md5_i(state1[53], state1[52], state1[51]) + state1[50] + msg1[md5_msg_index[53]] + md5_add[53], 10) + state1[53];
-		state2[54] = rot_left(md5_i(state2[53], state2[52], state2[51]) + state2[50] + msg2[md5_msg_index[53]] + md5_add[53], 10) + state2[53];
-		if ((state1[54] ^ state1[52]) & sc[53].prev2)
+		state1[53] = rot_left(md5_i(state1[52], state1[51], state1[50]) + state1[49] + msg1[md5_msg_index[53]] + md5_add[53], 10) + state1[52];
+		state2[53] = rot_left(md5_i(state2[52], state2[51], state2[50]) + state2[49] + msg2[md5_msg_index[53]] + md5_add[53], 10) + state2[52];
+		if ((state1[53] ^ state1[51]) & sc[53].prev2)
 			continue;
-		if ((state1[54] ^ state2[54]) != sc[53].diff)
+		if ((state1[53] ^ state2[53]) != sc[53].diff)
 			continue;
 
 		/* C14 */
-		state1[55] = rot_left(md5_i(state1[54], state1[53], state1[52]) + state1[51] + msg1[md5_msg_index[54]] + md5_add[54], 15) + state1[54];
-		state2[55] = rot_left(md5_i(state2[54], state2[53], state2[52]) + state2[51] + msg2[md5_msg_index[54]] + md5_add[54], 15) + state2[54];
-		if ((state1[55] ^ state1[53]) & sc[54].prev2)
+		state1[54] = rot_left(md5_i(state1[53], state1[52], state1[51]) + state1[50] + msg1[md5_msg_index[54]] + md5_add[54], 15) + state1[53];
+		state2[54] = rot_left(md5_i(state2[53], state2[52], state2[51]) + state2[50] + msg2[md5_msg_index[54]] + md5_add[54], 15) + state2[53];
+		if ((state1[54] ^ state1[52]) & sc[54].prev2)
 			continue;
-		if ((state1[55] ^ state2[55]) != sc[54].diff)
+		if ((state1[54] ^ state2[54]) != sc[54].diff)
 			continue;
 
 		/* B14 */
-		state1[56] = rot_left(md5_i(state1[55], state1[54], state1[53]) + state1[52] + msg1[md5_msg_index[55]] + md5_add[55], 21) + state1[55];
-		state2[56] = rot_left(md5_i(state2[55], state2[54], state2[53]) + state2[52] + msg2[md5_msg_index[55]] + md5_add[55], 21) + state2[55];
-		if ((state1[56] ^ state1[54]) & sc[55].prev2)
+		state1[55] = rot_left(md5_i(state1[54], state1[53], state1[52]) + state1[51] + msg1[md5_msg_index[55]] + md5_add[55], 21) + state1[54];
+		state2[55] = rot_left(md5_i(state2[54], state2[53], state2[52]) + state2[51] + msg2[md5_msg_index[55]] + md5_add[55], 21) + state2[54];
+		if ((state1[55] ^ state1[53]) & sc[55].prev2)
 			continue;
-		if ((state1[56] ^ state2[56]) != sc[55].diff)
+		if ((state1[55] ^ state2[55]) != sc[55].diff)
 			continue;
 
 		/* A15 */
-		state1[57] = rot_left(md5_i(state1[56], state1[55], state1[54]) + state1[53] + msg1[md5_msg_index[56]] + md5_add[56], 6) + state1[56];
-		state2[57] = rot_left(md5_i(state2[56], state2[55], state2[54]) + state2[53] + msg2[md5_msg_index[56]] + md5_add[56], 6) + state2[56];
-		if ((state1[57] ^ state1[55]) & sc[56].prev2)
+		state1[56] = rot_left(md5_i(state1[55], state1[54], state1[53]) + state1[52] + msg1[md5_msg_index[56]] + md5_add[56], 6) + state1[55];
+		state2[56] = rot_left(md5_i(state2[55], state2[54], state2[53]) + state2[52] + msg2[md5_msg_index[56]] + md5_add[56], 6) + state2[55];
+		if ((state1[56] ^ state1[54]) & sc[56].prev2)
 			continue;
-		if ((state1[57] ^ state2[57]) != sc[56].diff)
+		if ((state1[56] ^ state2[56]) != sc[56].diff)
 			continue;
 
 		/* D15 */
-		state1[58] = rot_left(md5_i(state1[57], state1[56], state1[55]) + state1[54] + msg1[md5_msg_index[57]] + md5_add[57], 10) + state1[57];
-		state2[58] = rot_left(md5_i(state2[57], state2[56], state2[55]) + state2[54] + msg2[md5_msg_index[57]] + md5_add[57], 10) + state2[57];
-		if ((state1[58] ^ state1[56]) & sc[57].prev2)
+		state1[57] = rot_left(md5_i(state1[56], state1[55], state1[54]) + state1[53] + msg1[md5_msg_index[57]] + md5_add[57], 10) + state1[56];
+		state2[57] = rot_left(md5_i(state2[56], state2[55], state2[54]) + state2[53] + msg2[md5_msg_index[57]] + md5_add[57], 10) + state2[56];
+		if ((state1[57] ^ state1[55]) & sc[57].prev2)
 			continue;
-		if ((state1[58] ^ state2[58]) != sc[57].diff)
+		if ((state1[57] ^ state2[57]) != sc[57].diff)
 			continue;
 
 		/* C15 */
-		state1[59] = rot_left(md5_i(state1[58], state1[57], state1[56]) + state1[55] + msg1[md5_msg_index[58]] + md5_add[58], 15) + state1[58];
-		state2[59] = rot_left(md5_i(state2[58], state2[57], state2[56]) + state2[55] + msg2[md5_msg_index[58]] + md5_add[58], 15) + state2[58];
-		if ((state1[59] ^ state1[57]) & sc[58].prev2)
+		state1[58] = rot_left(md5_i(state1[57], state1[56], state1[55]) + state1[54] + msg1[md5_msg_index[58]] + md5_add[58], 15) + state1[57];
+		state2[58] = rot_left(md5_i(state2[57], state2[56], state2[55]) + state2[54] + msg2[md5_msg_index[58]] + md5_add[58], 15) + state2[57];
+		if ((state1[58] ^ state1[56]) & sc[58].prev2)
 			continue;
-		if ((state1[59] ^ state2[59]) != sc[58].diff)
+		if ((state1[58] ^ state2[58]) != sc[58].diff)
 			continue;
 
 		/* B15 */
-		state1[60] = rot_left(md5_i(state1[59], state1[58], state1[57]) + state1[56] + msg1[md5_msg_index[59]] + md5_add[59], 21) + state1[59];
-		state2[60] = rot_left(md5_i(state2[59], state2[58], state2[57]) + state2[56] + msg2[md5_msg_index[59]] + md5_add[59], 21) + state2[59];
-		if (state1[60] & sc[59].zero)
+		state1[59] = rot_left(md5_i(state1[58], state1[57], state1[56]) + state1[55] + msg1[md5_msg_index[59]] + md5_add[59], 21) + state1[58];
+		state2[59] = rot_left(md5_i(state2[58], state2[57], state2[56]) + state2[55] + msg2[md5_msg_index[59]] + md5_add[59], 21) + state2[58];
+		if (state1[59] & sc[59].zero)
 			continue;
-		if ((state1[60] ^ state2[60]) != sc[59].diff)
+		if ((state1[59] ^ state2[59]) != sc[59].diff)
 			continue;
 
 		/* A16 */
-		state1[61] = rot_left(md5_i(state1[60], state1[59], state1[58]) + state1[57] + msg1[md5_msg_index[60]] + md5_add[60], 6) + state1[60];
-		state2[61] = rot_left(md5_i(state2[60], state2[59], state2[58]) + state2[57] + msg2[md5_msg_index[60]] + md5_add[60], 6) + state2[60];
-		if ((state1[61] ^ state2[61]) != sc[60].diff)
+		state1[60] = rot_left(md5_i(state1[59], state1[58], state1[57]) + state1[56] + msg1[md5_msg_index[60]] + md5_add[60], 6) + state1[59];
+		state2[60] = rot_left(md5_i(state2[59], state2[58], state2[57]) + state2[56] + msg2[md5_msg_index[60]] + md5_add[60], 6) + state2[59];
+		if ((state1[60] ^ state2[60]) != sc[60].diff)
 			continue;
 
 		/* D16 */
-		state1[62] = rot_left(md5_i(state1[61], state1[60], state1[59]) + state1[58] + msg1[md5_msg_index[61]] + md5_add[61], 10) + state1[61];
-		state2[62] = rot_left(md5_i(state2[61], state2[60], state2[59]) + state2[58] + msg2[md5_msg_index[61]] + md5_add[61], 10) + state2[61];
-		if (state1[62] & sc[61].zero)
+		state1[61] = rot_left(md5_i(state1[60], state1[59], state1[58]) + state1[57] + msg1[md5_msg_index[61]] + md5_add[61], 10) + state1[60];
+		state2[61] = rot_left(md5_i(state2[60], state2[59], state2[58]) + state2[57] + msg2[md5_msg_index[61]] + md5_add[61], 10) + state2[60];
+		if (state1[61] & sc[61].zero)
 			continue;
-		if ((state1[62] - state2[62]) != sc[61].diff)
+		if ((state1[61] - state2[61]) != sc[61].diff)
 			continue;
 
 		/* C16 */
-		state1[63] = rot_left(md5_i(state1[62], state1[61], state1[60]) + state1[59] + msg1[md5_msg_index[62]] + md5_add[62], 15) + state1[62];
-		state2[63] = rot_left(md5_i(state2[62], state2[61], state2[60]) + state2[59] + msg2[md5_msg_index[62]] + md5_add[62], 15) + state2[62];
-		if (((state1[63] + md5_iv[2]) & 0x86000000) != (((state1[62] + md5_iv[3]) & 0x80000000) | 0x02000000))
+		state1[62] = rot_left(md5_i(state1[61], state1[60], state1[59]) + state1[58] + msg1[md5_msg_index[62]] + md5_add[62], 15) + state1[61];
+		state2[62] = rot_left(md5_i(state2[61], state2[60], state2[59]) + state2[58] + msg2[md5_msg_index[62]] + md5_add[62], 15) + state2[61];
+		if (((state1[62] + md5_iv[2]) & 0x86000000) != (((state1[61] + md5_iv[3]) & 0x80000000) | 0x02000000))
 			continue;
-		if ((state1[63] - state2[63]) != sc[62].diff)
+		if ((state1[62] - state2[62]) != sc[62].diff)
 			continue;
 
 		/* B16 */
-		state1[64] = rot_left(md5_i(state1[63], state1[62], state1[61]) + state1[60] + msg1[md5_msg_index[63]] + md5_add[63], 21) + state1[63];
-		state2[64] = rot_left(md5_i(state2[63], state2[62], state2[61]) + state2[60] + msg2[md5_msg_index[63]] + md5_add[63], 21) + state2[63];
-		if (((state1[64] + md5_iv[1]) & 0x86000020) != ((state1[63] + md5_iv[2]) & 0x80000000))
+		state1[63] = rot_left(md5_i(state1[62], state1[61], state1[60]) + state1[59] + msg1[md5_msg_index[63]] + md5_add[63], 21) + state1[62];
+		state2[63] = rot_left(md5_i(state2[62], state2[61], state2[60]) + state2[59] + msg2[md5_msg_index[63]] + md5_add[63], 21) + state2[62];
+		if (((state1[63] + md5_iv[1]) & 0x86000020) != ((state1[62] + md5_iv[2]) & 0x80000000))
 			continue;
-		if ((state1[64] - state2[64]) != sc[63].diff)
+		if ((state1[63] - state2[63]) != sc[63].diff)
 			continue;
 
 		return;
@@ -576,16 +578,17 @@ void block2(
 		for (i = 0; i < 16; i ++)
 		{
 			/* generate random state */
-			state1[i + 1] = myrandom(i + 16);
+			state1[i] = myrandom(i + 16);
 
 			/* do simple message modification */
-			fix_sc(state1, state2, i + 1, sc);
+			fix_sc(state1, state2, i, sc);
 		}
 
 		for (i = 0; i < 16; i ++)
 		{
-			msg1[16 + i] = rot_right(state1[i + 1] - state1[i], md5_shift[i]) - md5_f(state1[i], state1[i - 1], state1[i - 2]) - state1[i - 3] - md5_add[i];
-			msg2[16 + i] = rot_right(state2[i + 1] - state2[i], md5_shift[i]) - md5_f(state2[i], state2[i - 1], state2[i - 2]) - state2[i - 3] - md5_add[i];
+			msg1[16 + i] = rot_right(state1[i] - state1[i - 1], md5_shift[i]) - md5_f(state1[i - 1], state1[i - 2], state1[i - 3]) - state1[i - 4] - md5_add[i];
+			msg2[16 + i] = rot_right(state2[i] - state2[i - 1], md5_shift[i]) - md5_f(state2[i - 1], state2[i - 2], state2[i - 3]) - state2[i - 4] - md5_add[i];
+
 			if ((msg1[16 + i] ^ msg2[16 + i]) != message_delta[i])
 			{
 				ok = false;
@@ -596,26 +599,26 @@ void block2(
 			continue;
 
 		/* A5 */
-		state1[17] = rot_left(md5_g(state1[16], state1[15], state1[14]) + state1[13] + msg1[17] + md5_add[16], md5_shift[16]) + state1[16];
-		state2[17] = rot_left(md5_g(state2[16], state2[15], state2[14]) + state2[13] + msg2[17] + md5_add[16], md5_shift[16]) + state2[16];
-		if ((state1[17] & 0x80028008) != (state1[16] & 0x00008008))
+		state1[16] = rot_left(md5_g(state1[15], state1[14], state1[13]) + state1[12] + msg1[17] + md5_add[16], md5_shift[16]) + state1[15];
+		state2[16] = rot_left(md5_g(state2[15], state2[14], state2[13]) + state2[12] + msg2[17] + md5_add[16], md5_shift[16]) + state2[15];
+		if ((state1[16] & 0x80028008) != (state1[15] & 0x00008008))
 			continue;
-		if ((state1[17] ^ state2[17]) != sc[16].diff)
+		if ((state1[16] ^ state2[16]) != sc[16].diff)
 			continue;
 
 		/* D5 */
-		state1[18] = rot_left(md5_g(state1[17], state1[16], state1[15]) + state1[14] + msg1[22] + md5_add[17], md5_shift[17]) + state1[17];
-		state2[18] = rot_left(md5_g(state2[17], state2[16], state2[15]) + state2[14] + msg2[22] + md5_add[17], md5_shift[17]) + state2[17];
-		if ((state1[18] & 0xa0020000) != ((state1[17] & 0x20000000) | 0x00020000))
+		state1[17] = rot_left(md5_g(state1[16], state1[15], state1[14]) + state1[13] + msg1[22] + md5_add[17], md5_shift[17]) + state1[16];
+		state2[17] = rot_left(md5_g(state2[16], state2[15], state2[14]) + state2[13] + msg2[22] + md5_add[17], md5_shift[17]) + state2[16];
+		if ((state1[17] & 0xa0020000) != ((state1[16] & 0x20000000) | 0x00020000))
 			continue;
-		if ((state1[18] ^ state2[18]) != sc[17].diff)
+		if ((state1[17] ^ state2[17]) != sc[17].diff)
 			continue;
 
 		/* C5 to B8 */
-		for (i = 19; i <= 32; i ++)
+		for (i = 18; i < 32; i ++)
 		{
-			state1[i] = rot_left(md5_g(state1[i - 1], state1[i - 2], state1[i - 3]) + state1[i - 4] + msg1[16 + md5_msg_index[i - 1]] + md5_add[i - 1], md5_shift[i - 1]) + state1[i - 1];
-			state2[i] = rot_left(md5_g(state2[i - 1], state2[i - 2], state2[i - 3]) + state2[i - 4] + msg2[16 + md5_msg_index[i - 1]] + md5_add[i - 1], md5_shift[i - 1]) + state2[i - 1];
+			state1[i] = rot_left(md5_g(state1[i - 1], state1[i - 2], state1[i - 3]) + state1[i - 4] + msg1[16 + md5_msg_index[i]] + md5_add[i], md5_shift[i]) + state1[i - 1];
+			state2[i] = rot_left(md5_g(state2[i - 1], state2[i - 2], state2[i - 3]) + state2[i - 4] + msg2[16 + md5_msg_index[i]] + md5_add[i], md5_shift[i]) + state2[i - 1];
 
 			if (!check_sc(state1, state2, i, sc))
 			{
@@ -627,10 +630,10 @@ void block2(
 			continue;
 
 		/* A9 to C12 */
-		for (i = 33; i <= 47; i ++)
+		for (i = 32; i < 47; i ++)
 		{
-			state1[i] = rot_left(md5_h(state1[i - 1], state1[i - 2], state1[i - 3]) + state1[i - 4] + msg1[16 + md5_msg_index[i - 1]] + md5_add[i - 1], md5_shift[i - 1]) + state1[i - 1];
-			state2[i] = rot_left(md5_h(state2[i - 1], state2[i - 2], state2[i - 3]) + state2[i - 4] + msg2[16 + md5_msg_index[i - 1]] + md5_add[i - 1], md5_shift[i - 1]) + state2[i - 1];
+			state1[i] = rot_left(md5_h(state1[i - 1], state1[i - 2], state1[i - 3]) + state1[i - 4] + msg1[16 + md5_msg_index[i]] + md5_add[i], md5_shift[i]) + state1[i - 1];
+			state2[i] = rot_left(md5_h(state2[i - 1], state2[i - 2], state2[i - 3]) + state2[i - 4] + msg2[16 + md5_msg_index[i]] + md5_add[i], md5_shift[i]) + state2[i - 1];
 
 			if (!check_sc(state1, state2, i, sc))
 			{
@@ -642,129 +645,129 @@ void block2(
 			continue;
 
 		/* B12 */
-		state1[48] = rot_left(md5_h(state1[47], state1[46], state1[45]) + state1[44] + msg1[18] + md5_add[47], md5_shift[47]) + state1[47];
-		state2[48] = rot_left(md5_h(state2[47], state2[46], state2[45]) + state2[44] + msg2[18] + md5_add[47], md5_shift[47]) + state2[47];
-		if ((state1[48] & 0x80000000) != (state1[46] & 0x80000000))
+		state1[47] = rot_left(md5_h(state1[46], state1[45], state1[44]) + state1[43] + msg1[18] + md5_add[47], md5_shift[47]) + state1[46];
+		state2[47] = rot_left(md5_h(state2[46], state2[45], state2[44]) + state2[43] + msg2[18] + md5_add[47], md5_shift[47]) + state2[46];
+		if ((state1[47] & 0x80000000) != (state1[45] & 0x80000000))
 			continue;
-		if ((state1[48] ^ state2[48]) != sc[47].diff)
+		if ((state1[47] ^ state2[47]) != sc[47].diff)
 			continue;
 
 		/* A13 */
-		state1[49] = rot_left(md5_i(state1[48], state1[47], state1[46]) + state1[45] + msg1[16] + md5_add[48], md5_shift[48]) + state1[48];
-		state2[49] = rot_left(md5_i(state2[48], state2[47], state2[46]) + state2[45] + msg2[16] + md5_add[48], md5_shift[48]) + state2[48];
-		if ((state1[49] & 0x80000000) != (state1[47] & 0x80000000))
+		state1[48] = rot_left(md5_i(state1[47], state1[46], state1[45]) + state1[44] + msg1[16] + md5_add[48], md5_shift[48]) + state1[47];
+		state2[48] = rot_left(md5_i(state2[47], state2[46], state2[45]) + state2[44] + msg2[16] + md5_add[48], md5_shift[48]) + state2[47];
+		if ((state1[48] & 0x80000000) != (state1[46] & 0x80000000))
 			continue;
-		if ((state1[49] ^ state2[49]) != sc[48].diff)
+		if ((state1[48] ^ state2[48]) != sc[48].diff)
 			continue;
 
 		/* D13 */
-		state1[50] = rot_left(md5_i(state1[49], state1[48], state1[47]) + state1[46] + msg1[23] + md5_add[49], md5_shift[49]) + state1[49];
-		state2[50] = rot_left(md5_i(state2[49], state2[48], state2[47]) + state2[46] + msg2[23] + md5_add[49], md5_shift[49]) + state2[49];
-		if ((state1[50] ^ state2[50]) != sc[49].diff)
+		state1[49] = rot_left(md5_i(state1[48], state1[47], state1[46]) + state1[45] + msg1[23] + md5_add[49], md5_shift[49]) + state1[48];
+		state2[49] = rot_left(md5_i(state2[48], state2[47], state2[46]) + state2[45] + msg2[23] + md5_add[49], md5_shift[49]) + state2[48];
+		if ((state1[49] ^ state2[49]) != sc[49].diff)
 			continue;
 
 		/* C13 */
-		state1[51] = rot_left(md5_i(state1[50], state1[49], state1[48]) + state1[47] + msg1[30] + md5_add[50], md5_shift[50]) + state1[50];
-		state2[51] = rot_left(md5_i(state2[50], state2[49], state2[48]) + state2[47] + msg2[30] + md5_add[50], md5_shift[50]) + state2[50];
-		if ((state1[51] & 0x80000000) != (state1[49] & 0x80000000))
+		state1[50] = rot_left(md5_i(state1[49], state1[48], state1[47]) + state1[46] + msg1[30] + md5_add[50], md5_shift[50]) + state1[49];
+		state2[50] = rot_left(md5_i(state2[49], state2[48], state2[47]) + state2[46] + msg2[30] + md5_add[50], md5_shift[50]) + state2[49];
+		if ((state1[50] & 0x80000000) != (state1[48] & 0x80000000))
 			continue;
-		if ((state1[51] ^ state2[51]) != sc[50].diff)
+		if ((state1[50] ^ state2[50]) != sc[50].diff)
 			continue;
 
 		/* B13 */
-		state1[52] = rot_left(md5_i(state1[51], state1[50], state1[49]) + state1[48] + msg1[21] + md5_add[51], md5_shift[51]) + state1[51];
-		state2[52] = rot_left(md5_i(state2[51], state2[50], state2[49]) + state2[48] + msg2[21] + md5_add[51], md5_shift[51]) + state2[51];
-		if ((state1[52] & 0x80000000) != (state1[50] & 0x80000000))
+		state1[51] = rot_left(md5_i(state1[50], state1[49], state1[48]) + state1[47] + msg1[21] + md5_add[51], md5_shift[51]) + state1[50];
+		state2[51] = rot_left(md5_i(state2[50], state2[49], state2[48]) + state2[47] + msg2[21] + md5_add[51], md5_shift[51]) + state2[50];
+		if ((state1[51] & 0x80000000) != (state1[49] & 0x80000000))
 			continue;
-		if ((state1[52] ^ state2[52]) != sc[51].diff)
+		if ((state1[51] ^ state2[51]) != sc[51].diff)
 			continue;
 
 		/* A14 */
-		state1[53] = rot_left(md5_i(state1[52], state1[51], state1[50]) + state1[49] + msg1[28] + md5_add[52], md5_shift[52]) + state1[52];
-		state2[53] = rot_left(md5_i(state2[52], state2[51], state2[50]) + state2[49] + msg2[28] + md5_add[52], md5_shift[52]) + state2[52];
-		if ((state1[53] & 0x80000000) != (state1[51] & 0x80000000))
+		state1[52] = rot_left(md5_i(state1[51], state1[50], state1[49]) + state1[48] + msg1[28] + md5_add[52], md5_shift[52]) + state1[51];
+		state2[52] = rot_left(md5_i(state2[51], state2[50], state2[49]) + state2[48] + msg2[28] + md5_add[52], md5_shift[52]) + state2[51];
+		if ((state1[52] & 0x80000000) != (state1[50] & 0x80000000))
 			continue;
-		if ((state1[53] ^ state2[53]) != sc[52].diff)
+		if ((state1[52] ^ state2[52]) != sc[52].diff)
 			continue;
 
 		/* D14 */
-		state1[54] = rot_left(md5_i(state1[53], state1[52], state1[51]) + state1[50] + msg1[19] + md5_add[53], md5_shift[53]) + state1[53];
-		state2[54] = rot_left(md5_i(state2[53], state2[52], state2[51]) + state2[50] + msg2[19] + md5_add[53], md5_shift[53]) + state2[53];
-		if ((state1[54] & 0x80000000) != (state1[52] & 0x80000000))
+		state1[53] = rot_left(md5_i(state1[52], state1[51], state1[50]) + state1[49] + msg1[19] + md5_add[53], md5_shift[53]) + state1[52];
+		state2[53] = rot_left(md5_i(state2[52], state2[51], state2[50]) + state2[49] + msg2[19] + md5_add[53], md5_shift[53]) + state2[52];
+		if ((state1[53] & 0x80000000) != (state1[51] & 0x80000000))
 			continue;
-		if ((state1[54] ^ state2[54]) != sc[53].diff)
+		if ((state1[53] ^ state2[53]) != sc[53].diff)
 			continue;
 
 		/* C14 */
-		state1[55] = rot_left(md5_i(state1[54], state1[53], state1[52]) + state1[51] + msg1[26] + md5_add[54], md5_shift[54]) + state1[54];
-		state2[55] = rot_left(md5_i(state2[54], state2[53], state2[52]) + state2[51] + msg2[26] + md5_add[54], md5_shift[54]) + state2[54];
-		if ((state1[55] & 0x80000000) != (state1[53] & 0x80000000))
+		state1[54] = rot_left(md5_i(state1[53], state1[52], state1[51]) + state1[50] + msg1[26] + md5_add[54], md5_shift[54]) + state1[53];
+		state2[54] = rot_left(md5_i(state2[53], state2[52], state2[51]) + state2[50] + msg2[26] + md5_add[54], md5_shift[54]) + state2[53];
+		if ((state1[54] & 0x80000000) != (state1[52] & 0x80000000))
 			continue;
-		if ((state1[55] ^ state2[55]) != sc[54].diff)
+		if ((state1[54] ^ state2[54]) != sc[54].diff)
 			continue;
 
 		/* B14 */
-		state1[56] = rot_left(md5_i(state1[55], state1[54], state1[53]) + state1[52] + msg1[17] + md5_add[55], md5_shift[55]) + state1[55];
-		state2[56] = rot_left(md5_i(state2[55], state2[54], state2[53]) + state2[52] + msg2[17] + md5_add[55], md5_shift[55]) + state2[55];
-		if ((state1[56] & 0x80000000) != (state1[54] & 0x80000000))
+		state1[55] = rot_left(md5_i(state1[54], state1[53], state1[52]) + state1[51] + msg1[17] + md5_add[55], md5_shift[55]) + state1[54];
+		state2[55] = rot_left(md5_i(state2[54], state2[53], state2[52]) + state2[51] + msg2[17] + md5_add[55], md5_shift[55]) + state2[54];
+		if ((state1[55] & 0x80000000) != (state1[53] & 0x80000000))
 			continue;
-		if ((state1[56] ^ state2[56]) != sc[55].diff)
+		if ((state1[55] ^ state2[55]) != sc[55].diff)
 			continue;
 
 		/* A15 */
-		state1[57] = rot_left(md5_i(state1[56], state1[55], state1[54]) + state1[53] + msg1[24] + md5_add[56], md5_shift[56]) + state1[56];
-		state2[57] = rot_left(md5_i(state2[56], state2[55], state2[54]) + state2[53] + msg2[24] + md5_add[56], md5_shift[56]) + state2[56];
-		if ((state1[57] & 0x80000000) != (state1[55] & 0x80000000))
+		state1[56] = rot_left(md5_i(state1[55], state1[54], state1[53]) + state1[52] + msg1[24] + md5_add[56], md5_shift[56]) + state1[55];
+		state2[56] = rot_left(md5_i(state2[55], state2[54], state2[53]) + state2[52] + msg2[24] + md5_add[56], md5_shift[56]) + state2[55];
+		if ((state1[56] & 0x80000000) != (state1[54] & 0x80000000))
 			continue;
-		if ((state1[57] ^ state2[57]) != sc[56].diff)
+		if ((state1[56] ^ state2[56]) != sc[56].diff)
 			continue;
 
 		/* D15 */
-		state1[58] = rot_left(md5_i(state1[57], state1[56], state1[55]) + state1[54] + msg1[31] + md5_add[57], md5_shift[57]) + state1[57];
-		state2[58] = rot_left(md5_i(state2[57], state2[56], state2[55]) + state2[54] + msg2[31] + md5_add[57], md5_shift[57]) + state2[57];
-		if ((state1[58] & 0x80000000) != (state1[56] & 0x80000000))
+		state1[57] = rot_left(md5_i(state1[56], state1[55], state1[54]) + state1[53] + msg1[31] + md5_add[57], md5_shift[57]) + state1[56];
+		state2[57] = rot_left(md5_i(state2[56], state2[55], state2[54]) + state2[53] + msg2[31] + md5_add[57], md5_shift[57]) + state2[56];
+		if ((state1[57] & 0x80000000) != (state1[55] & 0x80000000))
 			continue;
-		if ((state1[58] ^ state2[58]) != sc[57].diff)
+		if ((state1[57] ^ state2[57]) != sc[57].diff)
 			continue;
 
 		/* C15 */
-		state1[59] = rot_left(md5_i(state1[58], state1[57], state1[56]) + state1[55] + msg1[22] + md5_add[58], md5_shift[58]) + state1[58];
-		state2[59] = rot_left(md5_i(state2[58], state2[57], state2[56]) + state2[55] + msg2[22] + md5_add[58], md5_shift[58]) + state2[58];
-		if ((state1[59] & 0x80000000) != (state1[57] & 0x80000000))
+		state1[58] = rot_left(md5_i(state1[57], state1[56], state1[55]) + state1[54] + msg1[22] + md5_add[58], md5_shift[58]) + state1[57];
+		state2[58] = rot_left(md5_i(state2[57], state2[56], state2[55]) + state2[54] + msg2[22] + md5_add[58], md5_shift[58]) + state2[57];
+		if ((state1[58] & 0x80000000) != (state1[56] & 0x80000000))
 			continue;
-		if ((state1[59] ^ state2[59]) != sc[58].diff)
+		if ((state1[58] ^ state2[58]) != sc[58].diff)
 			continue;
 
 		/* B15 */
-		state1[60] = rot_left(md5_i(state1[59], state1[58], state1[57]) + state1[56] + msg1[29] + md5_add[59], md5_shift[59]) + state1[59];
-		state2[60] = rot_left(md5_i(state2[59], state2[58], state2[57]) + state2[56] + msg2[29] + md5_add[59], md5_shift[59]) + state2[59];
-		if ((state1[60] ^ state2[60]) != sc[59].diff)
+		state1[59] = rot_left(md5_i(state1[58], state1[57], state1[56]) + state1[55] + msg1[29] + md5_add[59], md5_shift[59]) + state1[58];
+		state2[59] = rot_left(md5_i(state2[58], state2[57], state2[56]) + state2[55] + msg2[29] + md5_add[59], md5_shift[59]) + state2[58];
+		if ((state1[59] ^ state2[59]) != sc[59].diff)
 			continue;
 
 		/* A16 */
-		state1[61] = rot_left(md5_i(state1[60], state1[59], state1[58]) + state1[57] + msg1[20] + md5_add[60], md5_shift[60]) + state1[60];
-		state2[61] = rot_left(md5_i(state2[60], state2[59], state2[58]) + state2[57] + msg2[20] + md5_add[60], md5_shift[60]) + state2[60];
-		if ((state1[61] ^ state2[61]) != sc[60].diff)
+		state1[60] = rot_left(md5_i(state1[59], state1[58], state1[57]) + state1[56] + msg1[20] + md5_add[60], md5_shift[60]) + state1[59];
+		state2[60] = rot_left(md5_i(state2[59], state2[58], state2[57]) + state2[56] + msg2[20] + md5_add[60], md5_shift[60]) + state2[59];
+		if ((state1[60] ^ state2[60]) != sc[60].diff)
 			continue;
-		if ((state1[-3] + state1[61]) != (state2[-3] + state2[61]))
+		if ((state1[-4] + state1[60]) != (state2[-4] + state2[60]))
 			continue;
 
 		/* D16 */
-		state1[62] = rot_left(md5_i(state1[61], state1[60], state1[59]) + state1[58] + msg1[27] + md5_add[61], md5_shift[61]) + state1[61];
-		state2[62] = rot_left(md5_i(state2[61], state2[60], state2[59]) + state2[58] + msg2[27] + md5_add[61], md5_shift[61]) + state2[61];
-		if ((state1[-2] + state1[62]) != (state2[-2] + state2[62]))
+		state1[61] = rot_left(md5_i(state1[60], state1[59], state1[58]) + state1[57] + msg1[27] + md5_add[61], md5_shift[61]) + state1[60];
+		state2[61] = rot_left(md5_i(state2[60], state2[59], state2[58]) + state2[57] + msg2[27] + md5_add[61], md5_shift[61]) + state2[60];
+		if ((state1[-3] + state1[61]) != (state2[-3] + state2[61]))
 			continue;
 
 		/* C16 */
-		state1[63] = rot_left(md5_i(state1[62], state1[61], state1[60]) + state1[59] + msg1[18] + md5_add[62], md5_shift[62]) + state1[62];
-		state2[63] = rot_left(md5_i(state2[62], state2[61], state2[60]) + state2[59] + msg2[18] + md5_add[62], md5_shift[62]) + state2[62];
-		if ((state1[-1] + state1[63]) != (state2[-1] + state2[63]))
+		state1[62] = rot_left(md5_i(state1[61], state1[60], state1[59]) + state1[58] + msg1[18] + md5_add[62], md5_shift[62]) + state1[61];
+		state2[62] = rot_left(md5_i(state2[61], state2[60], state2[59]) + state2[58] + msg2[18] + md5_add[62], md5_shift[62]) + state2[61];
+		if ((state1[-2] + state1[62]) != (state2[-2] + state2[62]))
 			continue;
 
 		/* B16 */
-		state1[64] = rot_left(md5_i(state1[63], state1[62], state1[61]) + state1[60] + msg1[25] + md5_add[63], md5_shift[63]) + state1[63];
-		state2[64] = rot_left(md5_i(state2[63], state2[62], state2[61]) + state2[60] + msg2[25] + md5_add[63], md5_shift[63]) + state2[63];
-		if ((state1[0] + state1[64]) != (state2[0] + state2[64]))
+		state1[63] = rot_left(md5_i(state1[62], state1[61], state1[60]) + state1[59] + msg1[25] + md5_add[63], md5_shift[63]) + state1[62];
+		state2[63] = rot_left(md5_i(state2[62], state2[61], state2[60]) + state2[59] + msg2[25] + md5_add[63], md5_shift[63]) + state2[62];
+		if ((state1[-1] + state1[63]) != (state2[-1] + state2[63]))
 			continue;
 
 		return;
@@ -773,27 +776,27 @@ void block2(
 
 void gen_collisions(uint32_t msg1[32], uint32_t msg2[32])
 {
-	uint32_t state1real[69], state2real[69];
+	uint32_t state1real[68], state2real[68];
 	uint32_t *state1, *state2;
 
 	state1 = state1real + 4;
 	state2 = state2real + 4;
-	state1[-3] = state2[-3] = md5_iv[0];
-	state1[-2] = state2[-2] = md5_iv[3];
-	state1[-1] = state2[-1] = md5_iv[2];
-	state1[0] = state2[0] = md5_iv[1];
+	state1[-4] = state2[-4] = md5_iv[0];
+	state1[-3] = state2[-3] = md5_iv[3];
+	state1[-2] = state2[-2] = md5_iv[2];
+	state1[-1] = state2[-1] = md5_iv[1];
 
 	block1(msg1, msg2, state1, state2);
 
+	state1[-4] += state1[60];
 	state1[-3] += state1[61];
 	state1[-2] += state1[62];
 	state1[-1] += state1[63];
-	state1[0] += state1[64];
 
+	state2[-4] += state2[60];
 	state2[-3] += state2[61];
 	state2[-2] += state2[62];
 	state2[-1] += state2[63];
-	state2[0] += state2[64];
 
 	block2(msg1, msg2, state1, state2);
 }
