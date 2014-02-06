@@ -222,9 +222,9 @@ void block1(
 	uint32_t *state1,
 	uint32_t *state2)
 {
-	bool ok;
 	size_t i;
 	size_t attempts = 0;
+	bool ok;
 
 	compiled_sufficient_cond sc[64];
 
@@ -243,7 +243,10 @@ void block1(
 		/* C1 to A5 */
 		for (i = 2; i < 17; i ++)
 		{
+			/* generate random state */
 			state1[i] = myrandom(i - 2);
+
+			/* do simple message modification */
 			fix_sc(state1, state2, i, sc);
 		}
 
@@ -283,14 +286,6 @@ void block1(
 		state1[19] = myrandom(15);
 		state2[19] = state1[19] - sc[19].diff;
 
-		/* A1 */
-		state1[0] = rot_left((*md5_round_func[0])(state1[-1], state1[-2], state1[-3]) + state1[-4] + msg1[0] + md5_add[0], 7) + state1[-1];
-		state2[0] = state1[0] - sc[0].diff;
-
-		/* D1 */
-		state1[1] = rot_left((*md5_round_func[1])(state1[0], state1[-1], state1[-2]) + state1[-3] + msg1[1] + md5_add[1], 12) + state1[0];
-		state2[1] = state1[1] - sc[1].diff;
-
 		/* recover message words from internal state */
 		i = 19;
 		msg1[0] = rot_right(state1[i] - state1[i - 1], md5_shift[i]) - (*md5_round_func[i])(state1[i - 1], state1[i - 2], state1[i - 3]) - state1[i - 4] - md5_add[i];
@@ -303,6 +298,14 @@ void block1(
 		msg2[1] = rot_right(state2[i] - state2[i - 1], md5_shift[i]) - (*md5_round_func[i])(state2[i - 1], state2[i - 2], state2[i - 3]) - state2[i - 4] - md5_add[i];
 		if ((msg1[1] ^ msg2[1]) != message_delta[1])
 			continue;
+
+		/* A1 */
+		state1[0] = rot_left((*md5_round_func[0])(state1[-1], state1[-2], state1[-3]) + state1[-4] + msg1[0] + md5_add[0], 7) + state1[-1];
+		state2[0] = state1[0] - sc[0].diff;
+
+		/* D1 */
+		state1[1] = rot_left((*md5_round_func[1])(state1[0], state1[-1], state1[-2]) + state1[-3] + msg1[1] + md5_add[1], 12) + state1[0];
+		state2[1] = state1[1] - sc[1].diff;
 
 		for (i = 2; i < 6; i ++)
 		{
@@ -429,6 +432,7 @@ void block2(
 	while (true)
 	{
 		ok = true;
+
 		++ attempts;
 		if (attempts % 1000000 == 0)
 			fprintf(stderr, "attempt (2) %d\n", attempts);
