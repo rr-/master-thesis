@@ -12,12 +12,13 @@ void tick(tick_context *const tc, const char *const msg)
 	++ tc->counter;
 	if (tc->counter == 1000000L)
 	{
+		++ tc->done;
+
 		fprintf(stderr, "attempt %llu", tc->done * tc->counter);
 		if (msg != NULL)
 			fprintf(stderr, " (%s)", msg);
 		fprintf(stderr, "\n");
 
 		tc->counter = 0L;
-		++ tc->done;
 	}
 }
