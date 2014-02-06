@@ -13,7 +13,7 @@ uint32_t to_little_endian(uint32_t x);
 uint32_t to_big_endian(uint32_t x);
 uint32_t from_little_endian(uint32_t x);
 uint32_t from_big_endian(uint32_t x);
-uint32_t bit_at(uint32_t x, size_t index);
+bool bit_at(uint32_t x, size_t index);
 uint32_t set_bit(uint32_t x, bool bit, size_t position);
-
+void comb(int m, int n, void (*report)(int n, unsigned int *c));
 #endif
