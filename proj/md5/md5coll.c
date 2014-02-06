@@ -117,6 +117,7 @@ uint32_t (*md5_round_func[64])(uint32_t x, uint32_t y, uint32_t z) =
 uint32_t randoms[32];
 uint32_t myrandom(size_t index)
 {
+	return random();
 	return randoms[index];
 }
 
@@ -235,7 +236,7 @@ void block1(
 	while (true)
 	{
 		ok = true;
-		tick(&tc, "block 2");
+		tick(&tc, "block 1");
 
 		/* round 1 */
 		/* C1 to A5 */
@@ -430,7 +431,7 @@ void block2(
 	while (true)
 	{
 		ok = true;
-		tick(&tc, "block 1");
+		tick(&tc, "block 2");
 
 		/* round 1 */
 		/* A1 to B4 */
