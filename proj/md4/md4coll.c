@@ -6,6 +6,7 @@
 #include <string.h>
 #include "common.h"
 #include "sc.h"
+#include "tick.h"
 
 /* md4 stuff */
 
@@ -175,26 +176,21 @@ void fill_sc(compiled_sufficient_cond *sc)
 	compile_sc(sc_raw, sc, 48);
 }
 
-
 void block1(uint32_t *msg1, uint32_t *msg2, uint32_t *state1, uint32_t *state2)
 {
-	size_t i;
-	size_t attempts;
 	bool ok;
-
+	size_t i;
+	tick_context tc;
 	compiled_sufficient_cond sc[48];
 
 	/* compile sufficient conditions into bitmasks */
 	fill_sc(sc);
 
-	attempts = 0;
+	tick_init(&tc);
 	while (true)
 	{
 		ok = true;
-
-		++ attempts;
-		if (attempts % 1000000 == 0)
-			fprintf(stderr, "attempt %d\n", attempts);
+		tick(&tc, NULL);
 
 		/* round 1 */
 		/* A1 to B4 */

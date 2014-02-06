@@ -4,6 +4,7 @@
 #include <time.h>
 #include "common.h"
 #include "sc.h"
+#include "tick.h"
 
 /* md5 stuff */
 
@@ -222,22 +223,19 @@ void block1(
 	uint32_t *state1,
 	uint32_t *state2)
 {
-	size_t i;
-	size_t attempts = 0;
 	bool ok;
-
+	size_t i;
+	tick_context tc;
 	compiled_sufficient_cond sc[64];
 
 	/* compile sufficient conditions into bitmasks */
 	fill_sc_block1(sc);
 
+	tick_init(&tc);
 	while (true)
 	{
 		ok = true;
-
-		++ attempts;
-		if (attempts % 1000000 == 0)
-			fprintf(stderr, "attempt (1) %d\n", attempts);
+		tick(&tc, "block 2");
 
 		/* round 1 */
 		/* C1 to A5 */
@@ -420,22 +418,19 @@ void block2(
 	uint32_t *state1,
 	uint32_t *state2)
 {
-	size_t i;
-	size_t attempts = 0;
 	bool ok;
-
+	size_t i;
+	tick_context tc;
 	compiled_sufficient_cond sc[64];
 
 	/* compile sufficient conditions into bitmasks */
 	fill_sc_block2(sc);
 
+	tick_init(&tc);
 	while (true)
 	{
 		ok = true;
-
-		++ attempts;
-		if (attempts % 1000000 == 0)
-			fprintf(stderr, "attempt (2) %d\n", attempts);
+		tick(&tc, "block 1");
 
 		/* round 1 */
 		/* A1 to B4 */
