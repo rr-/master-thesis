@@ -236,7 +236,7 @@ bool block1_amm(
 	}
 
 	/* check round 2 and round 3 output differences */
-	/* A5 to B5 (partial) or A5 to B12 (full) */
+	/* a5 to b5 (partial) or a5 to b12 (full) */
 	for (i = 16; i < (full ? 48 : 20); i ++)
 	{
 		recover_state(msg1, msg2, state1, state2, i);
@@ -262,7 +262,7 @@ bool block1_try(
 	tick(tc, "1");
 
 	/* round 1 */
-	/* B1 to B4 */
+	/* b1 to b4 */
 	for (i = 1; i < 16; i ++)
 	{
 		/* generate random state */
@@ -285,8 +285,8 @@ bool block1_try(
 	}
 
 	/*
-		poke around trying to guess A1 and see if it passes
-		sufficient conditions for A5..B5.
+		poke around trying to guess a1 and see if it passes
+		sufficient conditions for a5..b5.
 		basically, it's simplification of first advanced message
 		modification technique proposed by Wang et al., that still
 		gives great probability for attack to succeed.
@@ -366,10 +366,10 @@ void gen_collisions(uint32_t msg1[16], uint32_t msg2[16])
 	*/
 	state1 = state1real + 4;
 	state2 = state2real + 4;
-	state1[-4] = state2[-4] = md4_iv[0]; /* A0 */
-	state1[-3] = state2[-3] = md4_iv[3]; /* D0 */
-	state1[-2] = state2[-2] = md4_iv[2]; /* C0 */
-	state1[-1] = state2[-1] = md4_iv[1]; /* B0 */
+	state1[-4] = state2[-4] = md4_iv[0]; /* a0 */
+	state1[-3] = state2[-3] = md4_iv[3]; /* d0 */
+	state1[-2] = state2[-2] = md4_iv[2]; /* c0 */
+	state1[-1] = state2[-1] = md4_iv[1]; /* b0 */
 
 	block1(msg1, msg2, state1, state2);
 }

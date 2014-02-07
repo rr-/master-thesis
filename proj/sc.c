@@ -9,11 +9,11 @@ bool check_sc(
 {
 	uint32_t diff1, diff2;
 
-	if (sc[i].fast_quit)
-		return true;
-
 	if ((state1[i] - state2[i]) != sc[i].diff)
 		return false;
+
+	if (sc[i].fast_quit)
+		return true;
 
 	if (state1[i] & sc[i].zero)
 		return false;
