@@ -96,6 +96,7 @@ uint32_t (*md4_round_func[48])(uint32_t x, uint32_t y, uint32_t z) =
 };
 
 
+
 void recover_msg(
 	uint32_t *const msg1,
 	uint32_t *const msg2,
@@ -253,13 +254,13 @@ bool block1_try(
 	uint32_t *const state1,
 	uint32_t *const state2,
 	const compiled_sufficient_cond *const sc,
-	const uint32_t *const message_delta,
-	tick_context *const tc)
+	const uint32_t *const message_delta)
 {
+	tick_context tc;
 	size_t i;
 	bool ok;
 
-	tick(tc, "1");
+	tick_init(&tc, 1000000);
 
 	/* round 1 */
 	/* b1 to b4 */
@@ -307,7 +308,7 @@ bool block1_try(
 	*/
 	for (i = 0; i < 5000000; i ++)
 	{
-		tick(tc, "2");
+		tick(&tc, "deep testing");
 
 		ok = block1_amm(msg1, msg2, state1, state2, sc, message_delta, true);
 		if (ok)
@@ -349,8 +350,9 @@ void block1(
 	compiled_sufficient_cond sc[48];
 	block1_fill_sc(sc);
 
-	tick_init(&tc);
-	while (!block1_try(msg1, msg2, state1, state2, sc, message_delta, &tc));
+	tick_init(&tc, 1000);
+	while (!block1_try(msg1, msg2, state1, state2, sc, message_delta))
+		tick(&tc, "random state");
 }
 
 

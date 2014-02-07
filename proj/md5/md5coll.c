@@ -373,13 +373,13 @@ bool block1_try(
 	uint32_t *const state1,
 	uint32_t *const state2,
 	const compiled_sufficient_cond *const sc,
-	const uint32_t *const message_delta,
-	tick_context *const tc)
+	const uint32_t *const message_delta)
 {
+	tick_context tc;
 	size_t i;
 	bool ok;
 
-	tick(tc, "block 1 (1)");
+	tick_init(&tc, 1000000);
 
 	/* round 1 */
 	/* c1 to a4 */
@@ -412,7 +412,7 @@ bool block1_try(
 
 	for (i = 0; i < 50000000; i ++)
 	{
-		tick(tc, "block 1 (2)");
+		tick(&tc, "block 1 - deep testing");
 
 		ok = block1_amm(msg1, msg2, state1, state2, sc, message_delta, true);
 		if (ok)
@@ -435,8 +435,9 @@ void block1(
 	/* compile sufficient conditions into bitmasks */
 	block1_fill_sc(sc);
 
-	tick_init(&tc);
-	while (!block1_try(msg1, msg2, state1, state2, sc, message_delta, &tc));
+	tick_init(&tc, 1000);
+	while (!block1_try(msg1, msg2, state1, state2, sc, message_delta))
+		tick(&tc, "block 1 - random state");
 }
 
 
@@ -573,13 +574,13 @@ bool block2_try(
 	uint32_t *const state1,
 	uint32_t *const state2,
 	const compiled_sufficient_cond *sc,
-	const uint32_t *const message_delta,
-	tick_context *const tc)
+	const uint32_t *const message_delta)
 {
+	tick_context tc;
 	size_t i;
 	bool ok;
 
-	tick(tc, "block 2 (1)");
+	tick_init(&tc, 1000000);
 
 	/* round 1 */
 	/* a1 to c4 */
@@ -612,7 +613,7 @@ bool block2_try(
 
 	for (i = 0; i < 50000000; i ++)
 	{
-		tick(tc, "block 2 (2)");
+		tick(&tc, "block 2 - deep testing");
 
 		ok = block2_amm(msg1, msg2, state1, state2, sc, message_delta, true);
 		if (ok)
@@ -635,8 +636,9 @@ void block2(
 	/* compile sufficient conditions into bitmasks */
 	block2_fill_sc(sc);
 
-	tick_init(&tc);
-	while (!block2_try(msg1, msg2, state1, state2, sc, message_delta, &tc));
+	tick_init(&tc, 1000);
+	while (!block2_try(msg1, msg2, state1, state2, sc, message_delta))
+		tick(&tc, "block 2 - random state");
 }
 
 
