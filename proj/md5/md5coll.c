@@ -142,6 +142,59 @@ const uint32_t message_delta[16] =
 	/* 15 */ 0,
 };
 
+void recover_msg(
+	uint32_t *const msg1,
+	uint32_t *const msg2,
+	const uint32_t *const state1,
+	const uint32_t *const state2,
+	const size_t i)
+{
+	msg1[i] = rot_right(state1[i] - state1[i - 1], md5_shift[i])
+		- (*md5_round_func[i])(state1[i - 1], state1[i - 2], state1[i - 3])
+		- state1[i - 4]
+		- md5_add[i];
+
+	msg2[i] = rot_right(state2[i] - state2[i - 1], md5_shift[i])
+		- (*md5_round_func[i])(state2[i - 1], state2[i - 2], state2[i - 3])
+		- state2[i - 4]
+		- md5_add[i];
+}
+
+void recover_state(
+	const uint32_t *const msg1,
+	const uint32_t *const msg2,
+	uint32_t *const state1,
+	uint32_t *const state2,
+	const size_t i)
+{
+	state1[i] =
+		rot_left(
+			(*md5_round_func[i])(state1[i - 1], state1[i - 2], state1[i - 3])
+				+ state1[i - 4]
+				+ msg1[md5_msg_index[i]]
+				+ md5_add[i],
+			md5_shift[i])
+		+ state1[i - 1];
+
+	state2[i] =
+		rot_left(
+			(*md5_round_func[i])(state2[i - 1], state2[i - 2], state2[i - 3])
+				+ state2[i - 4]
+				+ msg2[md5_msg_index[i]]
+				+ md5_add[i],
+			md5_shift[i])
+		+ state2[i - 1];
+}
+
+bool check_msg(
+	const uint32_t *const msg1,
+	const uint32_t *const msg2,
+	const size_t i,
+	const uint32_t *const message_delta)
+{
+	return (msg1[i] ^ msg2[i]) == message_delta[i];
+}
+
 /* prepare differences and bitmasks for sufficient conditions based on
  * human-readable table */
 void fill_sc_block1(compiled_sufficient_cond *sc)
@@ -149,6 +202,7 @@ void fill_sc_block1(compiled_sufficient_cond *sc)
 	/* differences and sufficient conditions as in wang's paper */
 	const sufficient_cond sc_raw[] =
 	{
+		#ifndef corrected
 		/* a1 */ {0x00000000, "-------- -------- -------- --------"},
 		/* d1 */ {0x00000000, "-------- -------- -------- --------"},
 		/* c1 */ {0x00000000, "-------- 0------- -------- -0------"},
@@ -213,6 +267,72 @@ void fill_sc_block1(compiled_sufficient_cond *sc)
 		/* d16*/ {0x7e000000, "------0- -------- -------- --------"},
 		/* c16*/ {0x7e000000, "-------- -------- -------- --------"},
 		/* b16*/ {0x7e000000, "-------- -------- -------- --------"},
+		#else
+		/* a1 */ {0x00000000, "-------- -------- -------- --------"},
+		/* d1 */ {0x00000000, "-------- -------- -------- --------"},
+		/* c1 */ {0x00000000, "-------- 0------- ----0--- -0------"},
+		/* b1 */ {0x00000000, "1------- 0ppp1ppp pppp1ppp p0------"},
+		/* a2 */ {0x00000040, "1000110- 01000000 00000000 001--1-1"},
+		/* d2 */ {0x7f800040, "0ppp0p1p 01111111 10111100 010pp0p1"},
+		/* c2 */ {0x07800041, "00000011 11111110 11111000 00100000"},
+		/* b2 */ {0x00827fff, "00000001 1--10001 0-0-0101 01000000"},
+		/* a3 */ {0x8000003f, "11111011 ---10000 0-1p1111 00111101"},
+		/* d3 */ {0x7ffff000, "01------ 0--11111 1-01---0 01----00"},
+		/* c3 */ {0x40000000, "00------ ----0001 1p00---0 11----10"},
+		/* b3 */ {0x80002080, "00----pp ----1000 0001---1 0-------"},
+		/* a4 */ {0x7f000000, "01----01 ----1111 111----0 0---1---"},
+		/* d4 */ {0x80000000, "0-0---00 ----1011 111----1 1---1---"},
+		/* c4 */ {0x80007ff8, "0-1---01 -------- 1------- ----0---"},
+		/* b4 */ {0xa0000000, "0-1----- -------- -------- --------"},
+		/* a5 */ {0x80000000, "0------- ------0- p------- ----p---"},
+		/* d5 */ {0x80000000, "0-p----- ------1- -------- --------"},
+		/* c5 */ {0x7ffe0000, "0------- ------0- -------- --------"},
+		/* b5 */ {0x80000000, "0------- -------- -------- --------"},
+		/* a6 */ {0x80000000, "0------- ------p- -------- --------"},
+		/* d6 */ {0x80000000, "0------- -------- -------- --------"},
+		/* c6 */ {0x00000000, "0------- -------- -------- --------"},
+		/* b6 */ {0x00000000, "P------- -------- -------- --------"},
+		/* a7 */ {0x00000000, "-------- -------- -------- --------"},
+		/* d7 */ {0x00000000, "-------- -------- -------- --------"},
+		/* c7 */ {0x00000000, "-------- -------- -------- --------"},
+		/* b7 */ {0x00000000, "-------- -------- -------- --------"},
+		/* a8 */ {0x00000000, "-------- -------- -------- --------"},
+		/* d8 */ {0x00000000, "-------- -------- -------- --------"},
+		/* c8 */ {0x00000000, "-------- -------- -------- --------"},
+		/* b8 */ {0x00000000, "-------- -------- -------- --------"},
+		/* a9 */ {0x00000000, "-------- -------- -------- --------"},
+		/* d9 */ {0x00000000, "-------- -------- -------- --------"},
+		/* c9 */ {0x80000000, "-------- -------- -------- --------"},
+		/* b9 */ {0x80000000, "-------- -------- -------- --------"},
+		/* a10*/ {0x80000000, "-------- -------- -------- --------"},
+		/* d10*/ {0x80000000, "-------- -------- -------- --------"},
+		/* c10*/ {0x80000000, "-------- -------- -------- --------"},
+		/* b10*/ {0x80000000, "-------- -------- -------- --------"},
+		/* a11*/ {0x80000000, "-------- -------- -------- --------"},
+		/* d11*/ {0x80000000, "-------- -------- -------- --------"},
+		/* c11*/ {0x80000000, "-------- -------- -------- --------"},
+		/* b11*/ {0x80000000, "-------- -------- -------- --------"},
+		/* a12*/ {0x80000000, "-------- -------- -------- --------"},
+		/* d12*/ {0x80000000, "-------- -------- -------- --------"},
+		/* c12*/ {0x80000000, "-------- -------- -------- --------"},
+		/* b12*/ {0x80000000, "f------- -------- -------- --------"},
+		/* a13*/ {0x80000000, "f------- -------- -------- --------"},
+		/* d13*/ {0x80000000, "F------- -------- -------- --------"},
+		/* c13*/ {0x80000000, "f------- -------- -------- --------"},
+		/* b13*/ {0x80000000, "f------- -------- -------- --------"},
+		/* a14*/ {0x80000000, "f------- -------- -------- --------"},
+		/* d14*/ {0x80000000, "f------- -------- -------- --------"},
+		/* c14*/ {0x80000000, "f------- -------- -------- --------"},
+		/* b14*/ {0x80000000, "f------- -------- -------- --------"},
+		/* a15*/ {0x80000000, "f------- -------- -------- --------"},
+		/* d15*/ {0x80000000, "f------- -------- -------- --------"},
+		/* c15*/ {0x80000000, "f------- -------- -------- --------"},
+		/* b15*/ {0x80000000, "F-----0- -------- -------- --------"},
+		/* a16*/ {0x80000000, "F----01- -------- -------- --------"},
+		/* d16*/ {0x7e000000, "F-----0- -------- -------- --------"},
+		/* c16*/ {0x7e000000, "F------- -------- -------- --------"},
+		/* b16*/ {0x7e000000, "-------- -------- -------- --------"},
+		#endif
 	};
 
 	compile_sc(sc_raw, sc, 64);
@@ -252,14 +372,11 @@ void block1(
 		/* recover message words from internal state */
 		for (i = 6; i < 16; i ++)
 		{
-			msg1[i] = rot_right(state1[i] - state1[i - 1], md5_shift[i]) - (*md5_round_func[i])(state1[i - 1], state1[i - 2], state1[i - 3]) - state1[i - 4] - md5_add[i];
-			msg2[i] = rot_right(state2[i] - state2[i - 1], md5_shift[i]) - (*md5_round_func[i])(state2[i - 1], state2[i - 2], state2[i - 3]) - state2[i - 4] - md5_add[i];
+			recover_msg(msg1, msg2, state1, state2, i);
+			ok &= check_msg(msg1, msg2, i, message_delta);
 
-			if ((msg1[i] ^ msg2[i]) != message_delta[i])
-			{
-				ok = false;
+			if (!ok)
 				break;
-			}
 		}
 		if (!ok)
 			continue;
@@ -269,14 +386,11 @@ void block1(
 		/* D5 to C5 */
 		for (i = 17; i < 19; i ++)
 		{
-			state1[i] = rot_left((*md5_round_func[i])(state1[i - 1], state1[i - 2], state1[i - 3]) + state1[i - 4] + msg1[md5_msg_index[i]] + md5_add[i], md5_shift[i]) + state1[i - 1];
-			state2[i] = rot_left((*md5_round_func[i])(state2[i - 1], state2[i - 2], state2[i - 3]) + state2[i - 4] + msg2[md5_msg_index[i]] + md5_add[i], md5_shift[i]) + state2[i - 1];
+			recover_state(msg1, msg2, state1, state2, i);
+			ok &= check_sc(state1, state2, i, sc);
 
-			if (!check_sc(state1, state2, i, sc))
-			{
-				ok = false;
+			if (!ok)
 				break;
-			}
 		}
 		if (!ok)
 			continue;
@@ -286,36 +400,27 @@ void block1(
 		state2[19] = state1[19] - sc[19].diff;
 
 		/* recover message words from internal state */
-		i = 19;
-		msg1[0] = rot_right(state1[i] - state1[i - 1], md5_shift[i]) - (*md5_round_func[i])(state1[i - 1], state1[i - 2], state1[i - 3]) - state1[i - 4] - md5_add[i];
-		msg2[0] = rot_right(state2[i] - state2[i - 1], md5_shift[i]) - (*md5_round_func[i])(state2[i - 1], state2[i - 2], state2[i - 3]) - state2[i - 4] - md5_add[i];
-		if ((msg1[0] ^ msg2[0]) != message_delta[0])
+		recover_msg(msg1 - 19, msg2 - 19, state1, state2, 19);
+		ok &= check_msg(msg1, msg2, 0, message_delta);
+		if (!ok)
 			continue;
 
-		i = 16;
-		msg1[1] = rot_right(state1[i] - state1[i - 1], md5_shift[i]) - (*md5_round_func[i])(state1[i - 1], state1[i - 2], state1[i - 3]) - state1[i - 4] - md5_add[i];
-		msg2[1] = rot_right(state2[i] - state2[i - 1], md5_shift[i]) - (*md5_round_func[i])(state2[i - 1], state2[i - 2], state2[i - 3]) - state2[i - 4] - md5_add[i];
-		if ((msg1[1] ^ msg2[1]) != message_delta[1])
+		recover_msg(msg1 + 1 - 16, msg2 + 1 - 16, state1, state2, 16);
+		ok &= check_msg(msg1, msg2, 1, message_delta);
+		if (!ok)
 			continue;
 
-		/* A1 */
-		state1[0] = rot_left((*md5_round_func[0])(state1[-1], state1[-2], state1[-3]) + state1[-4] + msg1[0] + md5_add[0], 7) + state1[-1];
-		state2[0] = state1[0] - sc[0].diff;
-
-		/* D1 */
-		state1[1] = rot_left((*md5_round_func[1])(state1[0], state1[-1], state1[-2]) + state1[-3] + msg1[1] + md5_add[1], 12) + state1[0];
-		state2[1] = state1[1] - sc[1].diff;
+		/* A1, D1 */
+		recover_state(msg1, msg2, state1, state2, 0);
+		recover_state(msg1, msg2, state1, state2, 1);
 
 		for (i = 2; i < 6; i ++)
 		{
-			msg1[i] = rot_right(state1[i] - state1[i - 1], md5_shift[i]) - (*md5_round_func[i])(state1[i - 1], state1[i - 2], state1[i - 3]) - state1[i - 4] - md5_add[i];
-			msg2[i] = rot_right(state2[i] - state2[i - 1], md5_shift[i]) - (*md5_round_func[i])(state2[i - 1], state2[i - 2], state2[i - 3]) - state2[i - 4] - md5_add[i];
+			recover_msg(msg1, msg2, state1, state2, i);
+			ok &= check_msg(msg1, msg2, i, message_delta);
 
-			if ((msg1[i] ^ msg2[i]) != message_delta[i])
-			{
-				ok = false;
+			if (!ok)
 				break;
-			}
 		}
 		if (!ok)
 			continue;
@@ -324,14 +429,11 @@ void block1(
 		/* A6 to B16 */
 		for (i = 20; i < 64; i ++)
 		{
-			state1[i] = rot_left((*md5_round_func[i])(state1[i - 1], state1[i - 2], state1[i - 3]) + state1[i - 4] + msg1[md5_msg_index[i]] + md5_add[i], md5_shift[i]) + state1[i - 1];
-			state2[i] = rot_left((*md5_round_func[i])(state2[i - 1], state2[i - 2], state2[i - 3]) + state2[i - 4] + msg2[md5_msg_index[i]] + md5_add[i], md5_shift[i]) + state2[i - 1];
+			recover_state(msg1, msg2, state1, state2, i);
+			ok &= check_sc(state1, state2, i, sc);
 
-			if (!check_sc(state1, state2, i, sc))
-			{
-				ok = false;
+			if (!ok)
 				break;
-			}
 		}
 		if (!ok)
 			continue;
@@ -447,30 +549,24 @@ void block2(
 		/* recover message words from internal state */
 		for (i = 0; i < 16; i ++)
 		{
-			msg1[16 + i] = rot_right(state1[i] - state1[i - 1], md5_shift[i]) - (*md5_round_func[i])(state1[i - 1], state1[i - 2], state1[i - 3]) - state1[i - 4] - md5_add[i];
-			msg2[16 + i] = rot_right(state2[i] - state2[i - 1], md5_shift[i]) - (*md5_round_func[i])(state2[i - 1], state2[i - 2], state2[i - 3]) - state2[i - 4] - md5_add[i];
+			recover_msg(msg1 + 16, msg2 + 16, state1, state2, i);
+			ok &= check_msg(msg1 + 16, msg2 + 16, i, message_delta);
 
-			if ((msg1[16 + i] ^ msg2[16 + i]) != message_delta[i])
-			{
-				ok = false;
+			if (!ok)
 				break;
-			}
 		}
 		if (!ok)
 			continue;
 
-		/* check round 2 and round  3 output differences */
+		/* check round 2 and round 3 output differences */
 		/* A5 to B16 */
 		for (i = 16; i < 32; i ++)
 		{
-			state1[i] = rot_left((*md5_round_func[i])(state1[i - 1], state1[i - 2], state1[i - 3]) + state1[i - 4] + msg1[16 + md5_msg_index[i]] + md5_add[i], md5_shift[i]) + state1[i - 1];
-			state2[i] = rot_left((*md5_round_func[i])(state2[i - 1], state2[i - 2], state2[i - 3]) + state2[i - 4] + msg2[16 + md5_msg_index[i]] + md5_add[i], md5_shift[i]) + state2[i - 1];
+			recover_state(msg1 + 16, msg2 + 16, state1, state2, i);
+			ok &= check_sc(state1, state2, i, sc);
 
-			if (!check_sc(state1, state2, i, sc))
-			{
-				ok = false;
+			if (!ok)
 				break;
-			}
 		}
 		if (!ok)
 			continue;

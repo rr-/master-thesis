@@ -202,19 +202,21 @@ void recover_state(
 	uint32_t *const state2,
 	const size_t i)
 {
-	state1[i] = rot_left(
-		(*md4_round_func[i])(state1[i - 1], state1[i - 2], state1[i - 3])
-			+ state1[i - 4]
-			+ msg1[md4_msg_index[i]]
-			+ md4_add[i],
-		md4_shift[i]);
+	state1[i] =
+		rot_left(
+			(*md4_round_func[i])(state1[i - 1], state1[i - 2], state1[i - 3])
+				+ state1[i - 4]
+				+ msg1[md4_msg_index[i]]
+				+ md4_add[i],
+			md4_shift[i]);
 
-	state2[i] = rot_left(
-		(*md4_round_func[i])(state2[i - 1], state2[i - 2], state2[i - 3])
-			+ state2[i - 4]
-			+ msg2[md4_msg_index[i]]
-			+ md4_add[i],
-		md4_shift[i]);
+	state2[i] =
+		rot_left(
+			(*md4_round_func[i])(state2[i - 1], state2[i - 2], state2[i - 3])
+				+ state2[i - 4]
+				+ msg2[md4_msg_index[i]]
+				+ md4_add[i],
+			md4_shift[i]);
 }
 
 bool check_msg(
