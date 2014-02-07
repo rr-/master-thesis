@@ -121,27 +121,6 @@ uint32_t myrandom(size_t index)
 	return randoms[index];
 }
 
-/* message delta as in wang's paper */
-const uint32_t message_delta[16] =
-{
-	/* 0 */ 0,
-	/* 1 */ 0,
-	/* 2 */ 0,
-	/* 3 */ 0,
-	/* 4 */ 0x80000000,
-	/* 5 */ 0,
-	/* 6 */ 0,
-	/* 7 */ 0,
-	/* 8 */ 0,
-	/* 9 */ 0,
-	/* 10 */ 0,
-	/* 11 */ 0x00008000,
-	/* 12 */ 0,
-	/* 13 */ 0,
-	/* 14 */ 0x80000000,
-	/* 15 */ 0,
-};
-
 void recover_msg(
 	uint32_t *const msg1,
 	uint32_t *const msg2,
@@ -195,9 +174,11 @@ bool check_msg(
 	return (msg1[i] ^ msg2[i]) == message_delta[i];
 }
 
+
+
 /* prepare differences and bitmasks for sufficient conditions based on
  * human-readable table */
-void fill_sc_block1(compiled_sufficient_cond *sc)
+void block1_fill_sc(compiled_sufficient_cond *const sc)
 {
 	/* differences and sufficient conditions as in wang's paper */
 	const sufficient_cond sc_raw[] =
@@ -328,9 +309,9 @@ void fill_sc_block1(compiled_sufficient_cond *sc)
 		/* d15*/ {0x80000000, "f------- -------- -------- --------"},
 		/* c15*/ {0x80000000, "f------- -------- -------- --------"},
 		/* b15*/ {0x80000000, "F-----0- -------- -------- --------"},
-		/* a16*/ {0x80000000, "F----01- -------- -------- --------"},
-		/* d16*/ {0x7e000000, "F-----0- -------- -------- --------"},
-		/* c16*/ {0x7e000000, "F------- -------- -------- --------"},
+		/* a16*/ {0x80000000, "f----01- -------- -------- --------"},
+		/* d16*/ {0x7e000000, "f-----0- -------- -------- --------"},
+		/* c16*/ {0x7e000000, "p------- -------- -------- --------"},
 		/* b16*/ {0x7e000000, "-------- -------- -------- --------"},
 		#endif
 	};
@@ -338,111 +319,176 @@ void fill_sc_block1(compiled_sufficient_cond *sc)
 	compile_sc(sc_raw, sc, 64);
 }
 
-void block1(
-	uint32_t *msg1,
-	uint32_t *msg2,
-	uint32_t *state1,
-	uint32_t *state2)
+bool block1_amm(
+	uint32_t *const msg1,
+	uint32_t *const msg2,
+	uint32_t *const state1,
+	uint32_t *const state2,
+	const compiled_sufficient_cond *const sc,
+	const uint32_t *const message_delta,
+	bool full)
 {
-	bool ok;
 	size_t i;
-	tick_context tc;
-	compiled_sufficient_cond sc[64];
 
-	/* compile sufficient conditions into bitmasks */
-	fill_sc_block1(sc);
+	/* A5 */
+	state1[16] = myrandom(14);
+	fix_sc(state1, state2, 16, sc);
 
-	tick_init(&tc);
-	while (true)
+	recover_msg(msg1 + 1 - 16, msg2 + 1 - 16, state1, state2, 16);
+	if (!check_msg(msg1, msg2, 1, message_delta))
+		return false;
+
+	/* D5 to C5 */
+	for (i = 17; i < 19; i ++)
 	{
-		ok = true;
-		tick(&tc, "block 1");
+		recover_state(msg1, msg2, state1, state2, i);
+		if (!check_sc(state1, state2, i, sc))
+			return false;
+	}
 
-		/* round 1 */
-		/* C1 to A5 */
-		for (i = 2; i < 17; i ++)
-		{
-			/* generate random state */
-			state1[i] = myrandom(i - 2);
+	/* B5 */
+	state1[19] = myrandom(15);
+	fix_sc(state1, state2, 19, sc);
 
-			/* do simple message modification */
-			fix_sc(state1, state2, i, sc);
-		}
+	/* recover message words from internal state */
+	recover_msg(msg1 - 19, msg2 - 19, state1, state2, 19);
+	if (!check_msg(msg1, msg2, 0, message_delta))
+		return false;
 
-		/* recover message words from internal state */
-		for (i = 6; i < 16; i ++)
-		{
-			recover_msg(msg1, msg2, state1, state2, i);
-			ok &= check_msg(msg1, msg2, i, message_delta);
+	/* A1, D1 */
+	recover_state(msg1, msg2, state1, state2, 0);
+	recover_state(msg1, msg2, state1, state2, 1);
 
-			if (!ok)
-				break;
-		}
-		if (!ok)
-			continue;
+	for (i = 2; i < 6; i ++)
+	{
+		recover_msg(msg1, msg2, state1, state2, i);
+		if (!check_msg(msg1, msg2, i, message_delta))
+			return false;
+	}
 
-		/* advanced message modification */
-
-		/* D5 to C5 */
-		for (i = 17; i < 19; i ++)
-		{
-			recover_state(msg1, msg2, state1, state2, i);
-			ok &= check_sc(state1, state2, i, sc);
-
-			if (!ok)
-				break;
-		}
-		if (!ok)
-			continue;
-
-		/* B5 */
-		state1[19] = myrandom(15);
-		state2[19] = state1[19] - sc[19].diff;
-
-		/* recover message words from internal state */
-		recover_msg(msg1 - 19, msg2 - 19, state1, state2, 19);
-		ok &= check_msg(msg1, msg2, 0, message_delta);
-		if (!ok)
-			continue;
-
-		recover_msg(msg1 + 1 - 16, msg2 + 1 - 16, state1, state2, 16);
-		ok &= check_msg(msg1, msg2, 1, message_delta);
-		if (!ok)
-			continue;
-
-		/* A1, D1 */
-		recover_state(msg1, msg2, state1, state2, 0);
-		recover_state(msg1, msg2, state1, state2, 1);
-
-		for (i = 2; i < 6; i ++)
-		{
-			recover_msg(msg1, msg2, state1, state2, i);
-			ok &= check_msg(msg1, msg2, i, message_delta);
-
-			if (!ok)
-				break;
-		}
-		if (!ok)
-			continue;
-
+	if (!full)
+	{
 		/* check round and round 3 output differences */
 		/* A6 to B16 */
 		for (i = 20; i < 64; i ++)
 		{
 			recover_state(msg1, msg2, state1, state2, i);
-			ok &= check_sc(state1, state2, i, sc);
-
-			if (!ok)
-				break;
+			if (!check_sc(state1, state2, i, sc))
+				return false;
 		}
-		if (!ok)
-			continue;
-
-		return;
 	}
+	else
+	{
+		/* check round and round 3 output differences */
+		/* A6 to B16 */
+		for (i = 20; i < 64; i ++)
+		{
+			recover_state(msg1, msg2, state1, state2, i);
+			if (!check_sc(state1, state2, i, sc))
+				return false;
+		}
+
+		/* check final SCs manually */
+		/* dd0 */
+		if (bit_at(state1[61] + state1[-3], 25) != 0)
+			return false;
+
+		/* cc0 */
+		if (bit_at(state1[62] + state1[-2], 25) != 1)
+			return false;
+		if (bit_at(state1[62] + state1[-2], 26) != 0)
+			return false;
+		if (bit_at(state1[62] + state1[-2], 31) != bit_at(state1[61] + state1[-3], 31))
+			return false;
+
+		/* bb0 */
+		if (bit_at(state1[63] + state1[-1], 5) != 0)
+			return false;
+		if (bit_at(state1[63] + state1[-1], 25) != 0)
+			return false;
+		if (bit_at(state1[63] + state1[-1], 26) != 0)
+			return false;
+		if (bit_at(state1[63] + state1[-1], 31) != bit_at(state1[62] + state1[-2], 31))
+			return false;
+	}
+	return true;
 }
 
-void fill_sc_block2(compiled_sufficient_cond *sc)
+bool block1_try(
+	uint32_t *const msg1,
+	uint32_t *const msg2,
+	uint32_t *const state1,
+	uint32_t *const state2,
+	const compiled_sufficient_cond *const sc,
+	const uint32_t *const message_delta,
+	tick_context *const tc)
+{
+	size_t i;
+	bool ok;
+
+	tick(tc, "block 1 (1)");
+
+	/* round 1 */
+	/* C1 to A4 */
+	for (i = 2; i < 16; i ++)
+	{
+		/* generate random state */
+		state1[i] = myrandom(i - 2);
+
+		/* do simple message modification */
+		fix_sc(state1, state2, i, sc);
+	}
+
+	/* recover message words from internal state */
+	for (i = 6; i < 16; i ++)
+	{
+		recover_msg(msg1, msg2, state1, state2, i);
+		if (!check_msg(msg1, msg2, i, message_delta))
+			return false;
+	}
+
+	/* advanced message modification */
+	for (i = 0; i < 300; i ++)
+	{
+		ok = block1_amm(state1, state2, msg1, msg2, sc, message_delta, false);
+		if (ok)
+			break;
+	}
+	if (!ok)
+		return false;
+
+	for (i = 0; i < 5000000; i ++)
+	{
+		tick(tc, "block 1 (2)");
+
+		ok = block1_amm(state1, state2, msg1, msg2, sc, message_delta, true);
+		if (ok)
+			return true;
+	}
+
+	return false;
+}
+
+void block1(
+	uint32_t *const msg1,
+	uint32_t *const msg2,
+	uint32_t *const state1,
+	uint32_t *const state2,
+	const uint32_t *const message_delta)
+{
+	tick_context tc;
+	compiled_sufficient_cond sc[64];
+
+	/* compile sufficient conditions into bitmasks */
+	block1_fill_sc(sc);
+
+	tick_init(&tc);
+	while (!block1_try(msg1, msg2, state1, state2, sc, message_delta, &tc));
+}
+
+
+
+void block2_fill_sc(compiled_sufficient_cond *sc)
 {
 	const sufficient_cond sc_raw[64] =
 	{
@@ -515,68 +561,92 @@ void fill_sc_block2(compiled_sufficient_cond *sc)
 	compile_sc(sc_raw, sc, 64);
 }
 
-void block2(
-	uint32_t *msg1,
-	uint32_t *msg2,
-	uint32_t *state1,
-	uint32_t *state2)
+bool block2_try(
+	uint32_t *const msg1,
+	uint32_t *const msg2,
+	uint32_t *const state1,
+	uint32_t *const state2,
+	const compiled_sufficient_cond *sc,
+	const uint32_t *const message_delta,
+	tick_context *const tc)
 {
-	bool ok;
 	size_t i;
+
+	tick(tc, "block 2 (1)");
+
+	/* round 1 */
+	/* A1 to B4 */
+	for (i = 0; i < 16; i ++)
+	{
+		/* generate random state */
+		state1[i] = myrandom(i + 16);
+
+		/* do simple message modification */
+		fix_sc(state1, state2, i, sc);
+	}
+
+	/* recover message words from internal state */
+	for (i = 0; i < 16; i ++)
+	{
+		recover_msg(msg1 + 16, msg2 + 16, state1, state2, i);
+		if (!check_msg(msg1 + 16, msg2 + 16, i, message_delta))
+			return false;
+	}
+
+	/* check round 2 and round 3 output differences */
+	/* A5 to B16 */
+	for (i = 16; i < 32; i ++)
+	{
+		recover_state(msg1 + 16, msg2 + 16, state1, state2, i);
+		if (!check_sc(state1, state2, i, sc))
+			return false;
+	}
+
+	return true;
+}
+
+void block2(
+	uint32_t *const msg1,
+	uint32_t *const msg2,
+	uint32_t *const state1,
+	uint32_t *const state2,
+	const uint32_t *const message_delta)
+{
 	tick_context tc;
 	compiled_sufficient_cond sc[64];
 
 	/* compile sufficient conditions into bitmasks */
-	fill_sc_block2(sc);
+	block2_fill_sc(sc);
 
 	tick_init(&tc);
-	while (true)
-	{
-		ok = true;
-		tick(&tc, "block 2");
-
-		/* round 1 */
-		/* A1 to B4 */
-		for (i = 0; i < 16; i ++)
-		{
-			/* generate random state */
-			state1[i] = myrandom(i + 16);
-
-			/* do simple message modification */
-			fix_sc(state1, state2, i, sc);
-		}
-
-		/* recover message words from internal state */
-		for (i = 0; i < 16; i ++)
-		{
-			recover_msg(msg1 + 16, msg2 + 16, state1, state2, i);
-			ok &= check_msg(msg1 + 16, msg2 + 16, i, message_delta);
-
-			if (!ok)
-				break;
-		}
-		if (!ok)
-			continue;
-
-		/* check round 2 and round 3 output differences */
-		/* A5 to B16 */
-		for (i = 16; i < 32; i ++)
-		{
-			recover_state(msg1 + 16, msg2 + 16, state1, state2, i);
-			ok &= check_sc(state1, state2, i, sc);
-
-			if (!ok)
-				break;
-		}
-		if (!ok)
-			continue;
-
-		return;
-	}
+	while (!block2_try(msg1, msg2, state1, state2, sc, message_delta, &tc));
 }
+
+
 
 void gen_collisions(uint32_t msg1[32], uint32_t msg2[32])
 {
+	/* message delta as in wang's paper */
+	const uint32_t message_delta[16] =
+	{
+		/* 0 */ 0,
+		/* 1 */ 0,
+		/* 2 */ 0,
+		/* 3 */ 0,
+		/* 4 */ 0x80000000,
+		/* 5 */ 0,
+		/* 6 */ 0,
+		/* 7 */ 0,
+		/* 8 */ 0,
+		/* 9 */ 0,
+		/* 10 */ 0,
+		/* 11 */ 0x00008000,
+		/* 12 */ 0,
+		/* 13 */ 0,
+		/* 14 */ 0x80000000,
+		/* 15 */ 0,
+	};
+
 	uint32_t state1real[68], state2real[68];
 	uint32_t *state1, *state2;
 
@@ -587,7 +657,7 @@ void gen_collisions(uint32_t msg1[32], uint32_t msg2[32])
 	state1[-2] = state2[-2] = md5_iv[2];
 	state1[-1] = state2[-1] = md5_iv[1];
 
-	block1(msg1, msg2, state1, state2);
+	block1(msg1, msg2, state1, state2, message_delta);
 
 	state1[-4] += state1[60];
 	state1[-3] += state1[61];
@@ -599,7 +669,7 @@ void gen_collisions(uint32_t msg1[32], uint32_t msg2[32])
 	state2[-2] += state2[62];
 	state2[-1] += state2[63];
 
-	block2(msg1, msg2, state1, state2);
+	block2(msg1, msg2, state1, state2, message_delta);
 }
 
 int main(int argc, char *argv[])
