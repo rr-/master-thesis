@@ -96,30 +96,62 @@ uint32_t (*md4_round_func[48])(uint32_t x, uint32_t y, uint32_t z) =
 };
 
 
-/* message delta as in wang's paper */
-const uint32_t message_delta[16] =
+void recover_msg(
+	uint32_t *const msg1,
+	uint32_t *const msg2,
+	const uint32_t *const state1,
+	const uint32_t *const state2,
+	const size_t i)
 {
-	/* 0 */ 0,
-	/* 1 */ (1 << 31),
-	/* 2 */ (1 << 31) | (1 << 28),
-	/* 3 */ 0,
-	/* 4 */ 0,
-	/* 5 */ 0,
-	/* 6 */ 0,
-	/* 7 */ 0,
-	/* 8 */ 0,
-	/* 9 */ 0,
-	/* 10 */ 0,
-	/* 11 */ 0,
-	/* 12 */ 1 << 16,
-	/* 13 */ 0,
-	/* 14 */ 0,
-	/* 15 */ 0,
-};
+	msg1[i] = rot_right(state1[i], md4_shift[i])
+		- (*md4_round_func[i])(state1[i - 1], state1[i - 2], state1[i - 3])
+		- md4_add[i]
+		- state1[i - 4];
+
+	msg2[i] = rot_right(state2[i], md4_shift[i])
+		- (*md4_round_func[i])(state2[i - 1], state2[i - 2], state2[i - 3])
+		- md4_add[i]
+		- state2[i - 4];
+}
+
+void recover_state(
+	const uint32_t *const msg1,
+	const uint32_t *const msg2,
+	uint32_t *const state1,
+	uint32_t *const state2,
+	const size_t i)
+{
+	state1[i] =
+		rot_left(
+			(*md4_round_func[i])(state1[i - 1], state1[i - 2], state1[i - 3])
+				+ state1[i - 4]
+				+ msg1[md4_msg_index[i]]
+				+ md4_add[i],
+			md4_shift[i]);
+
+	state2[i] =
+		rot_left(
+			(*md4_round_func[i])(state2[i - 1], state2[i - 2], state2[i - 3])
+				+ state2[i - 4]
+				+ msg2[md4_msg_index[i]]
+				+ md4_add[i],
+			md4_shift[i]);
+}
+
+bool check_msg(
+	const uint32_t *const msg1,
+	const uint32_t *const msg2,
+	const size_t i,
+	const uint32_t *const message_delta)
+{
+	return (msg1[i] ^ msg2[i]) == message_delta[i];
+}
+
+
 
 /* prepare differences and bitmasks for sufficient conditions based on
  * human-readable table */
-void fill_sc(compiled_sufficient_cond *sc)
+void block1_fill_sc(compiled_sufficient_cond *const sc)
 {
 	/* differences as in wang's paper */
 	const sufficient_cond sc_raw[48] =
@@ -177,232 +209,151 @@ void fill_sc(compiled_sufficient_cond *sc)
 	compile_sc(sc_raw, sc, 48);
 }
 
-void recover_msg(
+bool block1_amm(
 	uint32_t *const msg1,
 	uint32_t *const msg2,
-	const uint32_t *const state1,
-	const uint32_t *const state2,
-	const size_t i)
-{
-	msg1[i] = rot_right(state1[i], md4_shift[i])
-		- (*md4_round_func[i])(state1[i - 1], state1[i - 2], state1[i - 3])
-		- md4_add[i]
-		- state1[i - 4];
-
-	msg2[i] = rot_right(state2[i], md4_shift[i])
-		- (*md4_round_func[i])(state2[i - 1], state2[i - 2], state2[i - 3])
-		- md4_add[i]
-		- state2[i - 4];
-}
-
-void recover_state(
-	const uint32_t *const msg1,
-	const uint32_t *const msg2,
 	uint32_t *const state1,
 	uint32_t *const state2,
-	const size_t i)
+	const compiled_sufficient_cond *const sc,
+	const uint32_t *const message_delta,
+	bool full)
 {
-	state1[i] =
-		rot_left(
-			(*md4_round_func[i])(state1[i - 1], state1[i - 2], state1[i - 3])
-				+ state1[i - 4]
-				+ msg1[md4_msg_index[i]]
-				+ md4_add[i],
-			md4_shift[i]);
+	size_t i;
 
-	state2[i] =
-		rot_left(
-			(*md4_round_func[i])(state2[i - 1], state2[i - 2], state2[i - 3])
-				+ state2[i - 4]
-				+ msg2[md4_msg_index[i]]
-				+ md4_add[i],
-			md4_shift[i]);
+	/* simplify advanced message modification */
+	/* keep randomizing first state. */
+	state1[0] = random();
+	state1[0] &= (~0x480);
+	state1[0] |= (state1[1] & 0x480);
+	fix_sc(state1, state2, 0, sc);
+
+	/* recover message words from internal state */
+	for (i = 0; i < 5; i ++)
+	{
+		recover_msg(msg1, msg2, state1, state2, i);
+		if (!check_msg(msg1, msg2, i, message_delta))
+			return false;
+	}
+
+	/* check round 2 and round 3 output differences */
+	/* A5 to B5 (partial) or A5 to B12 (full) */
+	for (i = 16; i < (full ? 48 : 20); i ++)
+	{
+		recover_state(msg1, msg2, state1, state2, i);
+		if (!check_sc(state1, state2, i, sc))
+			return false;
+	}
+
+	return true;
 }
 
-bool check_msg(
-	const uint32_t *const msg1,
-	const uint32_t *const msg2,
-	const size_t i,
-	const uint32_t *const message_delta)
+bool block1_try(
+	uint32_t *const msg1,
+	uint32_t *const msg2,
+	uint32_t *const state1,
+	uint32_t *const state2,
+	const compiled_sufficient_cond *const sc,
+	const uint32_t *const message_delta,
+	tick_context *const tc)
 {
-	return (msg1[i] ^ msg2[i]) == message_delta[i];
-}
-
-void block1(uint32_t *msg1, uint32_t *msg2, uint32_t *state1, uint32_t *state2)
-{
+	size_t i;
 	bool ok;
-	size_t i, k;
-	tick_context tc;
-	compiled_sufficient_cond sc[48];
 
-	/* compile sufficient conditions into bitmasks */
-	fill_sc(sc);
+	tick(tc, "1");
+
+	/* round 1 */
+	/* B1 to B4 */
+	for (i = 1; i < 16; i ++)
+	{
+		/* generate random state */
+		state1[i] = random();
+
+		/* do simple message modification */
+		fix_sc(state1, state2, i, sc);
+	}
+
+	/*
+		recover message words from internal state, but only those that
+		can be recovered = words 5..15. message words 0..4 are going to
+		use state1[0], which is later randomized.
+	*/
+	for (i = 5; i < 16; i ++)
+	{
+		recover_msg(msg1, msg2, state1, state2, i);
+		if (!check_msg(msg1, msg2, i, message_delta))
+			return false;
+	}
+
+	/*
+		poke around trying to guess A1 and see if it passes
+		sufficient conditions for A5..B5.
+		basically, it's simplification of first advanced message
+		modification technique proposed by Wang et al., that still
+		gives great probability for attack to succeed.
+	*/
+	for (i = 0; i < 100; i ++)
+	{
+		ok = block1_amm(msg1, msg2, state1, state2, sc, message_delta, false);
+		if (ok)
+			break;
+	}
+	if (!ok)
+		return false;
+
+	/*
+		if we get here, it means that current set of state1[1..15] is
+		likely to pass full test upon good selection of state1[0].
+		try harder to look for good modification.
+	*/
+	for (i = 0; i < 5000000; i ++)
+	{
+		tick(tc, "2");
+
+		ok = block1_amm(msg1, msg2, state1, state2, sc, message_delta, true);
+		if (ok)
+			return true;
+	}
+
+	return false;
+}
+
+void block1(
+	uint32_t *const msg1,
+	uint32_t *const msg2,
+	uint32_t *const state1,
+	uint32_t *const state2)
+{
+	tick_context tc;
+
+	/* message delta as in wang's paper */
+	const uint32_t message_delta[16] =
+	{
+		/* 0 */ 0,
+		/* 1 */ (1 << 31),
+		/* 2 */ (1 << 31) | (1 << 28),
+		/* 3 */ 0,
+		/* 4 */ 0,
+		/* 5 */ 0,
+		/* 6 */ 0,
+		/* 7 */ 0,
+		/* 8 */ 0,
+		/* 9 */ 0,
+		/* 10 */ 0,
+		/* 11 */ 0,
+		/* 12 */ 1 << 16,
+		/* 13 */ 0,
+		/* 14 */ 0,
+		/* 15 */ 0,
+	};
+
+	compiled_sufficient_cond sc[48];
+	block1_fill_sc(sc);
 
 	tick_init(&tc);
-	while (true)
-	{
-		ok = true;
-		tick(&tc, "1");
-
-		#ifndef speedup
-			/* no advanced message modification. */
-
-			/* round 1 */
-			/* A1 to B4 */
-			for (i = 0; i < 16; i ++)
-			{
-				/* generate random state */
-				state1[i] = random();
-
-				/* do simple message modification */
-				fix_sc(state1, state2, i, sc);
-			}
-
-			/* recover message words from internal state */
-			for (i = 0; i < 16; i ++)
-			{
-				recover_msg(msg1, msg2, state1, state2, i);
-				ok &= check_msg(msg1, msg2, i, message_delta);
-
-				if (!ok)
-					break;
-			}
-			if (!ok)
-				continue;
-
-			/* check round 2 and round 3 output differences */
-			/* A5 to B12 */
-			for (i = 16; i < 48; i ++)
-			{
-				recover_state(msg1, msg2, state1, state2, i);
-				ok &= check_sc(state1, state2, i, sc);
-
-				if (!ok)
-					break;
-			}
-			if (!ok)
-				continue;
-
-			return;
-		#else
-			/* round 1 */
-			/* B1 to B4 */
-			for (i = 1; i < 16; i ++)
-			{
-				/* generate random state */
-				state1[i] = random();
-
-				/* do simple message modification */
-				fix_sc(state1, state2, i, sc);
-			}
-
-			/*
-				recover message words from internal state, but only those that
-				can be recovered = words 5..15. message words 0..4 are going to
-				use state1[0], which is later randomized.
-			*/
-			for (i = 5; i < 16; i ++)
-			{
-				recover_msg(msg1, msg2, state1, state2, i);
-				ok &= check_msg(msg1, msg2, i, message_delta);
-
-				if (!ok)
-					break;
-			}
-			if (!ok)
-				continue;
-
-			/*
-				poke around trying to guess A1 and see if it passes
-				sufficient conditions for A5..B5.
-				basically, it's simplification of first advanced message
-				modification technique proposed by Wang et al., that still
-				gives great probability for attack to succeed.
-			*/
-			for (k = 0; k < 100; k ++)
-			{
-				ok = true;
-
-				/* simplify advanced message modification */
-				state1[0] = random();
-				state1[0] &= (~0x480);
-				state1[0] |= (state1[1] & 0x480);
-				fix_sc(state1, state2, 0, sc);
-
-				/* recover message words from internal state */
-				for (i = 0; i < 5; i ++)
-				{
-					recover_msg(msg1, msg2, state1, state2, i);
-					ok &= check_msg(msg1, msg2, i, message_delta);
-
-					if (!ok)
-						break;
-				}
-				if (!ok)
-					continue;
-
-				/* check first bit of round 2 output differences */
-				/* A5 to B5 */
-				for (i = 16; i < 20; i ++)
-				{
-					recover_state(msg1, msg2, state1, state2, i);
-					ok &= check_sc(state1, state2, i, sc);
-
-					if (!ok)
-						break;
-				}
-				if (!ok)
-					continue;
-			}
-			if (!ok)
-				continue;
-
-			/*
-				if we get here, it means that current set of state1[1..15] is
-				likely to pass full test upon good selection of state1[0] =
-				try harder to look for good state1[0]<->message1[0..4].
-			*/
-			for (k = 0; k < 5000000; k ++)
-			{
-				ok = true;
-
-				/* again, keep randomizing first state. */
-				tick(&tc, "2");
-				state1[0] = random();
-				state1[0] &= (~0x480);
-				state1[0] |= (state1[1] & 0x480);
-				fix_sc(state1, state2, 0, sc);
-
-				/* recover message words from internal state */
-				for (i = 0; i < 5; i ++)
-				{
-					recover_msg(msg1, msg2, state1, state2, i);
-					ok &= check_msg(msg1, msg2, i, message_delta);
-
-					if (!ok)
-						break;
-				}
-				if (!ok)
-					continue;
-
-				/* check round 2 and round 3 output differences */
-				/* A5 to B12 */
-				for (i = 16; i < 48; i ++)
-				{
-					recover_state(msg1, msg2, state1, state2, i);
-					ok &= check_sc(state1, state2, i, sc);
-
-					if (!ok)
-						break;
-				}
-				if (!ok)
-					continue;
-
-				return;
-			}
-		#endif
-	}
+	while (!block1_try(msg1, msg2, state1, state2, sc, message_delta, &tc));
 }
+
+
 
 void gen_collisions(uint32_t msg1[16], uint32_t msg2[16])
 {
