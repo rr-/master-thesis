@@ -53,18 +53,11 @@ void fix_sc(
 
 	state1[i] |= sc[i].one;
 
-	state1[i] &= ~sc[i].zero;
+	state1[i] &= ~sc[i].zero_all;
 
-	state1[i] &= ~sc[i].prev1;
 	state1[i] |= (state1[i - 1] & sc[i].prev1);
-
-	state1[i] &= ~sc[i].prev1neg;
 	state1[i] |= ((~state1[i - 1]) & sc[i].prev1neg);
-
-	state1[i] &= ~sc[i].prev2;
 	state1[i] |= (state1[i - 2] & sc[i].prev2);
-
-	state1[i] &= ~sc[i].prev2neg;
 	state1[i] |= ((~state1[i - 2]) & sc[i].prev2neg);
 
 	state2[i] = state1[i] - sc[i].diff;
@@ -119,6 +112,12 @@ void compile_sc(
 
 			-- bit;
 		}
+
+		sc[i].zero_all = sc[i].zero
+			| sc[i].prev1
+			| sc[i].prev1neg
+			| sc[i].prev2
+			| sc[i].prev2neg;
 	}
 }
 

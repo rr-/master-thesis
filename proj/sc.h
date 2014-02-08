@@ -29,6 +29,7 @@ typedef struct
 	uint32_t prev1neg;
 	uint32_t prev2;
 	uint32_t prev2neg;
+	uint32_t zero_all;
 
 	bool fast_quit;
 } compiled_sufficient_cond;
