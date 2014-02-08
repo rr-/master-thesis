@@ -252,7 +252,7 @@ void block1_fill_sc(compiled_sufficient_cond *const sc)
 	compile_sc(sc_raw, sc, 64);
 }
 
-bool block1_amm(
+__attribute__((always_inline)) inline bool block1_amm(
 	uint32_t *const msg1,
 	uint32_t *const msg2,
 	uint32_t *const state1,
@@ -367,7 +367,7 @@ bool block1_amm(
 	return true;
 }
 
-bool block1_try(
+__attribute__((always_inline)) inline bool block1_try(
 	uint32_t *const msg1,
 	uint32_t *const msg2,
 	uint32_t *const state1,
@@ -515,7 +515,7 @@ void block2_fill_sc(compiled_sufficient_cond *sc)
 	compile_sc(sc_raw, sc, 64);
 }
 
-bool block2_amm(
+__attribute__((always_inline)) inline bool block2_amm(
 	uint32_t *const msg1,
 	uint32_t *const msg2,
 	uint32_t *const state1,
@@ -568,7 +568,7 @@ bool block2_amm(
 	return true;
 }
 
-bool block2_try(
+__attribute__((always_inline)) inline bool block2_try(
 	uint32_t *const msg1,
 	uint32_t *const msg2,
 	uint32_t *const state1,
