@@ -679,6 +679,7 @@ void gen_collisions(uint32_t msg1[32], uint32_t msg2[32])
 	state1[-1] = state2[-1] = md5_iv[1];
 
 	block1(msg1, msg2, state1, state2, message_delta);
+	dump_state(msg1, msg2, 32, state1, state2, 64);
 
 	for (i = 60; i < 64; i ++)
 	{
@@ -687,6 +688,7 @@ void gen_collisions(uint32_t msg1[32], uint32_t msg2[32])
 	}
 
 	block2(msg1, msg2, state1, state2, message_delta);
+	dump_state(msg1, msg2, 32, state1, state2, 64);
 }
 
 int main(int argc, char *argv[])

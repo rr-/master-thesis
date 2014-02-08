@@ -1,5 +1,7 @@
 #include <string.h>
+#include <stdio.h>
 #include "sc.h"
+#include "common.h"
 
 bool check_sc(
 	const uint32_t *const state1,
@@ -120,3 +122,34 @@ void compile_sc(
 	}
 }
 
+void dump_state(
+	const uint32_t *const msg1,
+	const uint32_t *const msg2,
+	size_t const msg_count,
+	const uint32_t *const state1,
+	const uint32_t *const state2,
+	size_t const state_count)
+{
+	size_t i;
+	for (i = 0; i < state_count; i ++)
+	{
+		fprintf(stderr,
+			"state1[%2d]=0x%08x; state2[%2d]=0x%08x; ",
+			i, to_big_endian(state1[i]),
+			i, to_big_endian(state2[i]));
+
+		if (i % 4 == 3)
+			fprintf(stderr, "\n");
+	}
+
+	for (i = 0; i < msg_count; i ++)
+	{
+		fprintf(stderr,
+			"msg1[%2d]=0x%08x; msg2[%2d]=0x%08x; ",
+			i, to_big_endian(msg1[i]),
+			i, to_big_endian(msg2[i]));
+
+		if (i % 4 == 3)
+			fprintf(stderr, "\n");
+	}
+}

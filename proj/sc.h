@@ -50,4 +50,12 @@ void compile_sc(
 	compiled_sufficient_cond *const sc,
 	size_t max);
 
+void dump_state(
+	const uint32_t *const msg1,
+	const uint32_t *const msg2,
+	size_t const msg_count,
+	const uint32_t *const state1,
+	const uint32_t *const state2,
+	size_t const state_count);
+
 #endif

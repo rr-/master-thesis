@@ -374,6 +374,7 @@ void gen_collisions(uint32_t msg1[16], uint32_t msg2[16])
 	state1[-1] = state2[-1] = md4_iv[1]; /* b0 */
 
 	block1(msg1, msg2, state1, state2);
+	dump_state(msg1, msg2, 16, state1, state2, 48);
 }
 
 int main(void)
