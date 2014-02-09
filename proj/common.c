@@ -82,3 +82,15 @@ void comb(int m, int n, void (*report)(int n, unsigned int *c))
 	unsigned int *buf = (unsigned int*) malloc(n * sizeof(unsigned int));
 	comb_helper(m, n, 0, buf, report);
 }
+
+size_t hamming(uint32_t a, uint32_t b)
+{
+	size_t i, result = 0;
+	uint32_t xor = a ^ b;
+	for (i = 0; i < 8*sizeof(uint32_t); i ++)
+	{
+		if (xor & (1 << i))
+			result ++;
+	}
+	return result;
+}

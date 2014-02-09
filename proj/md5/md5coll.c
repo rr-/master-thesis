@@ -114,13 +114,6 @@ uint32_t (*md5_round_func[64])(uint32_t x, uint32_t y, uint32_t z) =
 
 
 
-uint32_t randoms[32];
-uint32_t myrandom(size_t index)
-{
-	return random();
-	return randoms[index];
-}
-
 void recover_msg(
 	uint32_t *const msg1,
 	uint32_t *const msg2,
@@ -266,7 +259,7 @@ __attribute__((always_inline)) inline bool block1_amm(
 	if (!full)
 	{
 		/* a5 */
-		state1[16] = myrandom(14);
+		state1[16] = random();
 		fix_sc(state1, state2, 16, sc);
 
 		/* recover 1st message word from internal state of a5 */
@@ -284,7 +277,7 @@ __attribute__((always_inline)) inline bool block1_amm(
 	}
 
 	/* b5 */
-	state1[19] = myrandom(15);
+	state1[19] = random();
 	fix_sc(state1, state2, 19, sc);
 
 	/* recover 0th message word from internal state of b5 */
@@ -379,14 +372,14 @@ __attribute__((always_inline)) inline bool block1_try(
 	size_t i;
 	bool ok;
 
-	tick_init(&tc, 1000000);
+	tick_init(&tc, 10000000);
 
 	/* round 1 */
 	/* c1 to a4 */
 	for (i = 2; i < 16; i ++)
 	{
 		/* generate random state */
-		state1[i] = myrandom(i - 2);
+		state1[i] = random();
 
 		/* do simple message modification */
 		fix_sc(state1, state2, i, sc);
@@ -435,7 +428,7 @@ void block1(
 	/* compile sufficient conditions into bitmasks */
 	block1_fill_sc(sc);
 
-	tick_init(&tc, 1000);
+	tick_init(&tc, 1000000);
 	while (!block1_try(msg1, msg2, state1, state2, sc, message_delta))
 		tick(&tc, "block 1 - random state");
 }
@@ -446,30 +439,30 @@ void block2_fill_sc(compiled_sufficient_cond *sc)
 {
 	const sufficient_cond sc_raw[64] =
 	{
-		/* a1 */ {0x7e000000, "1---010- --1----- ----0--- --0-----"},
-		/* d1 */ {0x7dffffe0, "1ppp110- --0ppppp 0--p1--- pp0--00-"},
-		/* c1 */ {0x7dfef7e0, "1011111- --011111 ---01--1 011pp11-"},
-		/* b1 */ {0x7dffffe2, "1011101- --000100 ---00pp0 0001000p"},
-		/* a2 */ {0x7ffffcbf, "010010-- --101111 ---01110 01010000"},
-		/* d2 */ {0x80110000, "0--0010- --10--10 ---01100 01010110"},
-		/* c2 */ {0x88000040, "1--1011p p-00--01 p--11110 00-----1"},
-		/* b2 */ {0x80818000, "1--00100 0-11--10 1-----11 11----p0"},
-		/* a3 */ {0x7fffffbf, "1--11100 0-----01 0--p--01 11----01"},
-		/* d3 */ {0x7ffff000, "1----111 1----011 1--0--11 11----00"},
-		/* c3 */ {0x80000000, "1------- ----p101 1pp0--11 11----11"},
-		/* b3 */ {0x80002080, "1ppppppp ----1000 0001---- 1-------"},
-		/* a4 */ {0x7f000000, "0-111111 ----1111 111----- 0---1---"},
-		/* d4 */ {0x80000000, "01000000 ----1011 111----- 1---1---"},
-		/* c4 */ {0x7fff7ff8, "01111101 -------- 0------- ----0---"},
-		/* b4 */ {0xa0000000, "0-1----- -------- -------- --------"},
-		/* a5 */ {0x80000000, "0------- ------0- p------- ----p---"},
-		/* d5 */ {0x80000000, "0-p----- ------1- -------- --------"},
-		/* c5 */ {0x7ffe0000, "0------- ------0- -------- --------"},
-		/* b5 */ {0x80000000, "0------- -------- -------- --------"},
-		/* a6 */ {0x80000000, "0------- ------p- -------- --------"},
-		/* d6 */ {0x80000000, "0------- -------- -------- --------"},
-		/* c6 */ {0x00000000, "0------- -------- -------- --------"},
-		/* b6 */ {0x00000000, "-------- -------- -------- --------"},
+		/* a1 */ {0x7e000000, "P---010- --1----- ----0--- --0-----"},
+		/* d1 */ {0x7dffffe0, "pppp110- --0ppppp 0--p1--- pp0--00-"},
+		/* c1 */ {0x7dfef7e0, "p011111- --011111 ---01--1 011pp11-"},
+		/* b1 */ {0x7dffffe2, "p011101- --000100 ---00pp0 0001000p"},
+		/* a2 */ {0x7ffffcbf, "P10010-- --101111 ---01110 01010000"},
+		/* d2 */ {0x80110000, "p--0010- --10--10 ---01100 01010110"},
+		/* c2 */ {0x88000040, "P--1011p p-00--01 p--11110 00-----1"},
+		/* b2 */ {0x80818000, "p--00100 0-11--10 1-----11 11----p0"},
+		/* a3 */ {0x7fffffbf, "p--11100 0-----01 0--p--01 11----01"},
+		/* d3 */ {0x7ffff000, "p----111 1----011 1--0--11 11----00"},
+		/* c3 */ {0x80000000, "p------- ----p101 1pp0--11 11----11"},
+		/* b3 */ {0x80002080, "pppppppp ----1000 0001---- 1-------"},
+		/* a4 */ {0x7f000000, "P-111111 ----1111 111----- 0---1---"},
+		/* d4 */ {0x80000000, "p1000000 ----1011 111----- 1---1---"},
+		/* c4 */ {0x7fff7ff8, "p1111101 -------- 0------- ----0---"},
+		/* b4 */ {0xa0000000, "p-1----- -------- -------- --------"},
+		/* a5 */ {0x80000000, "p------- ------0- p------- ----p---"},
+		/* d5 */ {0x80000000, "p-p----- ------1- -------- --------"},
+		/* c5 */ {0x7ffe0000, "p------- ------0- -------- --------"},
+		/* b5 */ {0x80000000, "p------- -------- -------- --------"},
+		/* a6 */ {0x80000000, "p------- ------p- -------- --------"},
+		/* d6 */ {0x80000000, "p------- -------- -------- --------"},
+		/* c6 */ {0x00000000, "p------- -------- -------- --------"},
+		/* b6 */ {0x00000000, "P------- -------- -------- --------"},
 		/* a7 */ {0x00000000, "-------- -------- -------- --------"},
 		/* d7 */ {0x00000000, "-------- -------- -------- --------"},
 		/* c7 */ {0x00000000, "-------- -------- -------- --------"},
@@ -505,7 +498,7 @@ void block2_fill_sc(compiled_sufficient_cond *sc)
 		/* a15*/ {0x80000000, "f------- -------- -------- --------"},
 		/* d15*/ {0x80000000, "f------- -------- -------- --------"},
 		/* c15*/ {0x80000000, "f------- -------- -------- --------"},
-		/* b15*/ {0x80000000, "-------- -------- -------- --------"},
+		/* b15*/ {0x80000000, "F------- -------- -------- --------"},
 		/* a16*/ {0x80000000, "f-----1- -------- -------- --------"}, /* checked manually */
 		/* d16*/ {0x82000000, "f-----1- -------- -------- --------"}, /* checked manually */
 		/* c16*/ {0x82000000, "f-----1- -------- -------- --------"}, /* checked manually */
@@ -526,8 +519,71 @@ __attribute__((always_inline)) inline bool block2_amm(
 {
 	size_t i;
 
-	/* b4 */
-	state1[15] = myrandom(31);
+	#if 1
+
+	if (!full)
+	{
+		/* d1 */
+		state1[1] = random();
+		fix_sc(state1, state2, 1, sc);
+
+		for (i = 1; i < 6; i ++)
+		{
+			recover_msg(msg1 + 16, msg2 + 16, state1, state2, i);
+			if (!check_msg(msg1 + 16, msg2 + 16, i, message_delta))
+				return false;
+		}
+
+		/* a5 */
+		recover_state(msg1 + 16, msg2 + 16, state1, state2, 16);
+		if (!check_sc(state1, state2, 16, sc))
+			return false;
+	}
+
+	/* d2 */
+	state1[6] = random();
+	fix_sc(state1, state2, 6, sc);
+
+	for (i = 6; i < 11; i ++)
+	{
+		recover_msg(msg1 + 16, msg2 + 16, state1, state2, i);
+		if (!check_msg(msg1 + 16, msg2 + 16, i, message_delta))
+			return false;
+	}
+
+	/* d5 */
+	recover_state(msg1 + 16, msg2 + 16, state1, state2, 17);
+	if (!check_sc(state1, state2, 17, sc))
+		return false;
+
+	/* b3 */
+	state1[11] = random();
+	fix_sc(state1, state2, 11, sc);
+
+	for (i = 11; i < 16; i ++)
+	{
+		recover_msg(msg1 + 16, msg2 + 16, state1, state2, i);
+		if (!check_msg(msg1 + 16, msg2 + 16, i, message_delta))
+			return false;
+	}
+
+	/* c5 */
+	recover_state(msg1 + 16, msg2 + 16, state1, state2, 18);
+	if (!check_sc(state1, state2, 18, sc))
+		return false;
+
+	/* check round 2 and round 3 output differences */
+	/* b5 to b6 (partial) or b5 to b15 (full)*/
+	for (i = 19; i < (full ? 60 : 24); i ++)
+	{
+		recover_state(msg1 + 16, msg2 + 16, state1, state2, i);
+		if (!check_sc(state1, state2, i, sc))
+			return false;
+	}
+
+	#else
+
+	state1[15] = random();
 	fix_sc(state1, state2, 15, sc);
 
 	recover_msg(msg1 + 16, msg2 + 16, state1, state2, 15);
@@ -542,6 +598,8 @@ __attribute__((always_inline)) inline bool block2_amm(
 		if (!check_sc(state1, state2, i, sc))
 			return false;
 	}
+
+	#endif
 
 	/* check final SCs on a16 to b16 manually */
 	if (full)
@@ -580,21 +638,21 @@ __attribute__((always_inline)) inline bool block2_try(
 	size_t i;
 	bool ok;
 
-	tick_init(&tc, 1000000);
+	tick_init(&tc, 10000000);
 
 	/* round 1 */
 	/* a1 to c4 */
-	for (i = 0; i < 15; i ++)
+	for (i = 0; i < 16; i ++)
 	{
 		/* generate random state */
-		state1[i] = myrandom(16 + i);
+		state1[i] = random();
 
 		/* do simple message modification */
 		fix_sc(state1, state2, i, sc);
 	}
 
 	/* recover message words from internal state */
-	for (i = 0; i < 15; i ++)
+	for (i = 0; i < 16; i ++)
 	{
 		recover_msg(msg1 + 16, msg2 + 16, state1, state2, i);
 		if (!check_msg(msg1 + 16, msg2 + 16, i, message_delta))
@@ -602,7 +660,7 @@ __attribute__((always_inline)) inline bool block2_try(
 	}
 
 	/* deep testing */
-	for (i = 0; i < 1000; i ++)
+	for (i = 0; i < 10000; i ++)
 	{
 		ok = block2_amm(msg1, msg2, state1, state2, sc, message_delta, false);
 		if (ok)
@@ -636,7 +694,7 @@ void block2(
 	/* compile sufficient conditions into bitmasks */
 	block2_fill_sc(sc);
 
-	tick_init(&tc, 1000);
+	tick_init(&tc, 1000000);
 	while (!block2_try(msg1, msg2, state1, state2, sc, message_delta))
 		tick(&tc, "block 2 - random state");
 }
@@ -695,52 +753,6 @@ int main(int argc, char *argv[])
 {
 	size_t i;
 	uint32_t msg1[32], msg2[32];
-
-	#define dataset_num 4
-
-	uint32_t dataset[] =
-	{
-		#if dataset_num == 1
-			0x272041c9, 0x36d69572, 0x0967f364, 0x471aad20,
-			0x58b34b54, 0x2cad4fe2, 0x57085139, 0x3d1504ff,
-			0x6367e309, 0x4776fe20, 0x648c154d, 0x5c65c980,
-			0x556e2d59, 0x0e3bf852, 0x45c4ad14, 0x3560958c,
-			0x3b73fe0a, 0x61a9629c, 0x625cb56d, 0x5a7b7873,
-			0x6f5212c1, 0x1221ccd4, 0x0f8a220f, 0x22ad66e4,
-			0x10093f5e, 0x62fe2069, 0x71b49060, 0x4aa7106c,
-			0x27394180, 0x6d50766b, 0x31d459ed, 0x624e6371,
-		#elif dataset_num == 2
-			0x7824d6b9, 0x78c73729, 0x03226be3, 0x014aad9a,
-			0x68f40279, 0x778ee9d0, 0x43542dca, 0x6f3dd901,
-			0x67d85ab1, 0x5f450cf5, 0x34e676bd, 0x075ee791,
-			0x2c8acaf0, 0x2a794306, 0x68f472ce, 0x3273a16b,
-			0x18e06289, 0x4a084bc9, 0x7b2303db, 0x1dfa6355,
-			0x4e696eb4, 0x619325bf, 0x6bf41cc5, 0x1e629b4c,
-			0x28b42a89, 0x59326132, 0x7ce85364, 0x1ef56767,
-			0x183fd02e, 0x1e909a31, 0x0f0fcdd4, 0x2558dadc
-		#elif dataset_num == 3
-			0x75e52499, 0x7ca0933d, 0x016c740e, 0x5b44c205,
-			0x32aa72ab, 0x2bd6c5d5, 0x104b50f4, 0x7271875e,
-			0x2d792dc6, 0x1243f599, 0x094ced24, 0x2b46b153,
-			0x333c1f16, 0x4d43bd35, 0x42676890, 0x3b1c7317,
-			0x32fc565a, 0x3b6f69d0, 0x5b873257, 0x5edaaecc,
-			0x79e911ce, 0x2fcbfe97, 0x5ac2bae9, 0x4982c9be,
-			0x3f001867, 0x68510cd4, 0x084ed6b4, 0x5f8f81f4,
-			0x7130746b, 0x64f3baed, 0x76fbcb63, 0x6a589b6f
-		#elif dataset_num == 4
-			0x5b47a1fd, 0x0de88ffc, 0x031d79a6, 0x65e384be,
-			0x320f61af, 0x7e4a4105, 0x119bf388, 0x7fc29924,
-			0x75e9af5b, 0x11d81f6c, 0x15ceecdc, 0x70593137,
-			0x07fcba9d, 0x7af7631b, 0x490fd1d5, 0x0e5c3aaf,
-			0x79565315, 0x4896b46c, 0x0a2b271b, 0x2ec6b819,
-			0x4ae2f1dc, 0x76b03f54, 0x78ee153f, 0x20e20c8f,
-			0x24ad01ca, 0x00a36491, 0x4b56722d, 0x0e7cc8ec,
-			0x5f40f792, 0x31ce8fb9, 0x51645a8d, 0x3f0195d4
-		#endif
-	};
-
-	for (i = 0; i < 32; i ++)
-		randoms[i] = dataset[i];
 
 	srandom(time(NULL));
 	gen_collisions(msg1, msg2);
