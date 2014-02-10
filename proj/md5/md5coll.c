@@ -508,6 +508,8 @@ void block2_fill_sc(compiled_sufficient_cond *sc)
 	compile_sc(sc_raw, sc, 64);
 }
 
+unsigned long long block2_amm_technique1_attempts = 0;
+size_t block2_amm_technique = 1;
 __attribute__((always_inline)) inline bool block2_amm(
 	uint32_t *const msg1,
 	uint32_t *const msg2,
@@ -519,87 +521,96 @@ __attribute__((always_inline)) inline bool block2_amm(
 {
 	size_t i;
 
-	#if 1
-
-	if (!full)
+	if (block2_amm_technique == 1)
 	{
-		/* d1 */
-		state1[1] = random();
-		fix_sc(state1, state2, 1, sc);
+		block2_amm_technique1_attempts ++;
+		if (block2_amm_technique1_attempts >= 100000000)
+		{
+			block2_amm_technique = 2;
+			return false;
+		}
 
-		for (i = 1; i < 6; i ++)
+		if (!full)
+		{
+			/* d1 */
+			state1[1] = random();
+			fix_sc(state1, state2, 1, sc);
+
+			for (i = 1; i < 6; i ++)
+			{
+				recover_msg(msg1 + 16, msg2 + 16, state1, state2, i);
+				if (!check_msg(msg1 + 16, msg2 + 16, i, message_delta))
+					return false;
+			}
+
+			/* a5 */
+			recover_state(msg1 + 16, msg2 + 16, state1, state2, 16);
+			if (!check_sc(state1, state2, 16, sc))
+				return false;
+		}
+
+		/* d2 */
+		state1[6] = random();
+		fix_sc(state1, state2, 6, sc);
+
+		for (i = 6; i < 11; i ++)
 		{
 			recover_msg(msg1 + 16, msg2 + 16, state1, state2, i);
 			if (!check_msg(msg1 + 16, msg2 + 16, i, message_delta))
 				return false;
 		}
 
-		/* a5 */
-		recover_state(msg1 + 16, msg2 + 16, state1, state2, 16);
-		if (!check_sc(state1, state2, 16, sc))
+		/* d5 */
+		recover_state(msg1 + 16, msg2 + 16, state1, state2, 17);
+		if (!check_sc(state1, state2, 17, sc))
 			return false;
+
+		/* b3 */
+		state1[11] = random();
+		fix_sc(state1, state2, 11, sc);
+
+		for (i = 11; i < 16; i ++)
+		{
+			recover_msg(msg1 + 16, msg2 + 16, state1, state2, i);
+			if (!check_msg(msg1 + 16, msg2 + 16, i, message_delta))
+				return false;
+		}
+
+		/* c5 */
+		recover_state(msg1 + 16, msg2 + 16, state1, state2, 18);
+		if (!check_sc(state1, state2, 18, sc))
+			return false;
+
+		/* check round 2 and round 3 output differences */
+		/* b5 to b6 (partial) or b5 to b15 (full)*/
+		for (i = 19; i < (full ? 60 : 24); i ++)
+		{
+			recover_state(msg1 + 16, msg2 + 16, state1, state2, i);
+			if (!check_sc(state1, state2, i, sc))
+				return false;
+		}
+
+		block2_amm_technique1_attempts = 0;
 	}
 
-	/* d2 */
-	state1[6] = random();
-	fix_sc(state1, state2, 6, sc);
-
-	for (i = 6; i < 11; i ++)
+	else
 	{
-		recover_msg(msg1 + 16, msg2 + 16, state1, state2, i);
-		if (!check_msg(msg1 + 16, msg2 + 16, i, message_delta))
+		state1[15] = random();
+		fix_sc(state1, state2, 15, sc);
+
+		recover_msg(msg1 + 16, msg2 + 16, state1, state2, 15);
+		if (!check_msg(msg1 + 16, msg2 + 16, 15, message_delta))
 			return false;
+
+		/* check round 2 and round 3 output differences */
+		/* a5 to a6 (partial) or a5 to b15 (full)*/
+		for (i = 16; i < (full ? 60 : 21); i ++)
+		{
+			recover_state(msg1 + 16, msg2 + 16, state1, state2, i);
+			if (!check_sc(state1, state2, i, sc))
+				return false;
+		}
 	}
-
-	/* d5 */
-	recover_state(msg1 + 16, msg2 + 16, state1, state2, 17);
-	if (!check_sc(state1, state2, 17, sc))
-		return false;
-
-	/* b3 */
-	state1[11] = random();
-	fix_sc(state1, state2, 11, sc);
-
-	for (i = 11; i < 16; i ++)
-	{
-		recover_msg(msg1 + 16, msg2 + 16, state1, state2, i);
-		if (!check_msg(msg1 + 16, msg2 + 16, i, message_delta))
-			return false;
-	}
-
-	/* c5 */
-	recover_state(msg1 + 16, msg2 + 16, state1, state2, 18);
-	if (!check_sc(state1, state2, 18, sc))
-		return false;
-
-	/* check round 2 and round 3 output differences */
-	/* b5 to b6 (partial) or b5 to b15 (full)*/
-	for (i = 19; i < (full ? 60 : 24); i ++)
-	{
-		recover_state(msg1 + 16, msg2 + 16, state1, state2, i);
-		if (!check_sc(state1, state2, i, sc))
-			return false;
-	}
-
-	#else
-
-	state1[15] = random();
-	fix_sc(state1, state2, 15, sc);
-
-	recover_msg(msg1 + 16, msg2 + 16, state1, state2, 15);
-	if (!check_msg(msg1 + 16, msg2 + 16, 15, message_delta))
-		return false;
-
-	/* check round 2 and round 3 output differences */
-	/* a5 to a6 (partial) or a5 to b15 (full)*/
-	for (i = 16; i < (full ? 60 : 21); i ++)
-	{
-		recover_state(msg1 + 16, msg2 + 16, state1, state2, i);
-		if (!check_sc(state1, state2, i, sc))
-			return false;
-	}
-
-	#endif
 
 	/* check final SCs on a16 to b16 manually */
 	if (full)
@@ -671,7 +682,10 @@ __attribute__((always_inline)) inline bool block2_try(
 
 	for (i = 0; i < 50000000; i ++)
 	{
-		tick(&tc, "block 2 - deep testing");
+		if (block2_amm_technique == 1)
+			tick(&tc, "block 2 - deep testing, technique 1");
+		else
+			tick(&tc, "block 2 - deep testing, technique 2");
 
 		ok = block2_amm(msg1, msg2, state1, state2, sc, message_delta, true);
 		if (ok)
