@@ -299,7 +299,7 @@ __attribute__((always_inline)) inline bool block1_amm(
 
 	/* check round 2 and round 3 output differences */
 	/* a6 to b7 (partial) or a6 to b15 (full) */
-	for (i = 20; i < (full ? 60 : 26); i ++)
+	for (i = 20; i < (full ? 60 : 27); i ++)
 	{
 		recover_state(msg1, msg2, state1, state2, i);
 		if (!check_sc(state1, state2, i, sc))
