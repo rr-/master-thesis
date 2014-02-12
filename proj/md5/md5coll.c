@@ -508,8 +508,6 @@ void block2_fill_sc(compiled_sufficient_cond *sc)
 	compile_sc(sc_raw, sc, 64);
 }
 
-unsigned long long block2_amm_technique1_attempts = 0;
-size_t block2_amm_technique = 1;
 __attribute__((always_inline)) inline bool block2_amm(
 	uint32_t *const msg1,
 	uint32_t *const msg2,
@@ -521,15 +519,7 @@ __attribute__((always_inline)) inline bool block2_amm(
 {
 	size_t i;
 
-	if (block2_amm_technique == 1)
-	{
-		block2_amm_technique1_attempts ++;
-		if (block2_amm_technique1_attempts >= 100000000)
-		{
-			block2_amm_technique = 2;
-			return false;
-		}
-
+	#if 1
 		if (!full)
 		{
 			/* d1 */
@@ -590,11 +580,7 @@ __attribute__((always_inline)) inline bool block2_amm(
 				return false;
 		}
 
-		block2_amm_technique1_attempts = 0;
-	}
-
-	else
-	{
+	#else
 		state1[15] = random();
 		fix_sc(state1, state2, 15, sc);
 
@@ -610,7 +596,7 @@ __attribute__((always_inline)) inline bool block2_amm(
 			if (!check_sc(state1, state2, i, sc))
 				return false;
 		}
-	}
+	#endif
 
 	/* check final SCs on a16 to b16 manually */
 	if (full)
@@ -682,10 +668,7 @@ __attribute__((always_inline)) inline bool block2_try(
 
 	for (i = 0; i < 50000000; i ++)
 	{
-		if (block2_amm_technique == 1)
-			tick(&tc, "block 2 - deep testing, technique 1");
-		else
-			tick(&tc, "block 2 - deep testing, technique 2");
+		tick(&tc, "block 2 - deep testing");
 
 		ok = block2_amm(msg1, msg2, state1, state2, sc, message_delta, true);
 		if (ok)
