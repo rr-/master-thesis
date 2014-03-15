@@ -1,6 +1,6 @@
 #!/bin/bash
 cd "$( dirname "${BASH_SOURCE[0]}" )"
-rm -f praca.pdf
+rm -f thesis.pdf
 
 pdflatex -interaction=batchmode -file-line-error thesis.tex && \
 bibtex thesis.aux && \
