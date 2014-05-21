@@ -6,7 +6,7 @@ przed złamaniem haszy.
 \subsection{Ataki \en{online}}
 
 W~przypadku ataków \en{online} tak naprawdę mamy do czynienia tylko z~jedną
-metodą obrony i~jest nią identyfikacja atakującego i~następujące po niej
+metodą obrony i\renmich{myślnik?}~jest nią identyfikacja atakującego i~następujące po niej
 zablokowanie dostępu do danej usługi.
 
 Identyfikacja może następować na różne sposoby. Administrator mając do
@@ -25,14 +25,14 @@ przechowywanych w~metadanych połączenia (np. ciasteczkach przeglądarki).
 Kiedy atakujący zostanie zidentyfikowany jako osoba, która już wcześniej
 wielokrotnie podejmowała nieudane próby uwierzytelnienia, system może
 odpowiednio zareagować. Jedną z~najpopularniejszych metod reakcji jest
-ograniczenie liczby możliwości wypróbowania kolejnych kombinacji w~stosunku do
+ograniczenie liczby możliwości wypróbowania kolejnych kombinacji w~\renmich{ustalonym odcinku? (bez stosunku)}stosunku do
 ustalonego odcinka czasu. Przykładem może być formularz logowania, w~którym
 w~ciągu 10 minut nie można dokonać więcej niż 5~prób zalogowania. Jest to
 proste i~często spotykane zabezpieczenie, jednak tak naprawdę nie gwarantuje
 ono praktycznie żadnego bezpieczeństwa.
 
 Ataki \en{online} mogą być przeprowadzane z~jednego komputera. Atak tego typu
-jest wolny z~powodu ograniczeń przepustowości sieci, a~atakujący
+jest wolny\renmich{powolny? (mniejsza niejednoznaczność)} z~powodu ograniczeń przepustowości sieci, a~\renmich{zidentyfikowanie atakującego\ldots jest trywialne}atakujący
 przeprowadzając kolejne próby uwierzytelnienia z~jednego adresu IP jest
 trywialny do zidentyfikowania. Odmowa dostępu działa więc tutaj bardzo dobrze.
 Należy jednak zwrócić uwagę, że atak brutalny przeprowadzany z~jednego
@@ -51,38 +51,38 @@ atakujący:
 \end{itemize}
 
 Im lepiej wyposażony jest atakujący, tym identyfikacja źródła jest trudniejsza,
-a~więc nie coraz trudniejsze staje się efektywne odebranie dostępu atakującemu
+a~więc nie\renmich{?} coraz trudniejsze staje się efektywne odebranie dostępu atakującemu
 do danej usługi. Można bezpiecznie założyć, że poważny atakujący będzie
 dysponował wszystkimi tymi zasobami.
 
-Tak naprawdę problem zapobiegania atakom o~poważniejszej skali sprowadza się do
+Tak naprawdę problem zapobiegania atakom o~poważniejszej\renmich{powtórzenie} skali sprowadza się do
 zapobiegania atakowi \en{offline}, w~którym system nie ma możliwości efektywnej
 odmowy dostępu, a~atakujący nie jest ograniczony przepustowością sieci.
 Dodatkowo ataki tego typu cechują własności ataku DDoS, przed którego obroną
 należy się dodatkowo zabezpieczyć osobnymi sposobami.
 
 \subsubsection{Obrona przed atakami DDoS}
-W~kontekście kryptograficznych funkcji skrótu istnieje kilka kontekstów,
+W~kontekście kryptograficznych funkcji skrótu istnieje kilka kontekstów\renmich{powtórzenie},
 w~których można mówić o~ataku DDoS.
 
 \begin{itemize}
 
-\item Funkcja haszująca jest wystarczająco wolno działająca, że nawet niewielka
-ilość zapytań potrafi wyczerpać zasoby serwera.
+\item Funkcja haszująca jest wystarczająco wolno działająca\renmich{działa wystarczająco powoli?}, że nawet niewielka
+ilość\renmich{liczba!} zapytań potrafi wyczerpać zasoby serwera.
 
-\item ``Klasyczny'' atak DDoS~-- zasoby serwera są wyczerpane przez dużą ilość
+\item ``Klasyczny'' atak DDoS~-- zasoby serwera są wyczerpane przez dużą ilość\renmich{liczbę!}
 zapytań rozsyłanych z~wielu lokacji.
 
 \item Nieprzemyślane wykorzystanie funkcji haszujących: przykładem może być
 tablica mieszająca; w~przeciętnym przypadku pozwala ona wyszukiwać elementy
 w~czasie $O(1)$, ale w~najgorszym przypadku może działać w~czasie $O(n)$.
 Atakujący może znać sposób działania danego mechanizmu na serwerze
-i~przygotowywać specjalne zapytania, które będą powodować wolne działanie
+i~przygotowywać specjalne zapytania, które będą powodować wolne\renmich{powolne? i dalej może też\ldots} działanie
 użytych struktur, co ułatwia wyczerpanie zasobów serwera~\cite{ddos_hashes}.
 Atak ten rzadko jest związany z~\emph{kryptograficznymi} funkcjami haszującymi,
 należy jednak zwrócić uwagę, że także one są czasem wykorzystywane w~tego typu
 zastosowaniach (np. system git używa \texttt{SHA-1} do identyfikacji
-konkretnych rewizji kodu).
+konkretnych rewizji\renmich{rewizja to po polsku coś innego :)} kodu).
 
 \end{itemize}
 
@@ -91,11 +91,11 @@ W~przypadku słabości wynikających z~(pośredniego lub bezpośredniego) wolneg
 działania funkcji haszujących można próbować zastąpić je szybszymi funkcjami
 lub polepszać algorytmy z~nich korzystające. Nie zawsze jest to jednak możliwe;
 wówczas można starać się zidentyfikować zapytania potencjalnie powodujące wolne
-działanie algorytmów i~przekształcać je na bezpieczne odpowiedniki. Także taka
+działanie algorytmów i~przekształcać je na bezpieczne odpowiedniki. \renmich{Jednak także?} Także taka
 linia obrony nie zawsze jest możliwa do przeprowadzenia.
 
 W~sytuacji, kiedy dany zasób na serwerze zawsze będzie reagował wolno i~nie
-można z~tym nic zrobić, sytuacja sprowadza się w~zasadzie do zabezpieczenia
+można\renmich{nic na to poradzić} z~tym nic zrobić, sytuacja sprowadza się w~zasadzie do zabezpieczenia
 serwera przed klasycznymi atakami DDoS. Jedyna metoda skutecznej obrony to
 stosowanie firewalli odcinających dostęp atakującym oraz load-balancing, czyli
 rozpraszanie przychodzącego ruchu na wiele serwerów. Przykładami zewnętrznych
@@ -124,18 +124,18 @@ spełniających jedną i/lub więcej poniższych cech:
 Podejście to jest niewygodne dla użytkowników. Tak naprawdę bezpieczeństwo
 serwisu nie powinno być zależne od tego, czy jakiś użytkownik będzie miał hasło
 postaci \texttt{qwerty}; co więcej, również sam użytkownik stosujący takie
-hasło powinien być względnie bezpieczny w~sytuacji, kiedy baza zostanie
+hasło powinien być względnie bezpieczny w~sytuacji, kiedy baza\renmich{danych z hasłami} zostanie
 wykradziona.
 
 \subsubsection{Konkatenacja haszy}
 
 Jednym z~pomysłów jest próba zwiększenia siły funkcji skrótu bez jej
-faktycznego zmieniania stosując konkatenację. Zamiast przechowywać w~bazie
+faktycznego zmieniania stosując\renmich{przez zastosowanie \ldots} konkatenację. Zamiast przechowywać w~bazie
 hasz postaci:
     $$H(m)$$
 przechowywane są hasze postaci:
     $$H_1(m)||H_2(m)||\ldots||H_n(m)$$
-gdzie $H_i$ to kolejne różne od siebie funkcje haszujące. Dawne protokoły
+gdzie $H_i$ to kolejne\renmich{przecinek} różne od siebie\renmich{przecinek} funkcje haszujące. Dawne protokoły
 SSL/TLS korzystały z~$\mathtt{MD5}(m)||\mathtt{SHA1}(m)$. Konstrukcja ma na
 celu sprawienie, że nawet jeżeli atakujący znajdzie $m' : H_i(m') = H_i(m)$, to
 wykorzystanie innych $H_{j \neq i}$ zagwarantuje że cały hasz i~tak będzie
@@ -192,7 +192,7 @@ potrzeba znacznie mniej zapytań, aby wyczerpać zasoby serwera.
 \subsubsection{``Sól'' (metoda I)}
 
 Sól stanowi dobrą linię obrony przed atakami \en{offline}. Ma ona na celu
-zagwarantować nieskuteczność ataków przy pomocy tęczowych tablic oraz ataków na
+zagwarantować\renmich{zagwarantowanie} nieskuteczność ataków przy pomocy tęczowych tablic oraz ataków na
 więcej niż 1~hasło naraz.
 
 Wyobraźmy sobie scenariusz, w~którym w~bazie danych hasła użytkowników
@@ -233,13 +233,13 @@ potrzebnego na sprawdzenie obecności pojedynczego hasła w~bazie z~1 operacji
 haszowania do $n$ operacji haszowania, gdzie $n$ stanowi liczbę użytkowników
 w~bazie (np. chcąc sprawdzić, czy istnieje użytkownik z~hasłem \texttt{1234},
 trzeba dla każdego użytkownika $u$ obliczyć $H(\texttt{1234}||s_u)$). Należy
-jednak zwrócić uwagę że przyrost ten nie polepsza bezpieczeństwa;
+jednak zwrócić uwagę że przyrost ten nie polepsza \renmich{znacząco} bezpieczeństwa;
 przetestowanie takich haseł nadal będzie się odbywało bardzo szybko.
 
 \label{salt_2}
 \subsubsection{``Sól'' (metoda II)}
 Drugim rodzajem zabezpieczenia korzystającego z~soli jest stosowanie utajnionej
-soli. Zabezpieczenie to w~przeciwieństwie do poprzedniej metody zakłada, że
+soli. Zabezpieczenie to\renmich{przecinek} w~przeciwieństwie do poprzedniej metody\renmich{przecinek} zakłada, że
 taka sól będzie wspólna dla wszystkich użytkowników, a~więc zamiast
 przechowywać $H(p_u)$ przechowywany jest $H(p_u||s)$. Podczas uwierzytelniania
 $p'$ sprawdzane jest, czy $H(p'||s) \stackrel{?}{=} H(p_u||s)$.
@@ -248,7 +248,7 @@ Podstawową korzyścią jest bezpieczeństwo w~sytuacji, gdy baza została
 wykradziona. Ponieważ $s$ nie jest przechowywane w~bazie, atakujący nie może
 przeprowadzić żadnego sensownego ataku~-- tak naprawdę nie zna nawet $H$, na
 jakie mógłby przeprowadzić atak. Nawet dysponując wiedzą, że użyte zostało np.
-$\texttt{MD5}$, nie daje mu to znaczącej przewagi, gdyż do przeprowadzenia
+$\texttt{MD5}$, nie daje mu to\renmich{posiada} znaczącej przewagi, gdyż do przeprowadzenia
 ataku brutalnego potrzebuje dodatkowo nieznanego $s$. Jeżeli $s$ jest
 wystarczająco długie, to jest ono bezpieczne przed atakiem brutalnym.
 
@@ -261,7 +261,7 @@ sekretna sól; poprawność $h$ może później zostać zweryfikowana po stronie
 serwera).
 
 Bezpieczeństwo takiego systemu w~całości opiera się na tajności $s$. Wiąże się
-to niestety z~paroma wadami.
+to niestety z~paroma\renmich{kilkoma? paroma to chyba zbyt kolokwialne\ldots} wadami.
 \begin{enumerate}
 
 \item Należy zwrócić szczególną uwagę na sposób łączenia wejściowych danych
@@ -290,6 +290,6 @@ haszy, w~przypadku konieczności zmiany $s$ należy wymusić na użytkownikach
 zmianę hasła, a~to jest z~kolei niemile widziane.
 
 \end{enumerate}
-Jeżeli jednak jesteśmy zagwarantować bezpieczeństwo $s$ (np. poprzez
+Jeżeli jednak jesteśmy\renmich{czegoś brakuje} zagwarantować bezpieczeństwo $s$ (np. poprzez
 zastosowanie w~tym celu osobnego systemu kryptograficznego), podejście to
-w~połączeniu z~zastosowaniem~\ref{salt_1} stanowi najlepsze z~przedstawionych.
+w~połączeniu z~zastosowaniem~\ref{salt_1} stanowi najlepsze z~przedstawionych. \renmich{\ldots{}ale można by chyba wspomnieć choć słówkiem o tym, co naprawdę powinno się używać, czyli key derivation functions jak np. scrypt; wręcz można by o tym napisać nawet więcej niż słówko, jeśli Pan chce}

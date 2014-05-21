@@ -1,6 +1,6 @@
 \section{Konstrukcja funkcji haszujących}
 \label{sec:hash_construction}
-Wprawdzie konstrukcji funkcji haszujących jest wiele, większość z~nich wygląda
+Wprawdzie konstrukcji funkcji haszujących jest wiele, \renmich{jednak} większość z~nich wygląda
 podobnie. Na początku skupię się na teoretycznych aspektach konstruowania
 funkcji haszujących, a~w~następnej kolejności opiszę praktyczne implementacje.
 
@@ -21,7 +21,7 @@ zbioru. Innymi słowy, jest to bijekcja na samą siebie, lub permutacja.
 Znalezienie takiej funkcji w~praktyce polega na użyciu algorytmu losowego,
 który dobiera każdemu $m$ przypadkowy element $h$ tak długo, aż $h$ będzie
 niewykorzystany przez żaden inny element (czyli zapewniony będzie brak
-kolizji):
+kolizji):\renmich{To jest nie po polsku; może ,,próbuje dobrać kolejne losowe elementy póki nie trafi na jeszcze niewykorzystany'', czy coś takiego?}
 
 \begin{myenumerate}
 
@@ -32,7 +32,7 @@ kolizji):
     \begin{myenumerate}
 
         \item Wylosuj $h \in M$ takie, że $\not \exists_{m' \in M} : T_{m'} =
-        h$
+        h$\renmich{Sugeruję dodanie $\backslash$! między $\backslash$not a $\backslash$exists}
 
         \item Przydziel $T_m = h$
 
@@ -62,14 +62,14 @@ losowe permutacje!), jest podejściem złym z~prostych przyczyn:
     że każdy system kryptograficzny musi być bezpieczny nawet, gdy jego sposób
     działania wraz ze szczegółami implementacji jest jawny (za wyjątkiem
     klucza, który jest z~definicji tajny, z~tym że funkcje haszujące nie
-    używają klucza).
+    używają klucza).\renmich{Ale jeśli ukryjemy tablicę i potraktujemy algorytm jako black box, to jest to dokładnie random oracle, prawda? Nie wiem, czy to należy za wielką wadę uznać; można o tej tablicy wręcz myśleć jak o kluczu\ldots}
 
     \item Nawet gdy zignorujemy powyższe przykazanie, nasz algorytm będzie
     nieodporny na proste ataki statystyczne: analizując rozkład
     prawdopodobieństwa pewnych wzorców wewnątrz kolejnych $h$ (który nie jest
     jednostajny, jako że w~praktyce rzadko kiedy wejście ma rozkład
     jednostajny), możemy zyskać ogólne wyobrażenie o~tym, jak wyglądają wzorce
-    wewnątrz $m \in M$, co może doprowadzić do oryginalnych $m$.
+    wewnątrz $m \in M$, co może doprowadzić do oryginalnych $m$.\renmich{Chyba głupi jestem, bo zupełnie nie rozumiem jak to może zachodzić. Mnie się ten algorytm wydaje całkowicie odporny przed takim atakiem.}
 
     \item Wreszcie, funkcja taka jest bardzo niepraktyczna: po pierwsze, musimy
     znać z~góry \emph{wszystkie} możliwe wiadomości, jakie możemy chcieć
@@ -95,7 +95,7 @@ posiadanego konkretnego wyjścia.
 
     \item żaden probabilistyczny algorytm działający w~czasie wielomianowym nie
     potrafi zgadnąć argumentu z~zaniedbywalnie małym
-    prawdopodobieństwem~\cite{one_way_functions}.
+    prawdopodobieństwem~\cite{one_way_functions}.\renmich{Z zaniedbywalnie małym prawdopodobieństwem chyba właśnie potrafi.}
 
 \end{itemize}
 
@@ -107,7 +107,7 @@ posiadanego konkretnego wyjścia.
 
     \item każdy probabilistyczny algorytm działający w~czasie wielomianowym,
     który ją potrafi odwrócić, zgaduje argumenty w~sposób niepoprawny
-    z~niezaniedbywalnie dużym prawdopodobieństwem~\cite{one_way_functions}.
+    z~niezaniedbywalnie dużym prawdopodobieństwem~\cite{one_way_functions}.\renmich{Wydaje mi się to nieprawdziwe, a w zasadzie niewystarczające. Zamiast czytać \cite{one_way_functions}, pozwolę Panu mnie przekonać, że jest inaczej. :)}
 
 \end{itemize}
 
@@ -213,12 +213,12 @@ pokazaniu istnienia algorytmu, który przekształca w~czasie wielomianowym
 problem znajdowania kolizji dla takiej funkcji w~problem rozwiązania źródłowego
 problemu. W~ten sposób, kiedy zostanie znaleziony algorytm wielomianowy
 potrafiący złamać formalną funkcję haszującą, będzie od razu znany sposób
-szybkiego rozwiązywania problemu, na którym ta funkcja się opiera~-- a~na
+szybkiego rozwiązywania problemu, na którym ta funkcja się opiera~-- a~na\renmich{w chwili obecnej}
 chwilę obecną zakłada się, że problemy te (faktoryzacja, znajdywanie logarytmu
 dyskretnego itp.) są nierozwiązywalne w~czasie wielomianowym, tak więc oznacza
 to (najprawdopodobniej) sprzeczność. Możemy zatem powiedzieć, że trudność
 złamania formalnych funkcji skrótu jest nie mniejsza niż trudność rozwiązania
-dowolnego problemu, o~którym podejrzewamy, że jest trudny do rozwiązania.
+dowolnego\renmich{to by sugerowało, że chodzi o NP-zupełne; wyrzuciłbym ,,dowolnego''} problemu, o~którym podejrzewamy, że jest trudny do rozwiązania.
 Innymi słowy, problem złamania takich funkcji jest redukowalny do problemu
 milenijnego, stąd funkcje te są postrzegane jako najbezpieczniejsze dostępne
 warianty.
@@ -227,7 +227,7 @@ warianty.
 
 \subsection{Współczesne implementacje}
 Wprawdzie formalnie bezpieczne funkcje skrótu są bardzo bezpieczne, nie
-przychodzi to bez kosztów. Praktyka pokazuje, że funkcje te prawie w~ogóle się
+przychodzi to bez kosztów\renmich{to nie jest po polsku}. Praktyka pokazuje, że funkcje te prawie w~ogóle się
 nie nadają do zastosowań praktycznych lub przemysłowych z~racji swojego wolnego
 działania lub wysokich kosztów pamięciowych; niestety, skutecznie eliminuje to
 ich przydatność wszędzie tam, gdzie mamy do czynienia z~ograniczonymi zasobami
@@ -235,8 +235,8 @@ ich przydatność wszędzie tam, gdzie mamy do czynienia z~ograniczonymi zasobam
 rzeczywistym czy też systemy uwierzytelniania o~dużej przepustowości).
 
 W~związku z~tym została stworzona druga rodzina kryptograficznych funkcji
-skrótu. Działanie funkcji z~tej rodziny polega ogólnie rzecz biorąc na
-dokonywaniu ogromnych liczby różnorodnych operacji na konkretnych bitach
+skrótu. Działanie funkcji z~tej rodziny polega\renmich{przecinek} ogólnie rzecz biorąc\renmich{przecinek} na
+dokonywaniu ogromnych\renmich{ogromnej} liczby różnorodnych operacji na konkretnych bitach
 wiadomości $m$ (takich jak przestawianie, dodawanie, odejmowanie i~inne).
 Komputery są przystosowane do tego typu obliczeń, dzięki czemu w~porównaniu do
 formalnie bezpiecznych funkcji skrótu haszowanie takimi funkcjami odbywa się
@@ -244,8 +244,8 @@ bardzo szybko. Oznacza to jednak, że autorzy funkcji zazwyczaj ograniczają si�
 jedynie do wstępnej analizy jej słabości, \latin{de~facto} nie przedstawiając
 formalnego dowodu trudności jej złamania. Badania mające na celu znalezienie
 słabości przypominają w~swojej naturze szukanie igły w~stogu siana:
-nieznalezienie igły na daną chwilę nie oznacza jeszcze nieistnienia igły. Daje
-to pole do popisu kryptologom, którzy znajdują luki na długo po pierwszym
+nieznalezienie igły na daną chwilę\renmich{w danej chwili} nie oznacza jeszcze nieistnienia igły. Daje
+to pole do popisu kryptologom, którzy znajdują luki na\renmich{usunąć ,,na''} długo po pierwszym
 opisaniu.
 
 
@@ -253,7 +253,7 @@ opisaniu.
 \subsubsection{Konstrukcja Merkle-Damg\r{a}rda}
 Przykładem sposobu, w~jaki działają nowoczesne kryptograficzne funkcje skrótu
 oparte o~operacje bitowe, może być konstrukcja Merkle-Damg\r{a}rda. Opisana po
-raz pierwszy przez Merkle w~roku 1979 w~jego pracy
+raz pierwszy przez Merkle\renmich{Merkle'go?} w~roku 1979 w~jego pracy
 doktorskiej~\cite{merkle_damgard_construction}, stanowi rdzeń używanych po dziś
 dzień funkcji skrótu takich jak \texttt{SHA-1} czy \texttt{MD5} i~jest jedną
 z~najpopularniejszych metod konstrukcji funkcji haszujących. W~konstrukcji
@@ -295,7 +295,7 @@ Sama konstrukcja składa się z~kroków opisanych poniżej.
     \begin{myenumerate}
 
         \item Niech $h=\mathtt{Comp}(h,M_i)$, gdzie $\mathtt{Comp}$ jest
-        funkcją kompresji, $h$ aktualnie obliczoną wartość skrótu a~$M_i$
+        funkcją kompresji, $h$ aktualnie obliczoną wartość\renmich{wartością} skrótu a~$M_i$
         stanowi $i$-ty blok wiadomości $M$.
 
     \end{myenumerate}
@@ -322,7 +322,7 @@ Sama konstrukcja składa się z~kroków opisanych poniżej.
 \texttt{MD5} jest pierwszą z~dwóch funkcji, na których się skupimy w~tej pracy.
 Jej wykorzystanie jest bardzo szerokie: znajduje zastosowanie w~systemach
 bezpieczeństwa oraz systemach weryfikacji integralności danych (pomimo faktu,
-że już w~latach 90-tych wyraźnie odradzano jej wykorzystania z~powodu
+że już w~latach 90-tych wyraźnie odradzano jej wykorzystania\renmich{wykorzystanie} z~powodu
 poważnych wątpliwości co do jej faktycznego bezpieczeństwa, które z~czasem
 okazały się uzasadnione~\cite{ps3_attack}).
 
@@ -557,7 +557,7 @@ funkcji~\cite{sha1_definition} została przedstawiona poniżej.
             \leq 15}$, każdy o~długości 32~bitów.
 
             \item Skonstruuj dodatkowe wektory $W_{16 \leq i \leq 79}$ zgodnie
-            z~wzorem:
+            z\renmich{ze}~wzorem:
 
             $$
                 W_i = (W_{i-3} \oplus W_{i-8} \oplus W_{i-14} \oplus W_{i-16})

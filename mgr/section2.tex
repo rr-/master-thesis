@@ -17,11 +17,11 @@ wykorzystywane będą następujące pojęcia:
     \item \textbf{zwykła funkcja haszująca}~-- funkcja skrótu, która może, ale
     nie musi być \emph{kryptograficzną funkcją skrótu},
 
-    \item \textbf{wiadomość}~-- wartość wejściowa dla \emph{funkcji skrótu},
+    \item \textbf{wiadomość}~-- wartość wejściowa dla\renmich{czy to ,,dla'' jest gramatycznie?} \emph{funkcji skrótu},
 
-    \item \textbf{skrót}~-- wartość wyjściowa z~\emph{funkcji skrótu},
+    \item \textbf{skrót}~-- wartość wyjściowa z\renmich{Czy to ,,z'' jest gramatycznie?}~\emph{funkcji skrótu},
 
-    \item \textbf{hasz}~-- alternatywne określenie na wartość wyjściową
+    \item \textbf{hasz}~-- alternatywne określenie na\renmich{niegramatycznie} wartość wyjściową
     \emph{funkcji skrótu},
 
     \item \textbf{kolizja}~-- sytuacja, w~której skróty dwóch różnych
@@ -34,7 +34,7 @@ wykorzystywane będą następujące pojęcia:
     \]
 
     \item \textbf{zadanie praktycznie niewykonalne}~-- algorytm, który
-    realizuje dane zadanie, nie istnieje, albo jego koszt obliczeniowy lub
+    realizuje dane zadanie,\renmich{usunąć przecinek} nie istnieje, albo jego koszt obliczeniowy lub
     pamięciowy jest tak wielki, że nie można go wykonać przy pomocy znanych
     obecnie technologii.
 
@@ -43,7 +43,7 @@ wykorzystywane będą następujące pojęcia:
 Dodatkowo, od części~\ref{sec:hash_construction} do końca pracy przez pojęcie
 funkcji haszujących będziemy rozumieć wyłącznie kryptograficzne funkcje
 haszujące, gdyż tylko na takich funkcjach w~tych częściach będziemy się
-skupiać.
+skupiać.\renmich{Szczerze powiedziawszy, to dobrze by było konsekwentnie dalej wszystkie nazywać, nie zmuszając czytelnika, żeby to pamiętał\ldots}
 \pagebreak
 
 
@@ -52,7 +52,7 @@ skupiać.
 Funkcja skrótu jest to funkcja, której dziedziną są ciągi bitów dowolnej
 długości, a~przeciwdziedziną~-- ciągi bitów o~stałej, ograniczonej długości.
 Rzutowanie to odbywa się w~sposób jednoznaczny, tj. każdemu wejściu funkcja
-skrótu przyporządkowuje dokładnie jedno wyjście; formalnie zatem jest to
+skrótu przyporządkowuje dokładnie jedno wyjście; \renmich{Naprawdę bycie suriekcją oznacza, że przyporządkowanie jest jednoznaczne?} formalnie zatem jest to
 surjekcja:
 
 $$ f \colon X \to Y $$
@@ -113,12 +113,12 @@ w~sekcji~\ref{sec:secure_hash_usages}).
 \subsubsection{Cechy kryptograficznych funkcji haszujących}
 \label{sec:secure_hash_attributes}
 Aby lepiej zrozumieć naturę warunków nałożonych na cechy kryptograficznych, lub
-też \emph{bezpiecznych} funkcji skrótu, należy uświadomić sobie ich naturę:
+też \emph{bezpiecznych}\renmich{Przecinki mi się nie podobają} funkcji skrótu, należy uświadomić sobie ich naturę:
 w~sytuacji, kiedy kolizje są tylko niepożądane, sięgamy po zwykłe funkcje
 haszujące, funkcje kryptograficzne stają się natomiast potrzebne wówczas, gdy
 kolizje są \emph{niedopuszczalne}.
 
-Jednak z~racji mniejszego rozmiaru przeciwdziedziny w~stosunku do dziedziny
+Jednak \renmich{Przecinek}z~racji mniejszego rozmiaru przeciwdziedziny w~stosunku do dziedziny
 (patrz rysunek~\ref{fig:surjection} na stronie \pageref{fig:surjection}),
 kolizje \emph{będą} się zdarzać.
 
@@ -129,23 +129,23 @@ użycia narzędzie we wszystkich sytuacjach, które wymagają wysokiego
 bezpieczeństwa.
 
 \myparagraph{Odporność na kolizje pierwszego rzędu (\en{preimage resistance})}
-\label{sec:preimage_resistance}
-Mając dany skrót $h$, znalezienie wiadomości $m$ takiej, że $H(m) = h$ powinno
+\label{sec:preimage_resistance}\renmich{Dokładnie w tym miejscu należy wpisać \%, bo inaczej będzie spacja na początku linii}
+\renmich{Może lepiej}Mając dany skrót $h$, znalezienie wiadomości $m$ takiej, że $H(m) = h$ powinno
 być w~praktyce niewykonalne. Jest to warunek zapewniający jednostronność
 funkcji skrótu. Należy zauważyć, że zależy nam na \emph{dowolnej} wiadomości,
 a~nie oryginalnej wiadomości z~której zostało utworzone $h$.
 
 \myparagraph{Odporność na kolizje drugiego rzędu (\en{second preimage
 resistance})}
-\label{sec:second_preimage_resistance}
+\label{sec:second_preimage_resistance}\renmich{Dokładnie w tym miejscu należy wpisać \%, bo inaczej będzie spacja na początku linii}
 Mając daną wiadomość $m$, znalezienie wiadomości $m' \neq m$ takiej, że $H(m) =
 H(m')$ powinno być praktycznie niewykonalne.
 
 \myparagraph{Odporność na kolizje (\en{collision resistance})}
-\label{sec:collision_resistance}
+\label{sec:collision_resistance}\renmich{Dokładnie w tym miejscu należy wpisać \%, bo inaczej będzie spacja na początku linii}
 Znalezienie dwóch dowolnych różnych wiadomości $m \neq m'$ takich, że $H(m) =
 H(m')$ powinno być praktycznie niewykonalne. Spełnienie tej własności implikuje
-odporność na kolizje drugiego rzędu, co jednak nie implikuje odporności na
+odporność na kolizje drugiego rzędu, co\renmich{usunąć ,,co'', albo napisać inaczej, bo teraz jest że implikacja nie implikuje, a nie spełnienie własności} jednak nie implikuje odporności na
 kolizje pierwszego rzędu.
 
 \myparagraph{Niemożność odróżnienia od \en{random oracles}}
@@ -154,10 +154,10 @@ argumentowi losową (z jednostajnym rozkładem prawdopodobieństwa) wartość
 z~określonej przeciwdziedziny w~taki sposób, że dla konkretnego argumentu
 zawsze wybiera taką samą wartość.  Pożądane jest, by kryptograficzna funkcja
 skrótu była trudna do odróżnienia od \en{random oracle}~\cite{random_oracle},
-choć jest to zadanie znacznie trudniejsze od spełnienia poprzednich własności.
+choć jest to zadanie znacznie trudniejsze od spełnienia\renmich{zapewnienia?} poprzednich własności.
 
 \myparagraph{Własność efektu lawinowego}
-\label{sec:avalance_effect}
+\label{sec:avalance_effect}\renmich{Dokładnie w tym miejscu należy wpisać \%, bo inaczej będzie spacja na początku linii}
 W~dobrych funkcjach haszujących powinien zachodzić tzw. efekt lawinowy. Jest to
 własność zapewniająca, że nawet mała zmiana wiadomości $m'$ w~stosunku do $m$
 powoduje duże zmiany w~wartości $H(m')$ w~porównaniu do $H(m)$. Jej celem jest
@@ -189,7 +189,7 @@ lawinowego~\cite{avalanche_criterion1,avalanche_criterion2}.
     się zmienić z~prawdopodobieństwem równym $\frac{1}{2}$.
 
     Formalnie funkcja $f : \mathbb{Z}_2^n \to \mathbb{Z}_2^m$ spełnia ścisłe
-    kryterium lawinowe, gdy:
+    kryterium lawinowe, gdy:\renmich{,,j'' tu nie występuje}
 
     $$\forall i,j \; \sum_{x \in \mathbb{Z}_2^n} D_H(f(x) \oplus f(x \oplus
     C_i^n)) = m 2^{n-1}$$
@@ -203,7 +203,7 @@ lawinowego~\cite{avalanche_criterion1,avalanche_criterion2}.
     powinny zmieniać się w~sposób niezależny od siebie.
 
     Możliwe jest ocenienie stopnia, w~jakim dana funkcja $f$ spełnia kryterium
-    niezależności bitowej. Formalnie:
+    niezależności bitowej. Formalnie:\renmich{Trzeba zdefiniować corr. Poza tym trzeba się zastanowić czy tu i dalej corr i BIC mają być kursywą -- można by zrobić $\backslash$textrm\{BIC\}.}
 
     $$BIC(f) = \max_{x, y \in \mathbb{Z}_2^n} \left( \max_{1 \leq i \leq n}
     |corr(f(x) \oplus (f(x) \oplus C_i^n), f(y) \oplus (f(y) \oplus C_i^n))|
@@ -355,7 +355,7 @@ lawinowego~\cite{avalanche_criterion1,avalanche_criterion2}.
     kolejnych bitach skrótów \texttt{MD5}, otrzymanych z~zahaszowania wyrazów
     z~listy~\ref{wl:english_wordlist} w~dodatku~\ref{app:wordlists}.}
     %todo: wspomnieć o programie z dodatku C
-    \end{figure}
+    \end{figure}\renmich{Zahaszowania?}\renmich{Nie rozumiem indeksu dolnego w opisie osi y}
 \pagebreak
 
 
@@ -364,7 +364,7 @@ lawinowego~\cite{avalanche_criterion1,avalanche_criterion2}.
 \label{sec:secure_hash_usages}
 Same funkcje skrótu mają bardzo szerokie zastosowania, my jednak skupimy się
 wyłącznie na zastosowaniach \emph{kryptograficznych} funkcji haszujących.
-W~każdym przypadku opisane zastosowanie utylizuje podstawową cechę
+W~każdym przypadku opisane zastosowanie utylizuje\renmich{Utylizować to odpady można.} podstawową cechę
 kryptograficznych funkcji skrótu, jaką jest odporność na kolizje.
 
 
@@ -382,7 +382,7 @@ oznaczona przez $m'$.
     \caption{Wiadomość odebrana przez Boba niekoniecznie musi dotrzeć do niego
     w~formie identycznej jak podczas nadania przez Alicję}
     \label{fig:usage_integrity_check_1}
-\end{figure}
+\end{figure}\renmich{identycznej do, nie jak}
 
 Z~taką transmisją wiąże się wiele problemów, gdy zaczniemy rozpatrywać ją pod
 kątem zapewnienia bezpieczeństwa. Jednym z~takim problemów jest zapewnienie
@@ -405,7 +405,7 @@ $h$ jest równy obliczonemu przez niego $h'$).
     \label{fig:usage_integrity_check_2}
 \end{figure}
 
-Wprowadzenie funkcji haszujących właśnie pozwoliło sprowadzić problem
+Wprowadzenie funkcji haszujących właśnie\renmich{,,właśnie'' na początek?} pozwoliło sprowadzić problem
 zabezpieczenia transmisji potencjalnie bardzo długich komunikatów do
 zabezpieczenia transmisji jedynie samych skrótów.
 
@@ -438,7 +438,7 @@ zastosowania płyną pewne wymienione niżej korzyści.
 \subsubsection{Bezpieczne przechowywanie / weryfikacja haseł}
 \label{sec:usage_password_check}
 Funkcje haszujące przychodzą z~pomocą także w~technikach przechowywania haseł.
-Wyobraźmy sobie przeciętny mechanizm autentykacji.
+Wyobraźmy sobie przeciętny\renmich{typowy} mechanizm autentykacji.
 
 \begin{myenumerate}
 
@@ -471,9 +471,9 @@ uwierzytelniające \emph{wszystkich} użytkowników, także Alicji, a~następnie
 pomyślnie zalogować się przy pomocy tak wykradzionych danych.
 
 Musimy zatem jakoś zabezpieczyć bazę danych. Można próbować ją szyfrować lub
-inaczej zabezpieczać dane w~niej przechowywane, problem z~takim podejściem jest
+inaczej zabezpieczać dane w~niej przechowywane,\renmich{kropka} problem z\renmich{,,problem z czymś'' to kolokwializm}~takim podejściem jest
 jednak taki, że na pewnym poziomie tak czy inaczej jakaś osoba (administrator)
-zawsze będzie miał dostęp do fizycznych danych. Możemy także zahaszować dane
+zawsze będzie miał\renmich{miała} dostęp do fizycznych danych. Możemy także zahaszować\renmich{zahaszować?} dane
 uwierzytelniające i~zmodyfikować nasz protokół w~sposób opisany poniżej.
 
 \label{sec:secure_pasword_storage}
@@ -501,12 +501,12 @@ uwierzytelniające i~zmodyfikować nasz protokół w~sposób opisany poniżej.
 
 Dzięki temu, że w~bazie przechowywane są jedynie nieodwracalne skróty, nawet
 w~przypadku kradzieży bazy danych na podstawie wykradzionych skrótów nie
-powinno być można odtworzyć oryginalnych danych (patrz
+powinno być można\renmich{dać się?} odtworzyć oryginalnych danych (patrz
 punkt~\ref{sec:preimage_resistance}). Teoretycznie zatem atakującemu taka baza
 w~zasadzie do niczego się nie przyda.
 
 Należy jednak zwrócić uwagę, że protokół ten nie jest bezpieczny bez pewnych
-poprawek. Przyczyny i~natura poprawek omówione są
+poprawek. Przyczyny\renmich{tego?} i~natura poprawek omówione są
 w~części~\ref{sec:universal_attacks}.
 
 
@@ -524,19 +524,19 @@ rozwiązaniach.
     numerowania kolejnych zmian i~bezpiecznego przechowywania historycznej
     struktury repozytorium.
 
-    \item Linki ed2k oraz magnet, używane w~sieciach peer-to-peer, wykorzystują
-    funkcje skrótu w~celu lokalizacji źródeł, skąd dany plik może być pobrany,
+    \item Linki\renmich{odnośniki, albo może adresy} ed2k oraz magnet, używane w~sieciach peer-to-peer, wykorzystują
+    funkcje skrótu w~celu lokalizacji źródeł,\renmich{bez przecinka} skąd dany plik może być pobrany,
     a~także weryfikacji już ściągniętych danych (patrz
     punkt~\ref{sec:usage_integrity_check}).
 
     \item Struktury danych takie jak tablice mieszające (tzn. tablice, których
     kluczami może być dowolny obiekt, w~przeciwieństwie do klasycznych tablic
     o~indeksach liczbowych), wykorzystują funkcje haszujące do serializacji
-    dowolnych obiektów na taką postać, jaką ich algorytmy indeksowania są
+    dowolnych obiektów na taką postać\renmich{do takiej postaci}, jaką ich algorytmy indeksowania są
     w~stanie obsłużyć. Przykładowo, w~języku Java każdy zdefiniowany przez
     użytkownika obiekt powinien zaimplementować metodę \texttt{hashCode()},
     która w~zamierzeniu ma pozwolić łatwo odróżniać (na~tyle, na~ile to
-    możliwe) konkretne instancje obiektu w~stosunku do pozostałych.
+    możliwe) konkretne instancje obiektu w~stosunku do\renmich{w stosunku do $\rightarrow$ od?} pozostałych.
 
 \end{itemize}
 
@@ -577,7 +577,7 @@ ostatecznie sformalizowane przez Damg\r{a}rda w~roku 1987. W~roku 2004 Rogaway
 i~Shrimpton pokazali, że funkcje haszujące w~miarę możliwości nie powinny być
 odróżnialne od \en{random oracles}.
 
-Już od samego początku, czyli późnych lat 70--tych, funkcje haszujące
+Już od samego początku, czyli późnych lat 70--tych\renmich{Ktoś lepszy ode mnie w typografii powinien się wypowiedzieć czy nie powinno być 70-tych. Zapytam dr Borkowskiego.}, funkcje haszujące
 przeżywały bardzo szybki rozwój. Zapotrzebowanie na bezpieczne i~szybkie
 funkcje skrótu było szeroko rozumiane, nie zaskakuje zatem fakt, że do lat
 90--tych znane było już około 50 konstrukcji. Pierwsi kandydaci korzystali

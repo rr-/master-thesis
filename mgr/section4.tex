@@ -9,7 +9,7 @@ metody w~większości opierają się na wypróbowywaniu kolejnych możliwych wej
 $m_0, m_1, m_2, \ldots$ tak długo, aż nie zostanie znalezione $m : H(m) = h$,
 gdzie $h$ to łamany skrót.
 
-Przykłady będą odnosiły się do scenariuszu opisanego
+Przykłady będą odnosiły się do scenariuszu\renmich{scenariusza} opisanego
 w~sekcji~\ref{sec:secure_pasword_storage}, w~którym atakujący stara się
 (pośrednio lub bezpośrednio) znaleźć kolizje dla skrótów otrzymanych z~haseł
 użytkowników pewnego serwisu internetowego. Jest to oczywiście tylko jedno
@@ -26,7 +26,7 @@ i~nietrudno mu zapobiec.
 %todo: co zostało opisane w X i Y
 
 Znacznie ciekawszym rodzajem ataku jest atak \en{offline}. W~tym przypadku
-atakujący ma częściowy lub kompletny dostęp bazy danych zawierającej dane takie
+atakujący ma częściowy lub kompletny dostęp\renmich{do} bazy danych zawierającej dane takie
 jak hasze haseł czy nazwy użytkowników. Pozwala mu to przeprowadzić atak
 \en{offline}, gdzie wypróbowywanie kolejnych haseł nie wymaga jakiejkolwiek
 interakcji z~atakowanym zasobem~-- wystarczy, że dla wymyślonych przez siebie
@@ -176,7 +176,7 @@ jest dobór kolejnych liter). Jest to niepożądane zjawisko, dlatego wykształc
 się inna rodzina ataków brutalnych, jaką są ataki zrandomizowane. W~tym
 podejściu zamiast liniowo przeszukiwać przestrzeń haseł próbuje się je
 przeszukiwać tak, by każda kombinacja miała względnie równą szansę być
-wypróbowana wraz z~upływem czasu, bez znacznego faworyzowania jakichkolwiek
+wypróbowana\renmich{niegramatycznie} wraz z~upływem czasu, bez znacznego faworyzowania jakichkolwiek
 cech (w~szczególności bez np. faworyzowania haseł zaczynających się na
 literkę~``a'', w~następnej kolejności~``aa'' itd.). Do implementacji takiego
 wyszukiwania można podejść na kilka sposobów.
@@ -230,7 +230,7 @@ wyszukiwania można podejść na kilka sposobów.
     nieprzewidywalny sposób na wygląd aktualnego bloku (co realizuje dowolny
     tryb inny niż \texttt{ECB}). Wadą tego rozwiązania jest to, że
     implementacja iteratora, który będzie zwracał wyniki w~kolejności
-    przypominającej losową, jest trudna w~implementacji oraz kosztowna
+    przypominającej losową, jest trudna w~implementacji\renmich{implementacja trudna w implementacji} oraz kosztowna
     obliczeniowo, a~przy generowaniu haseł zależy nam na jak najoptymalniejszym
     szybkościowo i~pamięciowo działaniu procesu.
 
@@ -255,7 +255,7 @@ wyszukiwania można podejść na kilka sposobów.
     $n$ przypadkowych znaków z~alfabetu $A$. Popełnialibyśmy jednak w~ten
     sposób ten sam błąd, co wcześniej~-- także i~w~tym wypadku można skorzystać
     z~dobrodziejstwa analizy~częstości i~uzależnić prawdopodobieństwa
-    wyciągnięcia odpowiednich liter od prawdopodobieństwa ich wystąpienia
+    wyciągnięcia\renmich{wyciągnięcia?} odpowiednich liter od prawdopodobieństwa ich wystąpienia
     w~zakładanym języku. Możemy pójść także krok dalej i~uzależnić swój
     generator od prawdopodobieństw występowania tzw. digramów oraz trigramów,
     czyli ciągów odpowiednio 2- i~3-literowych.
@@ -352,7 +352,7 @@ lista~\ref{wl:xato_passwords}.
         \end{tabular}
     \end{table}
 
-Dodatkowo w~przypadku gdy atakujący obiera na cel konkretny system, może on
+Dodatkowo\renmich{Powtórzenie. ,,Ponadto''?} w~przypadku gdy atakujący obiera na cel konkretny system, może on
 rozszerzać swój słownik o~dodatkowe informacje kontekstowe związane
 z~tym systemem. Przykładowo, dla portalu internetowego słownik może zostać
 rozszerzony o~słowa kluczowe występujące na jego stronach, a~w~przypadku
@@ -420,24 +420,25 @@ Przykładowe techniki zostały wymienione poniżej.
 
     \item
         Generowanie permutacji wejściowego hasła \\
-        Liczba generowanych haseł: $n!$.
+        Liczba generowanych haseł: $n!$.\renmich{Gdzie n to co?}
         %todo: kod?
 
     \item
         Zapisanie hasła podwójnie \\
-        Liczba generowanych haseł: 2.
+        Liczba generowanych haseł: 2. \renmich{Czyli próbujemy zhaszować dwa razy, na wszelki wypadek?}
         %todo: kod?
 
     \item
         Konkatenacja kandydata z~innym kandydatem \\
         Liczba generowanych haseł: $n$, gdzie $n$ to rozmiar słownika.
         %todo: kod?
+\renmich{Zdecydowanie bym dopisał kod, nawet niby trywialnych przypadków. Opis nie zawsze jest jasny.}
 
 \end{itemize}
 
 Zdecydowana większość z~tych technik zwiększa wielkość słownika
 w~niekontrolowany sposób. Przykładowo, samo sprawdzanie pojedynczego wariantu
-hasła z~dopisanym na końcu znakiem ``1'' wydłuża rozmiar słownika dwukrotnie.
+hasła z~dopisanym na końcu znakiem ``1''\renmich{nipolski cudzysłów przy ,,1''} wydłuża rozmiar słownika dwukrotnie.
 Większość z~tych operacji jest zatem w~zasadzie nieopłacalna, chyba że
 atakujący zastosuje dodatkowe triki takie jak uzależnienie technik mutowania od
 długości kandydatów.
@@ -458,7 +459,7 @@ Naiwny atak słownikowy można zrealizować na dwa sposoby.
     \item Skorzystać z~obliczonej wcześniej tablicy zapamiętującej dla pewnego
     zbioru kandydatów $M$ ich wartości $H$. Sprawdzenie dla danego $h$, jakie
     hasło $m \in M$ daje $H(m) = h$ przy pomocy takiej tablicy będzie względnie
-    szybkie bez względu na $|M|$ i~ilość niezależnych ataków. Jednak aby
+    szybkie bez względu na $|M|$ i~ilość\renmich{liczbę} niezależnych ataków. Jednak aby
     przechować taką tablicę w~pamięci komputera, potrzebne są czasem nawet
     i~tysiące gigabajtów. Chcąc przechować nieskompresowaną mapę skrótów
     długości $b$ bitów utworzoną z~haseł długości $n$ nad alfabetem $A$
@@ -528,11 +529,11 @@ wymaganych do odwracania $h$. Im większe $k$, tym mniej pamięci będzie
 potrzebne na przechowanie łańcuchów, ale też sprawdzanie będzie się odbywało
 wolniej i~\en{vice versa}.
 
-Budując tablicę mającą na celu przechować zbiór kandydatów $M$, wybierany jest
+Budując tablicę\renmich{Przy budowie tablicy\ldots -- inaczej jest ,,idąc do domu, spadł deszcz''.} mającą na celu przechować zbiór kandydatów $M$, wybierany jest
 przypadkowy podzbiór $M' \subset M$ i~dla każdego $m \in M'$ konstruowany jest
 łańcuch $C_m$ o~określonej długości $k$. Dla każdego łańcucha zapisywane są
 jedynie jego początkowy oraz końcowy element (w~przykładzie są to odpowiednio:
-$\mathtt{aaaaa}$ oraz $\mathtt{zqjwc}$); nie zapisywane są żadne z~pośrednich
+$\mathtt{aaaaa}$ oraz $\mathtt{zqjwc}$); nie zapisywane są żadne \renmich{żadne pośrednie}z~pośrednich
 wartości.
 
 Mając wszystkie ``początki'' $C_B$ wszystkich łańcuchów, odpowiadające im
@@ -555,7 +556,7 @@ $R$, $C_B = (\mathtt{aaaaa})$, $C_E = (\mathtt{zqjwc})$ i~hasz
 $h=\mathtt{9fb5cc35cd55717db41eec8dfb2b931c}$, oblicza $R(h)$ dostając
 $\mathtt{tojmd}$. Ponieważ $\mathtt{tojmd} \not\in C_E$, oblicza
 $R(H(\mathtt{tojmd}))$ i~dostaje $\mathtt{zqjwc}$. Tym razem $\mathtt{zqjwc}
-\in C_E$, zatem należy przyjrzeć się dokładniej łańcuchowi, którego końcówkę
+\in C_E$, zatem należy przyjrzeć się dokładniej łańcuchowi, \renmich{na}którego końcówkę
 właśnie natrafiono. Dzięki $C_B$ wiadomo, że zaczyna się on od
 $\mathtt{aaaaa}$. Atakujący oblicza zatem $H(\mathtt{aaaaa})$,
 $H(R(H(\mathtt{aaaaa})))$ itd. (maksymalnie $k$ razy) sprawdzając po każdym
@@ -597,6 +598,7 @@ czyni powtarzające się fragmenty łańcuchów niepotrzebnymi.
     \end{tikzcd}
     \]
 \end{multicols}
+\renmich{Dlaczego prawe hasze są niżej?}
 
 W~powyższym przykładzie $h = \mathtt{492ba685d856633d39ef7f868b5638a7}$ nie
 zostanie znalezione w~łańcuchu~1 mimo że atakujący będzie zmuszony go dokładnie
@@ -609,7 +611,7 @@ Dopiero łańcuch~2 jest w~stanie odwrócić $h$ (w 3.~iteracji).
 Wysoka podatność na kolizje opisanych wyżej prostych łańcuchów haszy
 powoduje, że przy wystarczającej długości łańcuchów i~liczności zbioru
 kandydatów $M$ wyszukiwanie przy pomocy tej metody staje się stosunkowo
-długie (i~monotonne) z~uwagi na konieczność sprawdzania dużych liczb
+długie (i~monotonne) z~uwagi na konieczność sprawdzania dużych liczb\renmich{,,wielu''?}
 powtarzających się fragmentów łańcuchów.
 
 Tablice tęczowe stanowią wariant łańcuchów haszy, które zamieniają pojedynczą
@@ -646,6 +648,7 @@ różniące, a~więc bardziej przydatne, łańcuchy.
     \end{tikzcd}
     \]
 \end{multicols}
+\renmich{Dlaczego prawe hasze są niżej?}
 
 Tak naprawdę by łańcuchy stały się niepotrzebne, do kolizji musiałoby dojść
 na poziomie tej samej iteracji, jednak nawet wówczas można odfiltrować łańcuchy
@@ -655,7 +658,7 @@ obliczeniowych i~pamięciowych podczas faktycznego ataku.
 Sprawdzanie, czy $h$ znajduje się w~$C_E$ wymaga małych zmian: zamiast obliczać
 $R(h)$, $R(H(R(h)))$ itd., należy sprawdzać teraz $R_k(h)$, $R_k(H(R_{k-1}(h)))$
 itd. Wydłuża to nieco czas wyszukiwania, jednak mimo tej niedogodności użycie
-tablic tęczowych jest dużo bardziej opłacalne z~racji na zminimalizowane
+tablic tęczowych jest dużo bardziej opłacalne z~racji na zminimalizowane\renmich{,,zmniejszenie liczby''? trochę nie po polsku}
 kolizje.
 
 Wadą rozwiązań opartych o~łańcuchy haszy jest to, że stworzenie funkcji
@@ -674,7 +677,7 @@ chce przeszukać, może przedsięwziąć pewne kroki pozwalające na przyspiesze
 obliczeń. Tak naprawdę problem przeprowadzenia ataku brutalnego bądź
 słownikowego z~szerszego punktu widzenia nie różni się od dowolnego innego
 obliczeniowo kosztownego problemu. Współczesna informatyka wykształciła szereg
-technik racjonalizujących\renmich{Czyli jak tłumaczyć szefowi, że mimo wszystko trzeba to zrobić? Obawiam się, że może być dwuznaczne\ldots} czas potrzebny na przeprowadzenie kosztownych
+technik racjonalizujących\renmich{Czyli jak tłumaczyć szefowi, że mimo wszystko trzeba to zrobić? Obawiam się, że może być dwuznaczne\ldots}\renmich{Chodziło mi tu o to, że ,,techniki racjonalizujące'' to (również) techniki uzasadniania i w języku polskim wydaje mi się, że to znaczenie jako pierwsze się narzuca.} czas potrzebny na przeprowadzenie kosztownych
 obliczeń.
 
 
@@ -727,7 +730,7 @@ Z~pomocą w~praktycznej implementacji takiego ataku przychodzi kilka rozwiązań
     \item Legalne chmury obliczeniowe takie jak \enn{Windows Azure},
     \enn{Amazon Elastic Compute Cloud (EC2)} czy też \enn{Rackspace}. Stopień
     prywatności którą powinny gwarantować takie usługi jest dopiero
-    kształtującą się kwestią; dlatego też usługodawcom tego typu trudno
+    kształtującą się kwestią;\renmich{przecinek?} dlatego też usługodawcom tego typu trudno
     odróżnić klientów chcących przeprowadzić legalne obliczenia (których
     szczegóły są np. chronione tajemnicą przemysłową) od klientów chcących
     wykorzystać usługę do nielegalnych celów~\cite{cloud_criminals}.
@@ -739,7 +742,7 @@ Z~pomocą w~praktycznej implementacji takiego ataku przychodzi kilka rozwiązań
 
 \end{itemize}
 
-Podejście to jest o~tyle lepsze od korzystania z~dedykowanego \enn{hardware},
+Podejście to jest o~tyle lepsze od korzystania z~dedykowanego \enn{hardware}\renmich{może ,,sprzętu''?},
 że w~tym przypadku stopień skalowalności jest praktycznie nieograniczony:
 wystarczy dołączyć do sieci jeszcze jedną maszynę, aby wyniki uzyskiwać
 szybciej. Rozwiązanie to jest także dużo tańsze. Nie jest ono jednak pozbawione
@@ -750,8 +753,8 @@ faktyczną kontrolę, zdemaskowanie staje się znacznie bardziej prawdopodobne.
 
 \subsection{Ataki typu \enn{Denial of Service}}
 Odmiennym do wszystkich wymienionych powyżej ataków jest atak typu \enn{Denial
-of Service}. W~przeciwieństwie do poprzednich ataków, atak ten nie ma na celu
-wykradzenia oryginalnych wejść do funkcji haszujących; jego celem jest
+of Service}. W~przeciwieństwie do poprzednich ataków, atak ten nie ma\renmich{nie ma on} na celu
+wykradzenia oryginalnych wejść\renmich{trochę nie po polsku brzmi} do funkcji haszujących; jego celem jest
 natomiast tymczasowe utrudnienie lub wręcz całkowite uniemożliwienie dostępu do
 danej usługi. Opiera się on na wykorzystaniu słabości funkcji haszujących,
 którą mogą przejawiać nawet kryptograficznie bezpieczne funkcje skrótu.
@@ -769,13 +772,13 @@ Słabości te zostały wymienione poniżej.
     w~dostępie do usługi.
 
     \item Źle zaimplementowane struktury danych \\
-    Wiele struktur danych takich jak tablice mieszające korzysta z~funkcji
+    Wiele struktur danych\renmich{przecinek?} takich jak tablice mieszające\renmich{przecinek?} korzysta z~funkcji
     haszujących, aby dokonać rzutowania danego obiektu na jakąś wartość
     liczbową, która posłuży później do wewnętrznego identyfikowania takiego
     obiektu. Gdy zastosowana funkcja haszująca nie posiada własności
     \en{collision resistance}, a~więc można znaleźć $m \neq m'$ takie że $H(m)
     = H(m')$, atakujący może wykorzystać tę słabość i~wysłać do serwera duże
-    ilości zapytań odwołujących się do $m$~i~$m'$. Ponieważ struktury danych
+    ilości\renmich{liczby!} zapytań odwołujących się do $m$~i~$m'$. Ponieważ struktury danych
     zazwyczaj zachowują dobrą złożoność obliczeniową odwoływania się do
     elementów po ich haszach tylko dopóki nie następuje kolizja tych skrótów,
     gdy taka kolizja już nastąpi, obsłużenie jej zajmuje dużo więcej czasu.

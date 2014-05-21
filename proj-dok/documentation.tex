@@ -17,6 +17,7 @@
 
 \newcommand{\en}[1]{\textit{\enn{#1}}}
 \newcommand{\enn}[1]{\foreignlanguage{english}{#1}}
+\newcommand{\renmich}[1]{\textbullet{}\marginpar{\tiny \raggedright renmich{}: #1}}
 
 \begin{titlepage}
     \begin{center}
@@ -77,7 +78,7 @@ Oba ataki opierają się w~głównej mierze na pracach Xiaoyun Wang~--
 z~prac~\cite{yajima2005wang,sasaki2005improved,liang2007improved} w~celu
 poprawienia tzw. warunków wystarczających oraz z~\cite{klima2005finding2} w~celu
 zmniejszenia złożoności obliczeniowej ataku. Techniki modyfikacji wiadomości są
-luźno inspirowane inną implementacją ataku na \texttt{MD4}~\cite{stach2005md4}
+luźno inspirowane\renmich{nieco zbyt kolokwialnie} inną implementacją ataku na \texttt{MD4}~\cite{stach2005md4}
 i~\texttt{MD5}~\cite{stach2005md5}.
 
 \subsection{Wcześniejsze rezultaty}
@@ -86,7 +87,7 @@ Jedyną znaną implementacją ataku na \texttt{MD4} oraz \texttt{MD5} są progra
 Patricka Stacha~\cite{stach2005md4,stach2005md5}. Działają one szybko, lecz
 implementacja ataku na \texttt{MD5} zawiera drobny błąd, który został
 poprawiony w~tym projekcie. Ponadto techniki modyfikacji wiadomości użyte
-w~implementacji Patricka nie są optymalne.
+w~implementacji Patricka\renmich{Tak po imieniu?} nie są optymalne.
 
 \section{Implementacja ataku na \texttt{MD4}}
 
@@ -146,9 +147,9 @@ $\mathtt{MD4}_{R1}(m_0) = \mathtt{MD4}_{R1}(m_1)$.
 Sytuacja komplikuje się, gdy obliczana jest druga oraz trzecia runda
 \texttt{MD4}. Wówczas bity $m_0$ i~$m_1$ zaczynają być wykorzystywane do
 aktualizacji stanu wewnętrznego po raz drugi i~trzeci, lecz tym razem w~całkiem
-innych miejscach. Mimo że większość warunków wystarczających dotyczy tylko
+innych miejscach. Mimo\renmich{przecinek?} że większość warunków wystarczających dotyczy tylko
 pierwszej rundy, to liczba warunków dla stanu wewnętrznego w~rundzie drugiej
-i~trzeciej nie pozostaje mała, stąd aby zapewnić kolizje także w~późniejszych
+i~trzeciej nie pozostaje\renmich{jest? ,,pozostaje'' sugeruje, że coś się dzieje w pierwszej rundzie i wpływa na liczbę warunków} mała,\renmich{kropka?} stąd aby zapewnić kolizje także w~późniejszych
 fazach wprowadza się tzw. \en{Advanced Message Modification}.
 
 Wang zaproponowała skomplikowane techniki korekcji pojedynczych warunków
@@ -169,7 +170,7 @@ wystarczających. Podejście to przyjął również autor tego projektu.
 Różnice między \texttt{MD4} i~\texttt{MD5} w~praktyce sprowadzają się do
 zwiększenia liczby rund z~3 do~4~oraz wprowadzeniu dodatkowej operacji
 \texttt{XOR} wykonywanej po cyklicznym przesunięciu bitowym:
-
+\renmich{Jeśli rysunki miały być obok siebie, to nie wyszło. Co więcej, wykraczają poza dolny margines strony\ldots}
 \begin{multicols}{2}
 \begingroup
     \centering
@@ -187,7 +188,7 @@ zwiększenia liczby rund z~3 do~4~oraz wprowadzeniu dodatkowej operacji
 \end{multicols}
 
 
-Atak na \texttt{MD5} przebiega bardzo podobnie jak atak na \texttt{MD4}. Jednak
+Atak na \texttt{MD5} przebiega bardzo podobnie jak atak\renmich{do ataku} na \texttt{MD4}. Jednak
 opisane wyżej różnice wystarczają, aby prawdopodobieństwo spełnienia warunków
 wystarczających, nawet po zastosowaniu \en{Advanced Message Modification}, było
 dużo mniejsze. W~przypadku ataku na \texttt{MD4} kolizje zostały wyszukiwane
@@ -210,9 +211,9 @@ przedstawione przez Vlastimila Klimę~\cite{klima2005finding2}.
 
 \section{Możliwe usprawnienia}
 
-Na komputerze wyposażonym w~procesor i5~750 i~4GB RAM-u, znalezienie kolizji
+\renmich{\ldots{}A możliwe usprawnienie to\ldots{}? Uruchomienie na szybszym komputerze? Czegoś chyba brakuje.}Na komputerze wyposażonym w~procesor i5~750 i~4GB RAM-u, znalezienie kolizji
 \texttt{MD4} zajmuje około 4\nicefrac{1}{2}~sekund; znalezienie kolizji
-\texttt{MD5} zajmuje około 2\nicefrac{1}{4} godziny.
+\texttt{MD5} zajmuje około 2\nicefrac{1}{4} godziny. 
 
 \newpage
 \bibliographystyle{plain}
