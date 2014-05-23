@@ -1,3 +1,4 @@
 *.o
 *.exe
 md4coll
+md5coll
