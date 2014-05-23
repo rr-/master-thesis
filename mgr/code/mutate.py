@@ -8,6 +8,9 @@ x = [
 	("mutate_infix('abc', ['0', '1', '2'])", 3),
 	("mutate_suffix('abc', [str(i) for i in range(10)] + ['123', '2000', '2001', '2013'])", 3),
 	("mutate_char_sub('leet', {'l':['L','1'], 'e':['E','3'], 't':['T','7']})", 6),
+	("mutate_char_del('nope')", 4),
+	("mutate_dup('george')", 1),
+	("mutate_perm('alice')", 4),
 ]
 
 for v in x:

@@ -1,6 +1,6 @@
 \section{Ataki teoretyczne}
 Poza atakami uniwersalnymi istnieje rodzina ataków wyspecjalizowanych, które
-mierzą w~słabości\renmich{wykorzystują słabości?}\renmich{biorą na cel słabości} konkretnych implementacji funkcji haszujących.
+biorą na cel słabości konkretnych implementacji funkcji haszujących.
 
 \subsection{Atak urodzinowy}
 Paradoks urodzinowy polega na tym, że mając ciąg $P$ złożony z~elementów
@@ -13,7 +13,7 @@ $$ \Pr(X) = \prod_{i=1}^{|P|} \frac{|M|-i}{|M|} $$
 Znajduje to zastosowanie przy atakach siłowych na funkcje haszujące.
 Z~powyższej własności wynika, że dla $n$-bitowej funkcji skrótu, aby natrafić
 na kolizję z~prawdopodobieństwem większym niż $p$, należy wygenerować
-ilość\renmich{liczbę!} skrótów daną wzorem:
+liczbę skrótów daną wzorem:
 
 $$ x : \prod_{i=1}^{x} \frac{2^n-i}{2^n} \geq p $$
 
@@ -28,7 +28,7 @@ Przybliżona wartość tej funkcji wynosi~\cite{birthday2}:
 $$ x = \sqrt{2 |M| \ln{\frac{1}{1-p}}} $$
 
 Korzystając z~tego wzoru można skonstruować tabelkę poniżej. Tabelka
-przedstawia ilości\renmich{liczby!} haszy, które należy wygenerować, żeby otrzymać kolizje
+przedstawia liczby haszy, które należy wygenerować, żeby otrzymać kolizje
 z~prawdopodobieństwem nie mniejszym niż $k$.
 
 \begin{tabular}{|r|c|*{5}{r|}}
@@ -56,7 +56,7 @@ przeprowadzić $2^\frac{n}{2}$ operacji haszowania~\cite{birthday3}.
 
 \subsection{\en{Collision attack}}
 Gdy funkcja nie ma własności \en{collision resistance}, można łatwo znaleźć $m'
-\neq m : H(m) = H(m')$, gdzie ``łatwo'' oznacza proces o~złożoności
+\neq m : H(m) = H(m')$, gdzie ,,łatwo'' oznacza proces o~złożoności
 obliczeniowej mniejszej niż teoretyczna granica $O(2^\frac{n}{2})$
 wynikająca z~opisanego wyżej paradoksu urodzinowego. Atak wykorzystujący tę
 cechę znany jest jako \en{collision attack} i~stanowi najpopularniejszy
@@ -71,7 +71,7 @@ operacji~\cite{best_md5_collision_attack}.
 Najskuteczniejsze ataki typu \en{collision} na kryptograficzne funkcje
 haszujące są atakami różnicowymi, w~których konstruowane są dwie wiadomości $M$
 i $M'$ różniące się w~pewien nieznaczny sposób. Najpopularniejsza konstrukcja
-ataku, przedstawiona poniżej, stosowana jest m.in. na\renmich{Nie wiem czy ,,na'' jest tu dobrym przyimkiem.} \texttt{MD4},
+ataku, przedstawiona poniżej, stosowana jest m.in. przeciwko \texttt{MD4},
 \texttt{MD5}, \texttt{RIPEMD}, \texttt{SHA-0} i~\texttt{SHA-1}. Zapoczątkowana
 została ona przez Wang Xiaoyun
 w~\cite{wang_collision_attack1,wang_collision_attack2,wang_collision_attack3}
@@ -90,7 +90,7 @@ prześledzeniu propagacji początkowych różnic pomiędzy $M$ a~$M'$ na końcow
 różnice pomiędzy $H$ a~$H'$.
 
 \item Analiza ta pozwala wyciągnąć pewne wnioski i~sformułować szereg warunków
-wystarczających, aby $M$ i~$M'$ dawały kolizję. Warunki te formułują\renmich{ustalają?}, jakie
+wystarczających, aby $M$ i~$M'$ dawały kolizję. Warunki te ustalają, jakie
 cechy powinien spełniać stan wewnętrzny funkcji haszującej w~kolejnych krokach
 działania. Przekłada się to w~praktyce na to, że jeśli mając losową
 wiadomość $M$ stan wewnętrzny funkcji haszującej nie będzie zgadzał się ze
@@ -154,12 +154,13 @@ Opisane w~poprzedniej sekcji ataki uniwersalne są przykładami
 brutalnych ataków \en{preimage}.
 
 Warto wspomnieć o~tym, że jeśli funkcja nie jest odporna na \en{collision
-attack}, nie gwarantuje\renmich{powoduje to koniecznie? pociąga?} to jej kryptograficznej bezużyteczności. Gdy funkcja
-jest odporna na \en{preimage attack}, może być z~powodzeniem wykorzystywana
-we wszystkich zastosowaniach, których specyfika nie wymaga odporności na
-\en{collision attack}. Przykładem takiego zastosowania może być przechowywanie
-haszy w~bazie danych: nawet gdy atakujący potrafi generować $m \neq m' : H(m) =
-H(m')$, nie przyda mu się to do złamania haseł istniejących użytkowników.
+attack}, nie czyni to jej bezużyteczną dla kryptograficznych potrzeb. Gdy
+funkcja jest odporna na \en{preimage attack}, może być z~powodzeniem
+wykorzystywana we wszystkich zastosowaniach, których specyfika nie wymaga
+odporności na \en{collision attack}. Przykładem takiego zastosowania może być
+przechowywanie haszy w~bazie danych: nawet gdy atakujący potrafi generować $m
+\neq m' : H(m) = H(m')$, nie przyda mu się to do złamania haseł istniejących
+użytkowników.
 
 Tego typu atak jest znacznie trudniejszy do przeprowadzenia w~stosunku do
 \en{collision attack} z~uwagi na to, że w~obu odmianach ataku mamy narzuconą
@@ -171,15 +172,15 @@ skrótu; atak \en{preimage} musi natomiast wspierać wiadomości dowolnych
 długości.
 
 Teoretyczna złożoność złamania własności \en{preimage resistance} dla
-$n$-bitowej funkcji haszującej wynosi $O(2^n)$. O~pomyślnym ataku mówi się
-wówczas, gdy polepsza on tę złożoność sprowadzając ją do niższej wartości. Dla
-\texttt{SHA-1} na chwilę obecną nie są znane żadne teoretyczne ataki
-\en{preimage}, natomiast dla \texttt{MD5} opublikowany został atak obniżający
-$O(2^{128})$ do $O(2^{123.4})$~\cite{best_md5_preimage_attack}.
+$n$-bitowej bezpiecznej funkcji haszującej wynosi $O(2^n)$. O~pomyślnym ataku
+mówi się wówczas, gdy polepsza on tę złożoność sprowadzając ją do niższej
+wartości. Dla \texttt{SHA-1} na chwilę obecną nie są znane żadne teoretyczne
+ataki \en{preimage}, natomiast dla \texttt{MD5} opublikowany został atak
+obniżający $O(2^{128})$ do $O(2^{123.4})$~\cite{best_md5_preimage_attack}.
 
 
 
-\label{length_extension_attack}
+\label{sec:length_extension_attack}%
 \subsection{\en{Length-extension attack}}
 Innym rodzajem ataku jest tzw. \en{length extension attack}. Dotyczy on jedynie
 kryptosystemów, które udostępniają publicznie oryginalną wiadomość $m$ oraz

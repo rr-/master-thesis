@@ -1,8 +1,8 @@
-\section{Konstrukcja funkcji haszujących}
-\label{sec:hash_construction}
-Wprawdzie konstrukcji funkcji haszujących jest wiele, \renmich{jednak} większość z~nich wygląda
-podobnie. Na początku skupię się na teoretycznych aspektach konstruowania
-funkcji haszujących, a~w~następnej kolejności opiszę praktyczne implementacje.
+\section{Konstrukcja bezpiecznych funkcji haszujących}
+\label{sec:hash_construction}%
+Wprawdzie konstrukcji kryptograficznych funkcji haszujących jest wiele, jednak
+większość z~nich wygląda podobnie. Na początku skupię się na teoretycznych
+zagadnieniach, a~w~następnej kolejności opiszę praktyczne implementacje.
 
 
 
@@ -19,9 +19,8 @@ zbioru. Innymi słowy, jest to bijekcja na samą siebie, lub permutacja.
 
 
 Znalezienie takiej funkcji w~praktyce polega na użyciu algorytmu losowego,
-który dobiera każdemu $m$ przypadkowy element $h$ tak długo, aż $h$ będzie
-niewykorzystany przez żaden inny element (czyli zapewniony będzie brak
-kolizji):\renmich{To jest nie po polsku; może ,,próbuje dobrać kolejne losowe elementy póki nie trafi na jeszcze niewykorzystany'', czy coś takiego?}
+który dla każdego $m$ próbuje dobrać przypadkowy, niewykorzystany do tej pory
+element $h$ (co zapewnia pożądany brak kolizji):
 
 \begin{myenumerate}
 
@@ -31,8 +30,8 @@ kolizji):\renmich{To jest nie po polsku; może ,,próbuje dobrać kolejne losowe
 
     \begin{myenumerate}
 
-        \item Wylosuj $h \in M$ takie, że $\not \exists_{m' \in M} : T_{m'} =
-        h$\renmich{Sugeruję dodanie $\backslash$! między $\backslash$not a $\backslash$exists}
+        \item Wylosuj $h \in M$ takie, że $\not\!\exists_{m' \in M} : T_{m'} =
+        h$
 
         \item Przydziel $T_m = h$
 
@@ -56,25 +55,20 @@ losowe permutacje!), jest podejściem złym z~prostych przyczyn:
     \item Gdy natomiast będziemy próbowali ukryć sposób w~jaki dokonujemy
     podstawienia (innymi słowy utajnić tablicę $T$), mamy do czynienia
     z~\en{security through obscurity} (bezpieczeństwo poprzez niezrozumiałość),
-    co jest bardzo negatywnym zjawiskiem w~kryptografii i~łamie tzw. zasadę
+    co jest bardzo negatywnym zjawiskiem w~kryptografii i~łamie zasadę
     Kerckhoffsa. Zasada ta jest jedną z~kilku reguł sformułowanych w~XIX w.
-    przez Kerckhoffsa, traktujących o~bezpieczeństwie kryptosystemów. Mówi ona,
+    przez Kerckhoffsa, traktujących o~bezpieczeństwie kryptosystemów i~mówi,
     że każdy system kryptograficzny musi być bezpieczny nawet, gdy jego sposób
     działania wraz ze szczegółami implementacji jest jawny (za wyjątkiem
-    klucza, który jest z~definicji tajny, z~tym że funkcje haszujące nie
-    używają klucza).\renmich{Ale jeśli ukryjemy tablicę i potraktujemy algorytm jako black box, to jest to dokładnie random oracle, prawda? Nie wiem, czy to należy za wielką wadę uznać; można o tej tablicy wręcz myśleć jak o kluczu\ldots}
+    klucza, który jest z~definicji tajny).
 
-    \item Nawet gdy zignorujemy powyższe przykazanie, nasz algorytm będzie
-    nieodporny na proste ataki statystyczne: analizując rozkład
-    prawdopodobieństwa pewnych wzorców wewnątrz kolejnych $h$ (który nie jest
-    jednostajny, jako że w~praktyce rzadko kiedy wejście ma rozkład
-    jednostajny), możemy zyskać ogólne wyobrażenie o~tym, jak wyglądają wzorce
-    wewnątrz $m \in M$, co może doprowadzić do oryginalnych $m$.\renmich{Chyba głupi jestem, bo zupełnie nie rozumiem jak to może zachodzić. Mnie się ten algorytm wydaje całkowicie odporny przed takim atakiem.}
-
-    \item Wreszcie, funkcja taka jest bardzo niepraktyczna: po pierwsze, musimy
-    znać z~góry \emph{wszystkie} możliwe wiadomości, jakie możemy chcieć
-    zahaszować; mało tego~-- wiadomości te muszą mieć tę samą długość. Powoduje
-    to, że funkcja ta nie nadaje się na kryptograficzną funkcję skrótu.
+    \item
+    Gdy z~kolei zignoruje się powyższe przykazanie bądź uzna się, że tablica
+    przestawień będzie stanowić klucz funkcji, pozostaje ostatnia,
+    decydująca kwestia: funkcja taka jest bardzo niepraktyczna~-- trzeba z~góry
+    znać \emph{wszystkie} możliwe wiadomości, jakie możemy chcieć podać jako
+    argumenty do danej funkcji, a~przechowanie klucza pozwalającego na
+    odtworzenie oryginalnej tablicy przestawień wymaga dużej ilości pamięci.
 
 \end{itemize}
 
@@ -89,13 +83,16 @@ posiadanego konkretnego wyjścia.
 
 \begin{itemize}
 
-    \item da się obliczyć w~czasie wielomianowym (czyli w~taki sposób, że czas
-    działania $f$ jest w~sposób wielomianowy zależny od rozmiaru danych
-    wejściowych),
+    \label{strong_oneway}%
+    \item jest łatwo obliczalna, tj. istnieje algorytm $A$
+    działający w~czasie wielomianowym, który dla argumentu $x$ zwraca $f(x)$,
 
-    \item żaden probabilistyczny algorytm działający w~czasie wielomianowym nie
-    potrafi zgadnąć argumentu z~zaniedbywalnie małym
-    prawdopodobieństwem~\cite{one_way_functions}.\renmich{Z zaniedbywalnie małym prawdopodobieństwem chyba właśnie potrafi.}
+    \item jest trudna do odwrócenia, tj. dla każdego probabilistycznego
+    algorytmu $A$ działającego w~czasie wielomianowym, dodatniego wielomianu
+    $p(\cdot)$ i~wystarczająco wysokich $n$ zachodzi:
+        $$\Pr(A(f(U_n),1^n) \; \in \; f^{-1}(f(U_n))) < \frac{1}{p(n)}$$
+    gdzie $U_n$ to zmienna losowa ze zbioru
+    $\mathbb{Z}_2^n$~\cite{one_way_functions}.
 
 \end{itemize}
 
@@ -103,15 +100,18 @@ posiadanego konkretnego wyjścia.
 
 \begin{itemize}
 
-    \item da się obliczyć w~czasie wielomianowym,
+    \item jest łatwo obliczalna (patrz def. funkcji silnie jednokierunkowej),
 
-    \item każdy probabilistyczny algorytm działający w~czasie wielomianowym,
-    który ją potrafi odwrócić, zgaduje argumenty w~sposób niepoprawny
-    z~niezaniedbywalnie dużym prawdopodobieństwem~\cite{one_way_functions}.\renmich{Wydaje mi się to nieprawdziwe, a w zasadzie niewystarczające. Zamiast czytać \cite{one_way_functions}, pozwolę Panu mnie przekonać, że jest inaczej. :)}
+    \item istnieje wielomian $p(\cdot)$, dla którego dla każdego
+    probabilistycznego algorytmu $A$ działającego w~czasie wielomianowym
+    i~wystarczająco wysokich $n$ zachodzi:
+        $$\Pr(A(f(U_n),1^n) \; \not\in \; f^{-1}(f(U_n))) > \frac{1}{p(n)}$$
+    gdzie $U_n$ to zmienna losowa ze zbioru
+    $\mathbb{Z}_2^n$~\cite{one_way_functions}.
 
 \end{itemize}
 
-Łatwo zauważyć, że każda silnie jednokierunkowa funkcja spełnia jednocześnie
+Można zauważyć, że każda silnie jednokierunkowa funkcja spełnia jednocześnie
 warunki nałożone na funkcje słabo jednokierunkowe. Ponadto każda funkcja
 jednokierunkowa spełnia automatycznie podstawowy warunek nałożony na bezpieczne
 funkcje skrótu (mianowicie \en{preimage collision resistance}). Funkcje te
@@ -199,44 +199,44 @@ przekształcenia problemów).
 
 \pagebreak
 \subsection{Formalnie bezpieczne funkcje skrótu}
-Implementacje funkcji skrótu dzielą się na dwie kategorie. Pierwsza z~nich,
-omówiona tutaj, wywodzi się z~formalnego spojrzenia na problem haszowania. Tak
-naprawdę metoda ta sprowadza się do wykorzystania opisanych wcześniej
-kandydatów na funkcje jednokierunkowe i~dostarczeniu dowodu, że złamanie
-konstrukcji opartej na danym problemie jest tak samo trudne, jak trudne jest
-rozwiązanie tego problemu. Z~charakteru tego podejścia wywodzi się nazwa tej
-rodziny kryptograficznych funkcji haszujących: \en{provably secure
+Implementacje kryptograficznych funkcji skrótu dzielą się na dwie kategorie.
+Pierwsza z~nich, omówiona tutaj, wywodzi się z~formalnego spojrzenia na problem
+haszowania. Tak naprawdę metoda ta sprowadza się do wykorzystania opisanych
+wcześniej kandydatów na funkcje jednokierunkowe i~dostarczeniu dowodu, że
+złamanie konstrukcji opartej na danym problemie jest tak samo trudne, jak
+trudne jest rozwiązanie tego problemu. Z~charakteru tego podejścia wywodzi się
+nazwa tej rodziny kryptograficznych funkcji haszujących: \en{provably secure
 cryptographic hash functions}.
 
 W~praktyce dowody trudności złamania funkcji z~tej rodziny polegają na
 pokazaniu istnienia algorytmu, który przekształca w~czasie wielomianowym
 problem znajdowania kolizji dla takiej funkcji w~problem rozwiązania źródłowego
 problemu. W~ten sposób, kiedy zostanie znaleziony algorytm wielomianowy
-potrafiący złamać formalną funkcję haszującą, będzie od razu znany sposób
-szybkiego rozwiązywania problemu, na którym ta funkcja się opiera~-- a~na\renmich{w chwili obecnej}
-chwilę obecną zakłada się, że problemy te (faktoryzacja, znajdywanie logarytmu
-dyskretnego itp.) są nierozwiązywalne w~czasie wielomianowym, tak więc oznacza
-to (najprawdopodobniej) sprzeczność. Możemy zatem powiedzieć, że trudność
-złamania formalnych funkcji skrótu jest nie mniejsza niż trudność rozwiązania
-dowolnego\renmich{to by sugerowało, że chodzi o NP-zupełne; wyrzuciłbym ,,dowolnego''} problemu, o~którym podejrzewamy, że jest trudny do rozwiązania.
-Innymi słowy, problem złamania takich funkcji jest redukowalny do problemu
-milenijnego, stąd funkcje te są postrzegane jako najbezpieczniejsze dostępne
-warianty.
+potrafiący złamać formalnie bezpieczną funkcję haszującą, będzie od razu znany sposób
+szybkiego rozwiązywania problemu, na którym ta funkcja się opiera~-- a~w~chwili
+obecnej zakłada się, że problemy te (faktoryzacja, znajdywanie logarytmu
+dyskretnego itp.) są nierozwiązywalne w~czasie wielomianowym. Tym samym
+oznaczałoby to sprzeczność ze współczesnymi hipotezami. Możemy zatem
+powiedzieć, że trudność złamania formalnie bezpiecznych funkcji skrótu jest nie
+mniejsza niż trudność rozwiązania problemu, o~którym podejrzewamy, że jest
+trudny do rozwiązania. Innymi słowy, problem złamania takich funkcji jest
+redukowalny do problemu milenijnego, stąd funkcje te są postrzegane jako
+najbezpieczniejsze dostępne warianty.
 
 
 
 \subsection{Współczesne implementacje}
-Wprawdzie formalnie bezpieczne funkcje skrótu są bardzo bezpieczne, nie
-przychodzi to bez kosztów\renmich{to nie jest po polsku}. Praktyka pokazuje, że funkcje te prawie w~ogóle się
-nie nadają do zastosowań praktycznych lub przemysłowych z~racji swojego wolnego
-działania lub wysokich kosztów pamięciowych; niestety, skutecznie eliminuje to
+Wprawdzie formalnie bezpieczne funkcje skrótu są bardzo bezpieczne, ich
+wykorzystanie pociąga za sobą sporą cenę. Praktyka pokazuje, że funkcje te prawie w~ogóle się
+nie nadają do zastosowań praktycznych lub przemysłowych z~racji swojego powolnego
+działania lub wysokich kosztów pamięciowych. Niestety, skutecznie eliminuje to
 ich przydatność wszędzie tam, gdzie mamy do czynienia z~ograniczonymi zasobami
 (przykładami mogą być: systemy wbudowane, transmisje danych w~czasie
 rzeczywistym czy też systemy uwierzytelniania o~dużej przepustowości).
 
 W~związku z~tym została stworzona druga rodzina kryptograficznych funkcji
-skrótu. Działanie funkcji z~tej rodziny polega\renmich{przecinek} ogólnie rzecz biorąc\renmich{przecinek} na
-dokonywaniu ogromnych\renmich{ogromnej} liczby różnorodnych operacji na konkretnych bitach
+skrótu. Działanie funkcji z~tej rodziny polega, ogólnie rzecz biorąc, na
+dokonywaniu ogromnej liczby różnorodnych operacji na konkretnych bitach
 wiadomości $m$ (takich jak przestawianie, dodawanie, odejmowanie i~inne).
 Komputery są przystosowane do tego typu obliczeń, dzięki czemu w~porównaniu do
 formalnie bezpiecznych funkcji skrótu haszowanie takimi funkcjami odbywa się
@@ -244,8 +244,8 @@ bardzo szybko. Oznacza to jednak, że autorzy funkcji zazwyczaj ograniczają si�
 jedynie do wstępnej analizy jej słabości, \latin{de~facto} nie przedstawiając
 formalnego dowodu trudności jej złamania. Badania mające na celu znalezienie
 słabości przypominają w~swojej naturze szukanie igły w~stogu siana:
-nieznalezienie igły na daną chwilę\renmich{w danej chwili} nie oznacza jeszcze nieistnienia igły. Daje
-to pole do popisu kryptologom, którzy znajdują luki na\renmich{usunąć ,,na''} długo po pierwszym
+nieznalezienie igły w~danej chwili nie oznacza jeszcze nieistnienia igły. Daje
+to pole do popisu kryptologom, którzy znajdują luki długo po pierwszym
 opisaniu.
 
 
@@ -253,13 +253,13 @@ opisaniu.
 \subsubsection{Konstrukcja Merkle-Damg\r{a}rda}
 Przykładem sposobu, w~jaki działają nowoczesne kryptograficzne funkcje skrótu
 oparte o~operacje bitowe, może być konstrukcja Merkle-Damg\r{a}rda. Opisana po
-raz pierwszy przez Merkle\renmich{Merkle'go?} w~roku 1979 w~jego pracy
+raz pierwszy przez Merkle'go w~roku 1979 w~jego pracy
 doktorskiej~\cite{merkle_damgard_construction}, stanowi rdzeń używanych po dziś
 dzień funkcji skrótu takich jak \texttt{SHA-1} czy \texttt{MD5} i~jest jedną
-z~najpopularniejszych metod konstrukcji funkcji haszujących. W~konstrukcji
-wyszczególnione są abstrakcyjne elementy, które muszą być zaimplementowane
-w~każdej konkretnej implementacji; spośród nich na szczególną uwagę zasługuje
-funkcja dopełnienia bitowego oraz funkcja kompresji.
+z~najpopularniejszych metod konstrukcji kryptograficznych funkcji haszujących.
+W~konstrukcji wyszczególnione są abstrakcyjne elementy, które muszą być
+zaimplementowane w~każdej konkretnej implementacji; spośród nich na szczególną
+uwagę zasługuje funkcja dopełnienia bitowego oraz funkcja kompresji.
 
 Nazwa wywodzi się stąd, że Merkle oraz Damg\r{a}rd, niezależnie od siebie,
 udowodnili~\cite{merkle_damgard_security1,merkle_damgard_security2} w~tym samym
@@ -295,7 +295,7 @@ Sama konstrukcja składa się z~kroków opisanych poniżej.
     \begin{myenumerate}
 
         \item Niech $h=\mathtt{Comp}(h,M_i)$, gdzie $\mathtt{Comp}$ jest
-        funkcją kompresji, $h$ aktualnie obliczoną wartość\renmich{wartością} skrótu a~$M_i$
+        funkcją kompresji, $h$ aktualnie obliczoną wartością skrótu a~$M_i$
         stanowi $i$-ty blok wiadomości $M$.
 
     \end{myenumerate}
@@ -322,7 +322,7 @@ Sama konstrukcja składa się z~kroków opisanych poniżej.
 \texttt{MD5} jest pierwszą z~dwóch funkcji, na których się skupimy w~tej pracy.
 Jej wykorzystanie jest bardzo szerokie: znajduje zastosowanie w~systemach
 bezpieczeństwa oraz systemach weryfikacji integralności danych (pomimo faktu,
-że już w~latach 90-tych wyraźnie odradzano jej wykorzystania\renmich{wykorzystanie} z~powodu
+że już w~latach 90-tych wyraźnie odradzano jej wykorzystanie z~powodu
 poważnych wątpliwości co do jej faktycznego bezpieczeństwa, które z~czasem
 okazały się uzasadnione~\cite{ps3_attack}).
 
@@ -499,7 +499,7 @@ w~dodatku~\ref{app:bitwise_operations}).
         \item $W_j$~-- $j$-ty 32-bitowy fragment pochodzący od 512-bitowego
         bloku wiadomości,
         \item $K_i$~-- 32-bitowa stała,
-        \item $S_i$~-- stała oznaczająca ilość bitów w~przesunięciu cyklicznym,
+        \item $S_i$~-- stała oznaczająca liczbę bitów w~przesunięciu cyklicznym,
         \item $i$~-- numer operacji w~kontekście funkcji kompresji ($i \in (0,
         1, \ldots, 63)$),
         \item $j$~-- numer operacji w~danej rundzie ($j \in (0, 1, \ldots,
@@ -557,7 +557,7 @@ funkcji~\cite{sha1_definition} została przedstawiona poniżej.
             \leq 15}$, każdy o~długości 32~bitów.
 
             \item Skonstruuj dodatkowe wektory $W_{16 \leq i \leq 79}$ zgodnie
-            z\renmich{ze}~wzorem:
+            ze~wzorem:
 
             $$
                 W_i = (W_{i-3} \oplus W_{i-8} \oplus W_{i-14} \oplus W_{i-16})

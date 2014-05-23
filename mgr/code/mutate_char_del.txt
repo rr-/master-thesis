@@ -1,0 +1,5 @@
+>>>pretty_print(mutate_char_del('nope'),4)
+nope   nop   noe   npe
+ope    no    np    ne
+op     oe    pe    n
+o      p     e
