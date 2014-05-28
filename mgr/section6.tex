@@ -299,8 +299,9 @@ w~połączeniu z~zastosowaniem~\ref{salt_1} stanowi najlepsze z~powyższych.
 Powyższe sposoby zabezpieczenia się przed atakami \en{online} oraz \en{offline}
 są uogólnione przez mechanizm \en{Key Derivation Function}. Funkcje z~tej
 rodziny służą do tworzenia pochodnego klucza lub kluczy na podstawie tajnego
-argumentu. Przykładem implementacji \abbr{KDF} są właśnie zasilane solą
-kryptograficzne funkcje skrótu. Ogólna postać takiej funkcji wyraża się wzorem
+argumentu. Przykładem implementacji \abbr{KDF} są właśnie kryptograficzne
+funkcje skrótu wykorzystujące sól. Ogólna postać takiej funkcji wyraża się
+wzorem
     $$K' = \mathrm{KDF}(K, S, n)$$
 gdzie $K'$ to otrzymany klucz, $K$ to tajny klucz źródłowy, $S$ to sól, a~$n$
 to liczba iteracji mająca wydłużyć działanie funkcji w~celu udaremnienia ataków
@@ -308,9 +309,9 @@ siłowych.
 
 \subsubsection{\en{Key Stretching}}
 Wspomniana wcześniej metoda potęgowania haszy również znalazła swoje
-uogólnienie w~postaci techniki zwanej \en{Key Stretching}. Technika ta stanowi
-przykład, w~jaki sposób można implementować \en{Key Derivation Functions}.
-Przykłady kilku prostych technik zostały umieszczone poniżej.
+uogólnienie w~postaci tzw. \en{Key Stretching}. Technika ta ilustruje, w~jaki
+sposób można konstruować \en{Key Derivation Functions}; poniżej zamieszczono
+kilka przykładów prostych implementacji.
 
 \begin{itemize}
     \item Potęgowanie haszy:
@@ -365,7 +366,11 @@ Oznaczenia:
 
 Jedną z~nowszych implementacji tej techniki stanowi \texttt{scrypt}. Stara się
 on udaremnić ataki korzystające z~wyspecjalizowanego sprzętu poprzez nałożenie
-dużych wymagań sprzętowych: atakujący albo musi zainwestować dużo cykli
-procesora w~celu obliczenia finalnego klucza, albo musi posiadać dużo pamięci
-by pomieścić powtarzające się wartości w cache. Pochodne tego algorytmu są
-wykorzystywane w~kryptowalutach takich jak Litecoin oraz Dogecoin.
+dużych wymagań obliczeniowych: atakujący albo musi zainwestować dużą liczbę
+cykli procesora w~celu obliczenia ostatecznego klucza, albo musi posiadać dużo
+pamięci tak, aby mógł w~niej przechować wyniki powtarzających się obliczeń.
+Należy zwrócić uwagę, że ,,specjalistyczny sprzęt'' to w~większości macierze
+procesorów. Wyposażenie tych procesorów w~pamięć potrzebną do przeprowadzenia
+skutecznego ataku byłoby bardzo kosztowne, co w~efekcie zapewnia ochronę przed
+zrównoleglonymi atakami.  Pochodne tego algorytmu są wykorzystywane
+w~kryptowalutach takich jak Litecoin oraz Dogecoin.
