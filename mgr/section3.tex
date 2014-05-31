@@ -1,633 +1,805 @@
-\section{Konstrukcja bezpiecznych funkcji haszujących}
-\label{sec:hash_construction}%
-Wprawdzie konstrukcji kryptograficznych funkcji haszujących jest wiele, jednak
-większość z~nich wygląda podobnie. Na początku skupię się na teoretycznych
-zagadnieniach, a~w~następnej kolejności opiszę praktyczne implementacje.
+\section{Ataki uniwersalne}
+\label{sec:universal_attacks}%
+Wprawdzie kryptograficzne funkcje haszujące z~założenia są bezpieczne, nie
+oznacza to jednak, że nie da się ich złamać. Istnieje kilka ogólnych technik,
+które można stosować do znajdywania wejściowych wiadomości $m$ niezależnie od
+rodzaju użytej funkcji haszującej. Techniki te są stosowane wówczas, gdy nie są
+znane żadne inne wady danego systemu kryptograficznego. Opisane w~tym rozdziale
+metody w~większości opierają się na wypróbowywaniu kolejnych możliwych wejść
+$m_0, m_1, m_2, \ldots$ tak długo, aż nie zostanie znalezione $m : H(m) = h$,
+gdzie $h$ to łamany skrót.
+
+Przykłady będą odnosiły się do scenariusza opisanego
+w~sekcji~\ref{sec:secure_pasword_storage}, w~którym atakujący stara się
+(pośrednio lub bezpośrednio) znaleźć kolizje dla skrótów otrzymanych z~haseł
+użytkowników pewnego serwisu internetowego. Jest to oczywiście tylko jedno
+z~możliwych zastosowań tych technik.
 
 
 
-\subsection{Doskonała funkcja skrótu}
-W~teorii mówi się o~doskonałej funkcji skrótu, która każdy element $m$ z~danego
-zbioru $M$ potrafi przekształcić w~sposób bezkolizyjny w~$h$ z~tego samego
-zbioru. Innymi słowy, jest to bijekcja na samą siebie, lub permutacja.
+\subsection{Atak \en{online} a~\en{offline}}
+Atak \en{online} jest to taki atak, w~którym atakujący nie ma dostępu do
+wewnętrznych informacji takich jak skróty haseł użytkowników i~dokonuje prób
+znalezienia \mbox{$m : H(m) = h$} poprzez publicznie dostępny zasób taki jak
+strona logowania lub zdalny terminal. Atak taki jest łatwo wykrywalny
+i~nietrudno mu zapobiec.
+%todo: co zostało opisane w X i Y
 
-\begin{figure}[htb!]
-    \includegraphics[width=6cm]{img/injection_self.eps}
-    \caption{Każdemu wyjściu przyporządkowywane jest dokładnie jedno wejście}
-    \label{fig:bijection}
-\end{figure}
+Znacznie ciekawszym rodzajem ataku jest atak \en{offline}. W~tym przypadku
+atakujący ma częściowy lub kompletny dostęp do bazy danych zawierającej dane
+takie jak hasze haseł czy nazwy użytkowników. Pozwala mu to przeprowadzić atak
+\en{offline}, gdzie wypróbowywanie kolejnych haseł nie wymaga jakiejkolwiek
+interakcji z~atakowanym zasobem~-- wystarczy, że dla wymyślonych przez siebie
+$m_0, m_1, m_2, \ldots$ atakujący będzie sprawdzał na własnym komputerze, czy
+$H(m)$ istnieje w~lokalnej kopii wykradzionej bazy danych.
 
 
-Znalezienie takiej funkcji w~praktyce polega na użyciu algorytmu losowego,
-który dla każdego $m$ próbuje dobrać przypadkowy, niewykorzystany do tej pory
-element $h$ (co zapewnia pożądany brak kolizji):
 
+\subsection{Atak brutalny}
+W~tym podejściu atakujący konsekwentnie wypróbowuje wszystkie hasła, jakie się
+da utworzyć za pomocą danego alfabetu $A$, zwiększając długość sprawdzanych
+haseł \latin{ad infinitum}. Przykładowo, mając alfabet $A=(\mathtt{a},
+\mathtt{b}, \mathtt{c}, \ldots, \mathtt{z})$ atakujący będzie próbował znaleźć
+kolizje haszy dla kolejnych haseł: $\mathtt{a}, \mathtt{b}, \mathtt{c}, \ldots,
+\mathtt{z}, \mathtt{aa}, \mathtt{ab}, \ldots$ itd.
+
+Technika ta, zwana także czasem przeszukiwaniem pełnym, przy odpowiednim
+alfabecie sprawia, że pomyślne znalezienie kolizji jest jedynie kwestią czasu.
+Jej działanie jest jednak nieoptymalne z~uwagi na ilość zasobów, które są
+potrzebne do pomyślnego przeprowadzenia. Chcąc sprawdzić wszystkie hasła
+długości \mbox{$|m| \in (1, \ldots n)$} nad alfabetem długości $a=|A|$, musimy
+przeprowadzić następującą liczbę operacji haszowania:
+    $$\sum_{i=1}^n a^i = \frac{a(a^n-1)}{a-1}$$
+Przykładowo, chcąc sprawdzić wszystkie hasła nad alfabetem składającym się
+z~cyfr oraz z~małych i~wielkich znaków alfabetu łacińskiego (a~więc $|A| =
+10+26+26 = 62$) o~długości od~1~do~8~znaków, musimy wypróbować następującą
+liczbę możliwości:
+    $$\frac{62(62^8-1)}{62-1} = \numprint{221919451578090}$$
+Zakładając, że atakujący~potrafi obliczyć \numprint{1000000}~haszy na~sekundę,
+nadal potrzebuje ok.~7~lat na złamanie hasła; jest to zatem wyjątkowo
+niepraktyczne podejście i~z~reguły skazane jest na niepowodzenie.
+
+
+
+\subsection{Zrandomizowany atak brutalny}
+Mimo że ataki brutalne w~domyślnej formie są niepraktyczne, atakujący mogą
+wprowadzić różnego rodzaju ulepszenia, tak by nie marnować czasu na
+przeszukiwanie nieprawdopodobnych haseł. Jednym z~takich podejść jest
+wykorzystanie zdobyczy analizy częstości: wiadomo, że w~pewnych językach pewne
+litery są częściej wykorzystywane niż inne, a~większość osób nie stara się
+czynić swoich haseł bezpiecznymi i~korzysta z~haseł będącymi zwykłymi słowami
+istniejącymi w~jakimś języku (więcej w~sekcji~\ref{sec:dictionary_attacks}).
+
+%todo: rozszerzyć tabelę o język polski
+\begin{table}[htb]
+    \caption{Przybliżony rozkład częstości występowania liter alfabetu
+    łacińskiego w~języku angielskim (tabelka sporządzona na podstawie
+    listy~\ref{wl:wiki_wordlist} przy użyciu skryptu~\ref{sc:ngrams_counter}).}
+    \begin{tabular}{|r||c|l|}
+        \hline
+        &Znak & \small \small \% wystąpień \\
+        \hline
+        1  & e & 12.47125\% \\
+        2  & t &  8.76323\% \\
+        3  & a &  8.48548\% \\
+        4  & i &  7.72037\% \\
+        5  & o &  7.54299\% \\
+        6  & n &  7.46700\% \\
+        7  & s &  6.74592\% \\
+        8  & r &  6.63512\% \\
+        9  & h &  4.68796\% \\
+        10 & l &  4.30882\% \\
+        11 & d &  3.74735\% \\
+        12 & c &  3.42035\% \\
+        13 & u &  2.70168\% \\
+        14 & m & 2.59310\% \\
+        15 & f & 2.21636\% \\
+        16 & p & 2.04369\% \\
+        17 & g & 1.85573\% \\
+        18 & y & 1.62379\% \\
+        19 & w & 1.44348\% \\
+        20 & b & 1.41570\% \\
+        21 & v & 1.04336\% \\
+        22 & k & 0.50712\% \\
+        23 & x & 0.24109\% \\
+        24 & z & 0.11776\% \\
+        25 & q & 0.10610\% \\
+        26 & j & 0.09521\% \\
+        \hline
+    \end{tabular}
+\end{table}
+
+Można to wykorzystać układając alfabet w~kolejności zgodnej z~kolejnością
+występowania liter w~danym języku, tak by zwiększyć prawdopodobieństwo
+wczesnego dobrego ich doboru. Przykładowo, domyślnie korzystalibyśmy
+z~alfabetu ułożonego w~następujący sposób:
+    $$A_1 = (
+    \mathtt{a}, \mathtt{b}, \mathtt{c}, \mathtt{d}, \mathtt{e}, \mathtt{f},
+    \mathtt{g}, \mathtt{h}, \mathtt{i}, \mathtt{j}, \mathtt{k}, \mathtt{l},
+    \mathtt{m}, \mathtt{n}, \mathtt{o}, \mathtt{p}, \mathtt{q}, \mathtt{r},
+    \mathtt{s}, \mathtt{t}, \mathtt{u}, \mathtt{v}, \mathtt{w}, \mathtt{x},
+    \mathtt{y}, \mathtt{z})$$
+Dla języka angielskiego moglibyśmy natomiast ułożyć alfabet w~poniższej
+kolejności:
+    $$A_2 = (
+    \mathtt{e}, \mathtt{t}, \mathtt{a}, \mathtt{o}, \mathtt{i}, \mathtt{n},
+    \mathtt{s}, \mathtt{h}, \mathtt{r}, \mathtt{d}, \mathtt{l}, \mathtt{c},
+    \mathtt{u}, \mathtt{m}, \mathtt{w}, \mathtt{f}, \mathtt{g}, \mathtt{y},
+    \mathtt{p}, \mathtt{b}, \mathtt{v}, \mathtt{k}, \mathtt{j}, \mathtt{x},
+    \mathtt{q}, \mathtt{z})$$
+\newpage
+Przypuśćmy, że hasło brzmi ,,thesis'' i~szukamy go metodą brutalną.
+Dla zadanego alfabetu $A$, zanim znajdziemy słowo ,,thesis'' trzeba wygenerować
+następującą liczbę haseł:
+    \[
+        \begin{aligned}
+        (A[\mathtt{t}]-1)\cdot(|A|^5) &+\\
+        (A[\mathtt{h}]-1)\cdot(|A|^4) &+\\
+        (A[\mathtt{e}]-1)\cdot(|A|^3) &+\\
+        (A[\mathtt{s}]-1)\cdot(|A|^2) &+\\
+        (A[\mathtt{i}]-1)\cdot(|A|^1) &+\\
+        (A[\mathtt{s}]-1)\cdot(|A|^0)
+        \end{aligned}
+    \]
+gdzie $A[x]$ oznacza pozycję litery $x$ w~alfabecie $A$ (indeksując od 1).
+Korzystając z~powyższego wzoru można obliczyć ile operacji zajmie znalezienie
+hasła metodą brutalną z~domyślnym alfabetem $A_1$:
+    \[
+        \begin{aligned}
+        n_1=\;&19 \cdot 62^5 + 7 \cdot 62^4 \\
+        +\;&4 \cdot 62^3 + 18 \cdot 62^2 \\
+        +\;&8 \cdot 62^1 + 18 \cdot 62^0 \\
+        =\;&\numprint{17510981178}
+        \end{aligned}
+    \]
+\ldots a~ile zajmie znalezienie hasła przy pomocy mądrze spreparowanego
+$A_2$:
+    \[
+        \begin{aligned}
+        n_2=\;&1 \cdot 62^5 + 7 \cdot 62^4 \\
+        +\;&0 \cdot 62^3 + 6 \cdot 62^2 \\
+        +\;&4 \cdot 62^1 + 6 \cdot 62^0 \\
+        =\;&\numprint{1019590502}
+        \end{aligned}
+    \]
+Jest to ponad 17 razy krócej. Należy jednak zauważyć, że tak dobry przyrost
+wynika głównie ze szczęśliwego wyboru pierwszej litery: w~pierwszym podejściu
+przy najwyższej potędze występował mnożnik 19, w~drugim~-- tylko 1. Widać stąd,
+że przy takiej strategii im mniej używana będzie pierwsza litera faktycznego
+hasła które atakujący próbuje znaleźć, tym dłuższy będzie czas jego łamania.
+
+Powyższa obserwacja prowadzi do szukania innego sposobu na optymalizację. Tak
+naprawdę zawsze, gdy przestrzeń haseł przeszukuje się liniowo, szybkość
+znalezienia kolizji będzie najbardziej uzależniona od wczesnych wyborów cechy,
+która jest modyfikowana (w przypadku klasycznych ataków brutalnych cechą tą
+jest dobór kolejnych liter). Jest to niepożądane zjawisko, dlatego wykształciła
+się inna rodzina ataków brutalnych, jaką są ataki zrandomizowane. W~tym
+podejściu zamiast liniowo przeszukiwać przestrzeń haseł, próbuje się je
+przeszukiwać w~przypadkowym porządku starając się zachować wraz z~upływem czasu
+jednostajny rozkład prawdopodobieństwa. Kluczowym elementem jest
+niefaworyzowanie jakichkolwiek cech (w~szczególności np. niefaworyzowanie haseł
+zaczynających się na literkę~,,a'', w~następnej kolejności~,,aa'' itd.). Do
+implementacji takiego wyszukiwania można podejść na kilka sposobów.
 \begin{myenumerate}
+    \item Na pierwszy rzut oka nasuwa się myśl, że można by po prostu
+    wygenerowane hasła potasować. Podejście to jest jednak nieskuteczne,
+    ponieważ potasowanie odbywa się tutaj dopiero \emph{po} wygenerowaniu. Nic
+    tak naprawdę nie zyskujemy, a~wręcz tracimy: najpierw należy całość
+    wygenerować i~przechować w~jakiejś strukturze danych, co niesie ze sobą
+    ogromne koszty pamięciowe, a~następnie wykonać długotrwałą operację
+    tasowania. Kluczowym elementem jest uzyskanie losowości już \emph{podczas}
+    generowania tak, by nie trzeba było przechowywać wypróbowywanych haseł
+    w~pamięci.
 
-    \item Zainicjuj tablicę podstawień $T$
+    \item W~sytuacji, kiedy chcemy osiągnąć losowy porządek już na etapie
+    tworzenia listy, możemy zmienić sposób obliczania nowego hasła na podstawie
+    poprzedniego. Niech $N(x, A)=y$, gdzie $x$ to poprzednie hasło, $y$ to
+    nowo wygenerowane hasło a~$A$ to alfabet. W~klasycznym ataku brutalnym
+    funkcja następnika dla $A=(\mathtt{a}, \mathtt{b}, \mathtt{c}, \ldots,
+    \mathtt{z})$ zachowuje się następująco:
+    \[
+        \begin{aligned}
+            N(\varnothing, A) &= \mathtt{a} \\
+            N(\mathtt{a},  A) &= \mathtt{b} \\
+            N(\mathtt{b},  A) &= \mathtt{c} \\
+            &\vdots \\
+            N(\mathtt{z},  A) &= \mathtt{aa} \\
+            N(\mathtt{aa}, A) &= \mathtt{ab} \\
+            &\vdots
+        \end{aligned}
+    \]
+    W~teorii można jednak skonstruować funkcję następnika, która przyjmując
+    dodatkowe parametry oznaczające minimalną i~maksymalną długość hasła,
+    będzie zwracała hasła w~kolejności przypominającej losową:
+    \[
+        \begin{aligned}
+            N(\varnothing, A, 1, 2) &= \mathtt{gx} \\
+            N(\mathtt{gx}, A, 1, 2) &= \mathtt{zt} \\
+            N(\mathtt{zt}, A, 1, 2) &= \mathtt{a} \\
+            N(\mathtt{a}, A, 1, 2) &= \mathtt{kk} \\
+            &\vdots
+        \end{aligned}
+    \]
 
-    \item Dla każdego $m \in M$:
+    Mając taką funkcję można dowiedzieć się, jakie hasło powinno zostać
+    wypróbowane w~następnej kolejności, przy zachowaniu pseudolosowego porządku
+    oraz bez żadnych kosztów pamięciowych.
 
-    \begin{myenumerate}
+    Podejście to znajduje swoje korzenie w~trybach szyfrów blokowych, gdzie
+    zazwyczaj zależy nam by poprzedni blok wpływał w~jak najbardziej
+    nieprzewidywalny sposób na wygląd aktualnego bloku (co realizuje dowolny
+    tryb inny niż \texttt{ECB}). Wadą tego rozwiązania jest to, że
+    implementacja iteratora, który będzie zwracał wyniki w~kolejności
+    przypominającej losową, jest trudna oraz kosztowna obliczeniowo, a~przy
+    generowaniu haseł zależy nam na jak najoptymalniejszym szybkościowo
+    i~pamięciowo działaniu procesu.
 
-        \item Wylosuj $h \in M$ takie, że $\not\!\exists_{m' \in M} : T_{m'} =
-        h$
+    \item Można też zwyczajnie generować przypadkowe hasła. Jest to podejście
+    atrakcyjne, bo nie dość, że jest proste w~implementacji oraz tanie
+    obliczeniowo (zakładając szybkość działania wykorzystanych generatorów
+    liczb pseudolosowych), to zostawia także dużo miejsca na kolejne
+    ulepszenia.
 
-        \item Przydziel $T_m = h$
+    Głównym problemem wiążącym się z~losowaniem haseł jest możliwość
+    otrzymywania tego samego hasła wielokrotnie, dopóki nie zostanie
+    wprowadzone zabezpieczenie w~postaci struktury danych zapamiętującej
+    wypróbowane hasła. To jednak z~kolei oznacza wysokie koszty: pamięciowe,
+    w~celu trzymania zapamiętanych haseł, oraz obliczeniowe, w~celu
+    sprawdzania, czy wylosowane hasło zostało już wybrane. Zależnie od
+    szybkości działania łamanej funkcji haszującej oraz charakteru ataku
+    (łamanie pojedynczego hasła vs. łamanie zbioru haseł), implementowanie tego
+    typu sprawdzania może być opłacalne lub nie.
 
-    \end{myenumerate}
+    Samo generowanie losowych haseł można zrealizować kierując się różnymi
+    wytycznymi. W~podejściu całkowicie losowym można po prostu składać ze sobą
+    $n$ przypadkowych znaków z~alfabetu $A$. Popełnialibyśmy jednak w~ten
+    sposób ten sam błąd, co wcześniej~-- także i~w~tym wypadku można skorzystać
+    z~dobrodziejstwa analizy~częstości i~uzależnić prawdopodobieństwa
+    wyboru odpowiednich liter od prawdopodobieństwa ich wystąpienia
+    w~zakładanym języku. Możemy pójść także krok dalej i~uzależnić swój
+    generator od prawdopodobieństw występowania tzw. digramów oraz trigramów,
+    czyli ciągów odpowiednio 2- i~3-literowych.
+
+    \begin{table}[htb]
+        \caption{Przybliżenie 15 najczęściej występujących digramów oraz
+        trigramów złożonych z~liter alfabetu łacińskiego w~języku~angielskim
+        (tabelka sporządzona na podstawie listy~\ref{wl:wiki_wordlist} przy
+        użyciu skryptu~\ref{sc:ngrams_counter}).}
+        \begin{tabular}{|r||c|l||c|l|}
+            \hline
+            & Bigram & \small \% wystąpień &
+            Trigram & \small \% wystąpień \\
+            \hline
+            1  & th & 3.08514\% & the & 2.88025\% \\
+            2  & he & 2.86055\% & and & 1.21997\% \\
+            3  & in & 2.40712\% & ion & 0.95958\% \\
+            4  & er & 2.15763\% & ing & 0.95724\% \\
+            5  & an & 2.11390\% & tio & 0.76296\% \\
+            6  & on & 1.77424\% & ent & 0.71174\% \\
+            7  & re & 1.76263\% & ati & 0.56554\% \\
+            8  & at & 1.41375\% & ter & 0.54204\% \\
+            9  & ti & 1.39238\% & for & 0.48440\% \\
+            10 & en & 1.38312\% & ate & 0.46068\% \\
+            11 & es & 1.38072\% & her & 0.41935\% \\
+            12 & or & 1.36063\% & all & 0.38966\% \\
+            13 & te & 1.31308\% & ver & 0.37819\% \\
+            14 & nd & 1.30632\% & ers & 0.37419\% \\
+            15 & ed & 1.28358\% & ere & 0.37155\% \\
+            \hline
+        \end{tabular}
+    \end{table}
+
+    Wprowadzając zróżnicowane prawdopodobieństwa wyboru liter, wybór hasła
+    zostaje związany z~cechą jaką jest rozkład prawdopodobieństwa liter. Jednak
+    w~odróżnieniu od poprzedniej metody, faworyzowanie tym sposobem odbywa się
+    w~sposób nieliniowy, co eliminuje opisaną wcześniej niechcianą stronniczość
+    związaną z~wyborem pierwszych liter. Z~tego też powodu autor uważa opisaną
+    w~tym punkcie metodę za lepszą od obu wcześniejszych podejść (klasyczne,
+    w~którym hasło zaczynające się na ,,z'' \emph{musi} czekać aż wszystkie
+    inne zostaną obliczone, oraz całkowicie losowe, w~którym hasła, które
+    uznane są za bardziej prawdopodobne na podstawie analizy językowej, są
+    wybierane równie często jak pozostałe).
 
 \end{myenumerate}
 
-Taka funkcja, mimo że na pierwszy rzut oka wydaje się przydatna
-w~zastosowaniach kryptograficznych (jak by nie patrzeć, implementuje całkowicie
-losowe permutacje!), jest podejściem złym z~prostych przyczyn:
+Analiza częstości, w~szczególności di- oraz trigramów, jest uznaną metodą
+ulepszania ataku brutalnego i~wykorzystywana jest w~programach takich jak
+\texttt{John The Ripper}~\cite{john_the_ripper_modes}.
+
+
+
+\subsection{Atak słownikowy}
+\label{sec:dictionary_attacks}%
+Innym rodzajem ataku jest atak słownikowy. Podobnie jak omówione powyżej metody
+opiera się on na wypróbowaniu kolejnych haseł, jednak w~tym przypadku zamiast
+sprawdzać \emph{wszystkie} możliwe hasła, co może zająć bardzo dużo czasu,
+atakujący zawęża wybór swoich kandydatów do z~góry znanego stałego zbioru
+o~skończonej wielkości (czyli tytułowego słownika). Słownik powinien się
+składać z~wyrazów, których użycie jako hasło przez użytkowników jest
+najbardziej prawdopodobne. Mogą to być słowa w~określonym języku, imiona itp.;
+tak naprawdę nawet gdy dany słownik zawiera kilkanaście milionów słów,
+sprawdzanie nimi metodą ,,\en{offlin}e'' odbywa się bardzo szybko. Atakujący
+mogą także pójść krok dalej i~skorzystać z~publicznie dostępnych raportów
+o~najczęściej używanych hasłach~-- przykładem takiego raportu może być
+lista~\ref{wl:xato_passwords}.
+
+    \begin{table}[htb]
+        \caption{Przybliżenie 15 najpopularniej stosowanych haseł przez
+        użytkowników Internetu (tabelka sporządzona na podstawie
+        listy~\ref{wl:xato_passwords} przy użyciu
+        skryptu~\ref{sc:freq_percentages}).}
+        \begin{tabular}{|r||c|c|}
+            \hline
+            & Hasło & \small \% wystąpień \\
+            \hline
+            1  & password & 1.70768\% \\
+            2  & 123456   & 1.38467\% \\
+            3  & 12345678 & 0.46212\% \\
+            4  & 1234     & 0.30851\% \\
+            5  & qwerty   & 0.29086\% \\
+            6  & 12345    & 0.24117\% \\
+            7  & dragon   & 0.23040\% \\
+            8  & pussy & 0.21035\% \\
+            9  & baseball & 0.19936\% \\
+            10 & football & 0.19632\% \\
+            11 & letmein  & 0.18854\% \\
+            12 & monkey   & 0.18593\% \\
+            13 & 696969   & 0.17836\% \\
+            14 & abc123   & 0.17649\% \\
+            15 & mustang  & 0.17537\% \\
+            \hline
+        \end{tabular}
+    \end{table}
+
+Ponadto w~przypadku gdy atakujący obiera na cel konkretny system, może on
+rozszerzać swój słownik o~dodatkowe informacje kontekstowe związane
+z~tym systemem. Przykładowo, dla portalu internetowego słownik może zostać
+rozszerzony o~słowa kluczowe występujące na jego stronach, a~w~przypadku
+zdalnych terminali o~nazwy użytkowników i~katalogów domowych.
+
+
+
+\subsubsection{,,Mutowanie'' kandydatów}
+Często się zdarza tak, że na użytkownikach jest wymuszane stosowanie hasła
+przykładowo zawierającego co~najmniej jedną cyfrę. W~wypadku, gdy słownik
+atakującego zawiera wyłącznie kandydatów pozbawionych cyfr, słownik taki
+staje się bezużyteczny. Dlatego też czasem stosuje się swoiste ,,mutowanie''
+kandydatów, na które przypada szereg technik przetwarzających bazowe hasło na
+takie, które mogło zostać wykorzystane przez ewentualnego użytkownika.
+Przykładowe techniki zostały wymienione poniżej.
 
 \begin{itemize}
-
-    \item Algorytm przekształcania elementów $m \in M$ na $h$ polega na
-    trywialnym podstawianiu elementów zgodnie z~jakąś tablicą $T$. Zatem, aby
-    uzyskać oryginalne $m$ na podstawie $h$ wystarczy odwrócić tablicę,
-    zamieniając jej klucze z~przypisanymi im wartościami (dla danego $h$
-    wyszukać $m$, dla którego $T_m = h$). Wykazaliśmy w~ten sposób brak
-    własności \en{preimage resistance}.
-
-    \item Gdy natomiast będziemy próbowali ukryć sposób w~jaki dokonujemy
-    podstawienia (innymi słowy utajnić tablicę $T$), mamy do czynienia
-    z~\en{security through obscurity} (bezpieczeństwo poprzez niezrozumiałość),
-    co jest bardzo negatywnym zjawiskiem w~kryptografii i~łamie zasadę
-    Kerckhoffsa. Zasada ta jest jedną z~kilku reguł sformułowanych w~XIX w.
-    przez Kerckhoffsa, traktujących o~bezpieczeństwie kryptosystemów i~mówi,
-    że każdy system kryptograficzny musi być bezpieczny nawet, gdy jego sposób
-    działania wraz ze szczegółami implementacji jest jawny (za wyjątkiem
-    klucza, który jest z~definicji tajny).
 
     \item
-    Gdy z~kolei zignoruje się powyższe przykazanie bądź uzna się, że tablica
-    przestawień będzie stanowić klucz funkcji, pozostaje ostatnia,
-    decydująca kwestia: funkcja taka jest bardzo niepraktyczna~-- trzeba z~góry
-    znać \emph{wszystkie} możliwe wiadomości, jakie możemy chcieć podać jako
-    argumenty do danej funkcji, a~przechowanie klucza pozwalającego na
-    odtworzenie oryginalnej tablicy przestawień wymaga dużej ilości pamięci.
+        Zmiana wielkości liter \\
+        Liczba generowanych haseł: $2^n$, gdzie $n$ to długość hasła.
+        \lstinputlisting[language=python,caption=Przykładowy kod
+        w~języku Python]{code/mutate_alpha.py}
+
+        \lstinputlisting[language=python,tabsize=4,caption=Przykładowe
+        użycie]{code/mutate_alpha.txt}
+
+    \item
+        Dopisywanie sufiksów na końcu hasła \\
+        Liczba generowanych haseł: $1+n$, gdzie $n$ to liczba sufiksów.
+
+        \lstinputlisting[language=python,caption=Przykładowy kod
+        w~języku Python]{code/mutate_suffix.py}
+
+        \lstinputlisting[language=python,tabsize=4,caption=Przykładowe
+        użycie]{code/mutate_suffix.txt}
+
+    \item
+        Dopisywanie infiksów z~określonego zbioru w~dowolnym miejscu hasła \\
+        Liczba generowanych haseł: $1 + |A| \cdot n$, gdzie $n$ to długość
+        hasła, $A$ to zbiór infiksów do dopisania.
+
+        \lstinputlisting[language=python,caption=Przykładowy kod
+        w~języku Python]{code/mutate_infix.py}
+
+        \lstinputlisting[language=python,tabsize=4,caption=Przykładowe
+        użycie]{code/mutate_infix.txt}
+
+    \item
+        Zamiana liter zgodnie z~tablicą możliwych podstawień \\
+        Przeciętna liczba generowanych haseł jest zależna od rozkładu częstości
+        liter w~słowniku, używanych przez tablicę podstawień.
+
+        \lstinputlisting[language=python,caption=Przykładowy kod
+        w~języku Python]{code/mutate_char_sub.py}
+
+        \lstinputlisting[language=python,tabsize=4,caption=Przykładowe
+        użycie]{code/mutate_char_sub.txt}
+
+    \item
+        Usuwanie znaków \\
+        Liczba generowanych haseł: $n \choose m$, gdzie $n$ to długość hasła,
+        $m$ to liczba usuwanych znaków.
+
+        \lstinputlisting[language=python,tabsize=4,caption=Przykładowy kod
+        w~języku Python]{code/mutate_char_del.py}
+
+        \lstinputlisting[language=python,tabsize=4,caption=Przykładowe
+        użycie]{code/mutate_char_del.txt}
+
+    \item
+        Generowanie permutacji wejściowego hasła \\
+        Liczba generowanych haseł: $n!$, gdzie $n$ to długość hasła.
+
+        \lstinputlisting[language=python,tabsize=4,caption=Przykładowy kod
+        w~języku Python]{code/mutate_perm.py}
+
+        \lstinputlisting[language=python,tabsize=4,caption=Przykładowe
+        użycie]{code/mutate_perm.txt}
+
+    \item
+        Zapisanie hasła podwójnie \\
+        Liczba generowanych haseł: 2.
+
+        \lstinputlisting[language=python,tabsize=4,caption=Przykładowy kod
+        w~języku Python]{code/mutate_dup.py}
+
+        \lstinputlisting[language=python,tabsize=4,caption=Przykładowe
+        użycie]{code/mutate_dup.txt}
 
 \end{itemize}
 
+Zdecydowana większość z~tych technik zwiększa wielkość słownika
+w~niekontrolowany sposób. Przykładowo, samo sprawdzanie pojedynczego wariantu
+hasła z~dopisanym na końcu znakiem ,,1'' wydłuża rozmiar słownika dwukrotnie.
+Większość z~tych operacji jest zatem w~zasadzie nieopłacalna, chyba że
+atakujący zastosuje dodatkowe triki takie jak uzależnienie technik mutowania od
+długości kandydatów.
 
 
-\subsection{Funkcja jednokierunkowa}
-Funkcja jednokierunkowa to funkcja, której wartości dla każdego wejścia da się
-łatwo obliczyć; powinno być trudne natomiast obliczenie wejścia na podstawie
-posiadanego konkretnego wyjścia.
 
-\noindent Nieformalnie, funkcja $f$ jest silnie jednokierunkowa, jeśli:
+\subsubsection{Łańcuchy haszy}
+Naiwny atak słownikowy można zrealizować na dwa sposoby.
+
+\begin{myenumerate}
+
+    \item Dla każdego kandydata obliczać jego hasz w~trakcie trwania ataku.
+    Takie obliczanie haszy na bieżąco nosi ze sobą wysokie koszty obliczeniowe.
+    Ma to szczególne znaczenie jeśli zamierza się łamać więcej niż jedną bazę
+    lub hasło~-- dla każdego niezależnego ataku trzeba ponownie obliczać hasz
+    dla danego kandydata.
+
+    \item Skorzystać z~obliczonej wcześniej tablicy zapamiętującej dla pewnego
+    zbioru kandydatów $M$ ich wartości $H$. Sprawdzenie dla danego $h$, jakie
+    hasło $m \in M$ daje $H(m) = h$ przy pomocy takiej tablicy będzie względnie
+    szybkie bez względu na $|M|$ i~liczbę niezależnych ataków. Jednak aby
+    przechować taką tablicę w~pamięci komputera, potrzebne są czasem nawet
+    i~tysiące gigabajtów. Chcąc przechować nieskompresowaną mapę skrótów
+    długości $b$ bitów utworzoną z~haseł długości $n$ nad alfabetem $A$
+    potrzebujemy co najmniej $|A|^n \cdot (n + \ceil{\frac{b}{8}})$ bajtów
+    pamięci (8 oznacza liczbę bitów przechowywaną przez pojedynczy bajt).
+    Przykładowo, dla \texttt{MD5} i~haseł długości 8~utworzonych z~cyfr oraz
+    małych i~wielkich znaków alfabetu łacińskiego potrzeba $62^8 \cdot (8 +
+    \ceil{\frac{128}{8}})$ bajtów pamięci, czyli ok. 4765 eksabajtów.
+
+\end{myenumerate}
+
+Oba podejścia na dłuższą metę są nieopłacalne, dlatego opracowano inny sposób
+przechowywania dużych tablic, zwany łańcuchami haszy. Ma on na celu zapewnienie
+kompromisu między kosztem pamięciowym a~czasowym. Docelowo atakujący chce dla
+danego $h$ znaleźć w~swoim dużym zbiorze kandydatów $M$ wejście $m \in M : H(m)
+= h$ lub dowiedzieć się, że nie ma takiego $m$~-- im szybciej, tym lepiej.
+Podczas gdy we wcześniej opisanych metodach sprawdzałby $\forall m \in M \;
+H(m) \stackrel{?}{=} h$, w~podejściu korzystającym z~łańcuchów haszy atak
+będzie przebiegał nieco inaczej.
+
+Kluczowa koncepcja polega na wprowadzeniu funkcji redukcji $R$, która będzie
+dokonywać przekształcenia $H \to M$. Charakter tego przekształcenia nie polega
+na \emph{odwróceniu} $H$~-- chodzi tylko o~przekształcanie w~jakikolwiek
+względnie bezkolizyjny sposób danego $h$ na $m \in M$. Mając daną funkcję
+redukcji $R$ można konstruować łańcuchy haszy długości $k$ w~sposób opisany
+poniżej.
+
+\begin{myenumerate}
+
+    \item Wybierz dowolne hasło $m \in M$
+
+    \item Stwórz pusty łańcuch $C := (\texttt{NULL}, m)$
+
+    \item Powtórz $k$ razy:
+
+    \begin{myenumerate}
+
+        \item Oblicz $h := H(m)$
+
+        \item Oblicz $m := R(h)$
+
+        \item Rozszerz łańcuch $C := C \cup (h, m)$
+
+    \end{myenumerate}
+
+\end{myenumerate}
+
+Przykładowo gdy przestrzeń haseł składa się z~wyrazów o~długości 5~nad
+alfabetem $A = (\mathtt{a}, \mathtt{b}, \mathtt{c}, \ldots, \mathtt{z})$,
+przykładowy łańcuch długości $k=3$ mógłby wyglądać w~następujący sposób:
+
+\[
+\begin{tikzcd}
+    \mathtt{aaaaa} \arrow{rd}{\mathtt{MD5}} & \\
+    & \arrow{ld}{R} \mathtt{594f803b380a41396ed63dca39503542} \\
+    \mathtt{kgeca} \arrow{rd}{\mathtt{MD5}} & \\
+    & \arrow{ld}{R} \mathtt{9fb5cc35cd55717db41eec8dfb2b931c} \\
+    \mathtt{tojmd} \arrow{rd}{\mathtt{MD5}} & \\
+    & \arrow{ld}{R} \mathtt{2a65895d5add273e6de19b5472b1ab0b} \\
+    \mathtt{zqjwc}
+\end{tikzcd}
+\]
+
+Parametr $k$ oznaczający długość tworzonych łańcuchów jest dobierany przez
+atakującego i~służy do kontroli stosunku kosztu pamięci do ilości obliczeń
+wymaganych do odwracania $h$. Im większe $k$, tym mniej pamięci będzie
+potrzebne na przechowanie łańcuchów, ale też sprawdzanie będzie się odbywało
+wolniej i~\en{vice versa}.
+
+Przy budowie tablicy mającej na celu przechować zbiór kandydatów $M$, wybierany
+jest przypadkowy podzbiór $M' \subset M$ i~dla każdego $m \in M'$ konstruowany
+jest łańcuch $C_m$ o~określonej długości $k$. Dla każdego łańcucha zapisywane
+są jedynie jego początkowy oraz końcowy element (w~przykładzie są to
+odpowiednio: $\mathtt{aaaaa}$ oraz $\mathtt{zqjwc}$); nie zapisywane są żadne
+pośrednie wartości.
+
+Mając wszystkie ,,początki'' $C_B$ wszystkich łańcuchów, odpowiadające im
+,,końcówki'' $C_E$, funkcję redukcji $R$, funkcję skrótu $H$ oraz hasz $h$ do
+złamania, atakujący może się zabrać do odwracania $h$. W~tym celu oblicza
+$R(h)$ i~sprawdza, czy wyjście z~tej funkcji znajduje się wśród końcówek $C_E$.
+Jeżeli nie, to sprawdza $R(H(R(h)))$, $R(H(R(H(Rh))))$ itd. powtarzając tę
+operację aż do pełnego przebiegu $k$ razy. Jeżeli atakujący wykonał cykl $k$
+razy i~$R(\ldots)$ ani razu nie znalazło się w~$C_E$, oznacza to niepowodzenie
+łamania.
+
+Gdy jednak na pewnym etapie obliczeń okaże się, że $R(\ldots) \in C_E$, wówczas
+można mówić o~szansie na złamanie $h$. Należy w~tym momencie prześledzić, jak
+wygląda cykl haszowania i~redukowania dla łańcucha, na którego końcówkę
+natrafiliśmy. Jeżeli okaże się że $\exists m \in C : H(m) = h$, oznacza to
+pozytywne złamanie $h$.
+
+Kontynuując wcześniejszy przykład, atakujący mając taką samą funkcję redukcji
+$R$, $C_B = (\mathtt{aaaaa})$, $C_E = (\mathtt{zqjwc})$ i~hasz
+$h=\mathtt{9fb5cc35cd55717db41eec8dfb2b931c}$, oblicza $R(h)$ dostając
+$\mathtt{tojmd}$. Ponieważ $\mathtt{tojmd} \not\in C_E$, oblicza
+$R(H(\mathtt{tojmd}))$ i~dostaje $\mathtt{zqjwc}$. Tym razem $\mathtt{zqjwc}
+\in C_E$, zatem należy przyjrzeć się dokładniej łańcuchowi, na którego końcówkę
+właśnie natrafiono. Dzięki $C_B$ wiadomo, że zaczyna się on od
+$\mathtt{aaaaa}$. Atakujący oblicza zatem $H(\mathtt{aaaaa})$,
+$H(R(H(\mathtt{aaaaa})))$ itd. (maksymalnie $k$ razy) sprawdzając po każdym
+kroku, czy nie natrafił na $h$. Jeżeli tak się stało, oznacza to, że $h$
+zostało złamane; jeżeli nie~-- oznacza to że przy pomocy posiadanej tablicy
+skrótu nie da się odwrócić.
+
+Nie zawsze jest tak, że gdy trafi się na wartość $x \in C_E$, będzie ona
+odwracalna przy pomocy danego łańcucha. Wynika to z~faktu, że funkcja redukcji
+z~definicji nie jest perfekcyjna i~może doprowadzać do kolizji, czyli
+przykładowo dochodzi do sytuacji, w~których z~dwóch różnych haszy $h_1$, $h_2$
+znajdujących się w~różnych łańcuchach dostajemy to samo $R(h_1) = R(h_2)$, co
+czyni powtarzające się fragmenty łańcuchów niepotrzebnymi.
+
+\pagebreak
+\newcommand{\tmp}{\vphantom{Kj}}
+\begin{multicols}{2}
+\begingroup
+    \[
+    \begin{tikzcd}
+        \mathtt{aaaaa\tmp} \arrow{d}{\mathtt{MD5}} \\
+        \mathtt{594f803b380a41396ed63dca39503542} \arrow{d}{R} \\
+        \mathtt{kgeca\tmp} \arrow{d}{\mathtt{MD5}} \\
+        \mathtt{9fb5cc35cd55717db41eec8dfb2b931c} \arrow[color=red]{d}{R} \\
+        \mathtt{\textcolor{red}{tojmd\tmp}} \arrow[color=red]{d}{\mathtt{MD5}} \\
+        \mathtt{\textcolor{red}{2a65895d5add273e6de19b5472b1ab0b}} \arrow[color=red]{d}{R} \\
+        \mathtt{\textcolor{red}{zqjwc\tmp}}
+    \end{tikzcd}
+    \]
+\endgroup
+
+\begingroup
+    \[
+    \begin{tikzcd}
+        \mathtt{ihjrc\tmp} \arrow{d}{\mathtt{MD5}} \\
+        \mathtt{492ba685d856633d39ef7f868b5638a7} \arrow[color=red]{d}{R} \\
+        \mathtt{\textcolor{red}{tojmd\tmp}} \arrow[color=red]{d}{\mathtt{MD5}} \\
+        \mathtt{\textcolor{red}{2a65895d5add273e6de19b5472b1ab0b}} \arrow[color=red]{d}{R} \\
+        \mathtt{\textcolor{red}{zqjwc\tmp}} \arrow{d}{\mathtt{MD5}} \\
+        \mathtt{3c683a47a5b37669468660abe795b251} \arrow{d}{R} \\
+        \mathtt{whelo\tmp}
+    \end{tikzcd}
+    \]
+\endgroup
+\end{multicols}
+
+W~powyższym przykładzie $h = \mathtt{492ba685d856633d39ef7f868b5638a7}$ nie
+zostanie znalezione w~łańcuchu~1 mimo że atakujący będzie zmuszony go dokładnie
+sprawdzić z~racji trafienia na $\mathtt{zqjwc} \in C_E$ po 2~iteracjach.
+Dopiero łańcuch~2 jest w~stanie odwrócić $h$ (w 3.~iteracji).
+
+
+
+\subsubsection{Tablice tęczowe}
+Wysoka podatność na kolizje opisanych wyżej prostych łańcuchów haszy powoduje,
+że przy wystarczającej długości łańcuchów i~liczności zbioru kandydatów $M$
+wyszukiwanie przy pomocy tej metody staje się stosunkowo długie (i~monotonne)
+z~uwagi na konieczność sprawdzania wielu powtarzających się fragmentów
+łańcuchów.
+
+Tablice tęczowe stanowią wariant łańcuchów haszy, które zamieniają pojedynczą
+funkcję redukcji $R$ na ciąg funkcji $R_i$ o~długości $k$. Ma to na celu
+zmniejszenie prawdopodobieństwa kolizji~-- filozofia tej metody zakłada, że
+jeżeli już musi dojść do kolizji $R_i(h)$ i~$R_j(h')$, to i~tak użycie
+$R_{i+1}(h)$ oraz $R_{j+1}(h)$ wyprodukuje najprawdopodobniej znacząco się
+różniące, a~więc bardziej przydatne, łańcuchy.
+
+\pagebreak
+\begin{multicols}{2}
+\begingroup
+    \[
+    \begin{tikzcd}
+        \mathtt{aaaaa\tmp} \arrow{d}{\mathtt{MD5}} \\
+        \mathtt{594f803b380a41396ed63dca39503542} \arrow{d}{R_1} \\
+        \mathtt{flaiq\tmp} \arrow{d}{\mathtt{MD5}} \\
+        \mathtt{0cbec3379db2438afd4e1a08ecf8cf8e} \arrow[color=red]{d}{R_2} \\
+        \mathtt{\textcolor{red}{mqusj\tmp}} \arrow[color=red]{d}{\mathtt{MD5}} \\
+        \mathtt{\textcolor{red}{535e4e89269db763cf1ed26d1e837b5e}} \arrow[color=red]{d}{R_3} \\
+        \mathtt{letqn\tmp}
+    \end{tikzcd}
+    \]
+\endgroup
+
+\begingroup
+    \[
+    \begin{tikzcd}
+        \mathtt{ihjrc\tmp} \arrow{d}{\mathtt{MD5}} \\
+        \mathtt{492ba685d856633d39ef7f868b5638a7} \arrow[color=red]{d}{R_1} \\
+        \mathtt{\textcolor{red}{mqusj\tmp}} \arrow[color=red]{d}{\mathtt{MD5}} \\
+        \mathtt{\textcolor{red}{535e4e89269db763cf1ed26d1e837b5e}} \arrow[color=red]{d}{R_2} \\
+        \mathtt{wnalp\tmp} \arrow{d}{\mathtt{MD5}} \\
+        \mathtt{9bb59c3da1721396b3cef428ca317329} \arrow{d}{R_3} \\
+        \mathtt{jubxl\tmp}
+    \end{tikzcd}
+    \]
+\endgroup
+\end{multicols}
+
+Tak naprawdę by łańcuchy stały się niepotrzebne, do kolizji musiałoby dojść
+na poziomie tej samej iteracji, jednak nawet wówczas można odfiltrować łańcuchy
+których końcówki są zdublowane w~celu dodatkowego zmniejszenia kosztów
+obliczeniowych i~pamięciowych podczas faktycznego ataku.
+
+Sprawdzanie, czy $h$ znajduje się w~$C_E$ wymaga małych zmian: zamiast obliczać
+$R(h)$, $R(H(R(h)))$ itd., należy sprawdzać teraz $R_k(h)$, $R_k(H(R_{k-1}(h)))$
+itd. Wydłuża to nieco czas wyszukiwania, jednak mimo tej niedogodności użycie
+tablic tęczowych jest dużo bardziej opłacalne -- znacząco zmniejsza liczbę
+kolizji, oszczędzając cenny czas.
+
+Wadą rozwiązań opartych o~łańcuchy haszy jest to, że stworzenie funkcji
+redukcji której przeciwdziedzina pokrywa 100\% haseł z~zadanego $M$ i~która
+działa zadowalająco szybko jest względnie trudne. Dodatkową cechą, o~którą
+należy zadbać przy konstruowaniu funkcji redukcji jest w~miarę równy rozkład
+prawdopodobieństwa otrzymania dowolnego $m \in M$ na podstawie $h$.
+Najprostszym przykładem funkcji redukcji może być $R(h) = M_{h \mod |M|}$,
+gdzie $M_i$ oznacza $i$-ty element zbioru kandydatów $M$.
+
+
+
+\subsection{Przyspieszanie obliczeń}
+Atakujący dysponując słownikiem albo ogólnym pojęciem o~przestrzeni haseł, jaką
+chce przeszukać, może przedsięwziąć pewne kroki pozwalające na przyspieszenie
+obliczeń. Tak naprawdę problem przeprowadzenia ataku brutalnego bądź
+słownikowego z~szerszego punktu widzenia nie różni się od dowolnego innego
+obliczeniowo kosztownego problemu. Współczesna informatyka wykształciła szereg
+technik skracających czas potrzebny na przeprowadzenie kosztownych obliczeń.
+
+
+
+\subsubsection{Dedykowany \enn{hardware}}
+
+Pierwsze rozwiązanie stanowi użycie procesorów GPU montowanych w~kartach
+graficznych, które okazują się być bardzo wydajne jeśli chodzi o~obliczenia
+wartości funkcji haszujących~-- dużo wydajniejsze od tradycyjnych procesorów
+CPU. Szybkość obliczania haszy przy użyciu GPU może osiągać do miliardów
+haszy na sekundę~\cite{gpu_cracking_benchmarks}, co pozwala dokonywać
+niewiarygodnie szybkich ataków słownikowych oraz brutalnych.
+
+Pomysł ten można dalej rozwijać zastępując pojedynczą kartę graficzną wieloma
+kartami. Dotychczasowe ataki praktyczne korzystające z~takich macierzy kart
+graficznych pozwalają atakującemu osiągać prędkości rzędu setek miliardów haszy
+na sekundę~\cite{gpu_cracking_parallel}.
+
+
+
+\subsubsection{Obliczenia równoległe}
+
+Użycie kart graficznych do przeprowadzania ataków brutalnych oraz słownikowych
+wymaga wysoce wyspecjalizowanego oprogramowania, które nie zawsze jest dostępne
+oraz sprzętu, którego zakup lub wynajem bywa nieopłacalny z~powodu stosunku
+jego ceny do potencjalnych zysków. Natomiast przeciętne komputery klasy desktop
+z~użyciem odpowiedniego oprogramowania potrafią w~dzisiejszych czasach
+przetworzyć do kilku milionów haszy na
+sekundę~\cite{oclhashcat,john_the_ripper_benchmarks}, co w~porównaniu z~kartami
+graficznymi wydaje się niewielką liczbą. Jednak gdy atakujący sprzęgnie wiele
+takich komputerów w~jedną dużą macierz obliczeniową, może się okazać, że
+rozwiązanie takie jest bardziej opłacalne. Szczególną korzyścią płynącą ze
+stosowania tej metodologii jest łatwa do osiągnięcia skalowalność: aby jeszcze
+bardziej przyspieszyć obliczenia, wystarczy dołączyć do sieci dodatkowe
+komputery, wykonanie czego jest zazwyczaj stosunkowo proste. Nie trzeba się
+martwić o~sprawy takie jak chłodzenie, zwiększony pobór prądu itp., jako że
+wszystko to jest zapewnione w~każdej z~maszyn z~osobna).
+
+Z~pomocą w~praktycznej implementacji takiego ataku przychodzi kilka rozwiązań.
 
 \begin{itemize}
 
-    \label{strong_oneway}%
-    \item jest łatwo obliczalna, tj. istnieje algorytm $A$
-    działający w~czasie wielomianowym, który dla argumentu $x$ zwraca $f(x)$,
+    \item Botnety, czyli sieci komputerów należących do nieświadomych
+    użytkowników, zainfekowane złośliwym oprogramowaniem nielegalnie
+    udostępniającym osobom trzecim zasoby takie jak łącze sieciowe, cykle
+    procesora czy też pamięć. Atakujący chcący złamać daną listę haszy nie musi
+    samodzielnie zajmować się tworzeniem takiej sieci: może wynająć już
+    istniejącą sieć od innego podmiotu~\cite{botnet_rental,botnet_rental2}.
 
-    \item jest trudna do odwrócenia, tj. dla każdego probabilistycznego
-    algorytmu $A$ działającego w~czasie wielomianowym, dodatniego wielomianu
-    $p(\cdot)$ i~wystarczająco wysokich $n$ zachodzi:
-        $$\Pr(A(f(U_n),1^n) \; \in \; f^{-1}(f(U_n))) < \frac{1}{p(n)}$$
-    gdzie $U_n$ to zmienna losowa ze zbioru
-    $\mathbb{Z}_2^n$~\cite{one_way_functions}.
+    \item Legalne chmury obliczeniowe takie jak \enn{Windows Azure},
+    \enn{Amazon Elastic Compute Cloud (EC2)} czy też \enn{Rackspace}. Stopień
+    prywatności którą powinny gwarantować takie usługi jest dopiero
+    kształtującą się kwestią, dlatego też usługodawcom tego typu trudno
+    odróżnić klientów chcących przeprowadzić legalne obliczenia (których
+    szczegóły są np. chronione tajemnicą przemysłową) od klientów chcących
+    wykorzystać usługę do nielegalnych celów~\cite{cloud_criminals}.
+
+    \item Rozwiązania do własnego użytku takie jak \enn{OpenStack}, które nie
+    dostarczają infrastruktury sieciowej, a~zamiast tego umożliwiają łatwe
+    pisanie skalowalnego oprogramowania, które w~tym przypadku mogłoby posłużyć
+    do przyspieszenia łamania.
 
 \end{itemize}
 
-\noindent $f$ jest natomiast słabo jednokierunkowa, jeśli:
+Podejście to jest o~tyle lepsze od korzystania z~dedykowanego sprzętu, że w~tym
+przypadku stopień skalowalności jest praktycznie nieograniczony: wystarczy
+dołączyć do sieci jeszcze jedną maszynę, aby wyniki uzyskiwać szybciej.
+Rozwiązanie to jest także dużo tańsze. Nie jest ono jednak pozbawione wad~--
+gdy atakujący korzysta z~maszyn, nad którymi ktoś inny sprawuje faktyczną
+kontrolę, zdemaskowanie staje się znacznie bardziej prawdopodobne.
+
+
+
+\subsection{Ataki typu \enn{Denial of Service}}
+Odmiennym do wszystkich wymienionych powyżej ataków jest atak typu \enn{Denial
+of Service}. W~przeciwieństwie do poprzednich ataków, nie ma on na celu
+wykradzenia pierwotnych argumentów funkcji haszujących; jego celem jest
+natomiast tymczasowe utrudnienie lub wręcz całkowite uniemożliwienie dostępu do
+danej usługi. Opiera się on na wykorzystaniu słabości funkcji haszujących,
+którą mogą przejawiać nawet kryptograficzne funkcje skrótu. Słabości te
+zostały wymienione poniżej.
 
 \begin{itemize}
 
-    \item jest łatwo obliczalna (patrz def. funkcji silnie jednokierunkowej),
+    \item Wysoka złożoność obliczeniowa funkcji haszujących \\
+    Gdy dana funkcja haszująca jest trudna do obliczenia, atakujący może
+    wykonać wiele zapytań do serwera mających na celu obliczenie wartości
+    takiej funkcji, nie patrząc w~ogóle na to, co taka funkcja zwraca. Gdy
+    zapytań, a~zatem zadań obliczeń wartości funkcji jest wystarczająco dużo,
+    serwer zaczyna odczuwać duże obciążenie procesora przez co w~rezultacie
+    wydłuża się średni czas odpowiedzi, a~to z~kolei powoduje utrudnienia
+    w~dostępie do usługi.
 
-    \item istnieje wielomian $p(\cdot)$, dla którego dla każdego
-    probabilistycznego algorytmu $A$ działającego w~czasie wielomianowym
-    i~wystarczająco wysokich $n$ zachodzi:
-        $$\Pr(A(f(U_n),1^n) \; \not\in \; f^{-1}(f(U_n))) > \frac{1}{p(n)}$$
-    gdzie $U_n$ to zmienna losowa ze zbioru
-    $\mathbb{Z}_2^n$~\cite{one_way_functions}.
+    \item Źle zaimplementowane struktury danych \\
+    Wiele struktur danych, takich jak tablice mieszające, korzysta z~funkcji
+    haszujących, aby dokonać rzutowania danego obiektu na jakąś wartość
+    liczbową, która posłuży później do wewnętrznego identyfikowania takiego
+    obiektu. Gdy zastosowana funkcja haszująca nie posiada własności
+    \en{collision resistance}, a~więc można znaleźć $m \neq m'$ takie że $H(m)
+    = H(m')$, atakujący może wykorzystać tę słabość i~wysłać do serwera duże
+    liczby zapytań odwołujących się do $m$~i~$m'$. Ponieważ struktury danych
+    zazwyczaj zachowują dobrą złożoność obliczeniową odwoływania się do
+    elementów po ich haszach tylko dopóki nie następuje kolizja tych skrótów,
+    gdy taka kolizja już nastąpi, obsłużenie jej zajmuje dużo więcej czasu.
+    Dlatego też tego typu atak również potencjalnie może doprowadzić do
+    znacznego przeciążenia serwera.
 
 \end{itemize}
 
-Można zauważyć, że każda silnie jednokierunkowa funkcja spełnia jednocześnie
-warunki nałożone na funkcje słabo jednokierunkowe. Ponadto każda funkcja
-jednokierunkowa spełnia automatycznie podstawowy warunek nałożony na bezpieczne
-funkcje skrótu (mianowicie \en{preimage collision resistance}). Funkcje te
-powinny zatem przyciągnąć nasze zainteresowanie.
-
-
-
-\subsubsection{$\textrm{P} \neq \textrm{NP}$?}
-Tak naprawdę nie wiadomo, czy funkcje jednokierunkowe\ldots w~ogóle istnieją.
-Nie udowodniono~\cite{one_way_functions_existence} ich istnienia. Istnieją
-pewne funkcje, które podejrzewamy o~jednokierunkowość, lecz nie potrafimy
-wykazać poprawności lub niepoprawności tego podejrzenia.
-Wykazano~\cite{one_way_functions}, że z~istnienia słabo jednokierunkowych
-funkcji wynika istnienie silnie jednokierunkowych funkcji. Ponadto
-udowodniono~\cite{one_way_functions}, że istnienie funkcji jednokierunkowych
-implikowałoby jednocześnie, że $\textrm{P} \neq \textrm{NP}$, co dałoby
-odpowiedź na jeden z~problemów milenijnych i~oznaczałoby, że klasa problemów,
-które da się \emph{rozwiązać} w~czasie wielomianowym ($\textrm{P}$) nie pokrywa
-się z~klasą, dla którego rozwiązanie da się \emph{zweryfikować} w~czasie
-wielomianowym ($\textrm{NP}$). Przykładowo: mając liczbę $x \in \mathbb{N}$
-i~dany zbiór liczb pierwszych $x_i$, możemy w~banalny sposób
-\emph{zweryfikować}, czy $x_0 \cdot x_1 \cdot \ldots \cdot x_n = x$. Natomiast
-nie wiadomo, czy istnieje algorytm wielomianowy, który potrafi \emph{rozwiązać}
-ten problem, znajdując dla danego $x$ liczby pierwsze $x_0, x_1, \ldots, x_n$
-takie, że $x_0 \cdot x_1 \cdot \ldots \cdot x_n = x$. Problem ten jest znany
-jako problem rozkładu liczby na czynniki pierwsze, lub inaczej problem
-faktoryzacji, i~stanowi pierwszy ze wspominanych kandydatów na funkcje
-jednokierunkowe.
-
-
-
-\subsubsection{Problem faktoryzacji}
-Niech $f(S) = \prod_{s \in S} s$, gdzie $S$ jest dowolnym zbiorem liczb
-pierwszych oraz $x \in \mathbb{N}$. Obliczenie $f(S)$ jest trywialne. Natomiast
-obliczenie wartości odwróconej funkcji $f^{-1}(x)=S$, a~więc znalezienie dla
-danej liczby $x$ jej czynników pierwszych, jest trudne, tzn. nieznany jest
-żaden algorytm, który by to potrafił realizować w~czasie zależnym wielomianowo
-od rozmiaru $x$~\cite{gregg2003factoring}.
-
-
-
-\subsubsection{Problem logarytmu dyskretnego}
-Niech $f(x, p, g) = g^x \mod p$, gdzie $p$ jest liczbą pierwszą, $g < p$ oraz
-$x < p$. Wyliczenie tej wartości jest trywialne; nie znamy natomiast algorytmu
-wielomianowego pozwalającego na zgadnięcie wartości odwróconej funkcji
-\mbox{$f^{-1}(y, p, g) = x : g^x \mod p = y$} na podstawie danego $y$. Nazwa
-problemu wynika z~charakteru $f$ (operacją odwrotną do potęgowania w~ciele
-modulo $p$ jest logarytm w~ciele modulo $p$)~\cite{gregg2003factoring}.
-
-
-
-\subsubsection{Funkcja Rabina}
-Niech $f(x,n) = x^2 \mod n$. Wykazano, że obliczenie $f^{-1}(y,n) = x : x^2
-\mod n = y$ na podstawie $y$ i~$n$ jest tak samo trudne, jak rozkład $n$ na
-czynniki pierwsze; co sprowadza się do problemu faktoryzacji, opisanego
-wcześniej~\cite{gregg2003factoring}.
-
-
-
-\subsubsection{Wnioski}
-Zastosowania funkcji jednokierunkowych są niejako podzbiorem tego, do czego
-potrzebujemy bezpiecznych funkcji haszujących: łatwe obliczenie $f(x)$, łatwa
-weryfikacja $f(x)=f(x')$ i~trudne uzyskanie odwróconej funkcji $f^{-1}(y)=x$.
-Stąd też nie powinno dziwić, że ostatnim, niewymienionym dotąd kandydatem na
-funkcje jednokierunkowe są\ldots kryptograficzne funkcje skrótu.
-
-Zapotrzebowanie na funkcje jednokierunkowe jest duże, o~czym świadczy ich
-wykorzystanie: trudność faktoryzacji jest zastosowana w~kryptosystemie RSA,
-trudność obliczenia logarytmu dyskretnego w~podpisach cyfrowych ElGamala,
-a~trudność obliczenia pierwiastka dyskretnego (funkcja Rabina)~--
-w~kryptosystemie Rabina. Trudność złamania tych kryptosystemów opiera się
-właśnie na trudności odwrócenia wymienionych funkcji.
-
-Wracając na chwilę do zagadnienia $\textrm{P} \stackrel{?}{=} \textrm{NP}$~--
-wystarczy udowodnić, że którakolwiek z~powyższych funkcji jest faktycznie
-jednokierunkowa lub pokazać, że może zostać złamana, by móc stwierdzić to samo
-o~wszystkich pozostałych wymienionych funkcjach. Jest tak dlatego, ponieważ
-istnieją sposoby przekształcania jednego problemu
-w~drugi~\cite{gregg2003factoring,bach1984discrete} tak, że rozwiązanie jednego
-gwarantuje rozwiązanie drugiego. Zatem tak naprawdę bezpieczeństwo powyższych
-kryptosystemów jest do pewnego stopnia równoważne (na tyle, na ile kosztowne są
-przekształcenia problemów).
-
-
-
-\pagebreak
-\subsection{Formalnie bezpieczne funkcje skrótu}
-Implementacje kryptograficznych funkcji skrótu dzielą się na dwie kategorie.
-Pierwsza z~nich, omówiona tutaj, wywodzi się z~formalnego spojrzenia na problem
-haszowania. Tak naprawdę metoda ta sprowadza się do wykorzystania opisanych
-wcześniej kandydatów na funkcje jednokierunkowe i~dostarczeniu dowodu, że
-złamanie konstrukcji opartej na danym problemie jest tak samo trudne, jak
-trudne jest rozwiązanie tego problemu. Z~charakteru tego podejścia wywodzi się
-nazwa tej rodziny kryptograficznych funkcji haszujących: \en{provably secure
-cryptographic hash functions}.
-
-W~praktyce dowody trudności złamania funkcji z~tej rodziny polegają na
-pokazaniu istnienia algorytmu, który przekształca w~czasie wielomianowym
-problem znajdowania kolizji dla takiej funkcji w~problem rozwiązania źródłowego
-problemu. W~ten sposób, kiedy zostanie znaleziony algorytm wielomianowy
-potrafiący złamać formalnie bezpieczną funkcję haszującą, będzie od razu znany sposób
-szybkiego rozwiązywania problemu, na którym ta funkcja się opiera~-- a~w~chwili
-obecnej zakłada się, że problemy te (faktoryzacja, znajdywanie logarytmu
-dyskretnego itp.) są nierozwiązywalne w~czasie wielomianowym. Tym samym
-oznaczałoby to sprzeczność ze współczesnymi hipotezami. Możemy zatem
-powiedzieć, że trudność złamania formalnie bezpiecznych funkcji skrótu jest nie
-mniejsza niż trudność rozwiązania problemu, o~którym podejrzewamy, że jest
-trudny do rozwiązania. Innymi słowy, problem złamania takich funkcji jest
-redukowalny do problemu milenijnego, stąd funkcje te są postrzegane jako
-najbezpieczniejsze dostępne warianty.
-
-
-
-\subsection{Współczesne implementacje}
-Wprawdzie formalnie bezpieczne funkcje skrótu są bardzo bezpieczne, ich
-wykorzystanie pociąga za sobą sporą cenę. Praktyka pokazuje, że funkcje te prawie w~ogóle się
-nie nadają do zastosowań praktycznych lub przemysłowych z~racji swojego powolnego
-działania lub wysokich kosztów pamięciowych. Niestety, skutecznie eliminuje to
-ich przydatność wszędzie tam, gdzie mamy do czynienia z~ograniczonymi zasobami
-(przykładami mogą być: systemy wbudowane, transmisje danych w~czasie
-rzeczywistym czy też systemy uwierzytelniania o~dużej przepustowości).
-
-W~związku z~tym została stworzona druga rodzina kryptograficznych funkcji
-skrótu. Działanie funkcji z~tej rodziny polega, ogólnie rzecz biorąc, na
-dokonywaniu ogromnej liczby różnorodnych operacji na konkretnych bitach
-wiadomości $m$ (takich jak przestawianie, dodawanie, odejmowanie i~inne).
-Komputery są przystosowane do tego typu obliczeń, dzięki czemu w~porównaniu do
-formalnie bezpiecznych funkcji skrótu haszowanie takimi funkcjami odbywa się
-bardzo szybko. Oznacza to jednak, że autorzy funkcji zazwyczaj ograniczają się
-jedynie do wstępnej analizy jej słabości, \latin{de~facto} nie przedstawiając
-formalnego dowodu trudności jej złamania. Badania mające na celu znalezienie
-słabości przypominają w~swojej naturze szukanie igły w~stogu siana:
-nieznalezienie igły w~danej chwili nie oznacza jeszcze nieistnienia igły. Daje
-to pole do popisu kryptologom, którzy znajdują luki długo po pierwszym
-opisaniu.
-
-
-
-\subsubsection{Konstrukcja Merkle-Damg\r{a}rda}
-Przykładem sposobu, w~jaki działają nowoczesne kryptograficzne funkcje skrótu
-oparte o~operacje bitowe, może być konstrukcja Merkle-Damg\r{a}rda. Opisana po
-raz pierwszy przez Merkle'go w~roku 1979 w~jego pracy
-doktorskiej~\cite{merkle_damgard_construction}, stanowi rdzeń używanych po dziś
-dzień funkcji skrótu takich jak \texttt{SHA-1} czy \texttt{MD5} i~jest jedną
-z~najpopularniejszych metod konstrukcji kryptograficznych funkcji haszujących.
-W~konstrukcji wyszczególnione są abstrakcyjne elementy, które muszą być
-zaimplementowane w~każdej konkretnej implementacji; spośród nich na szczególną
-uwagę zasługuje funkcja dopełnienia bitowego oraz funkcja kompresji.
-
-Nazwa wywodzi się stąd, że Merkle oraz Damg\r{a}rd, niezależnie od siebie,
-udowodnili~\cite{merkle_damgard_security1,merkle_damgard_security2} w~tym samym
-okresie czasu ważną własność tej konstrukcji~-- jeżeli użyty zostanie
-odpowiedni schemat dopełnienia bitowego oraz zastosowana funkcja kompresji
-będzie odporna na kolizje, to funkcja haszująca zbudowana za pomocą takiej
-konstrukcji także będzie odporna na kolizje.
-
-Sama konstrukcja składa się z~kroków opisanych poniżej.
-
-\begin{myenumerate}
-
-    \item Niech $M = \mathtt{Pad}(m)$, gdzie $m$ to wiadomość, a~$\mathtt{Pad}$
-    to funkcja dopełnienia bitowego. Zadaniem tej funkcji jest przekształcenie
-    wiadomości $m$ o~dowolnej liczbie bitów na wiadomość $M$ o~liczbie bitów
-    podzielnej przez z~góry określoną wartość $c$. Trywialnym przykładem
-    funkcji dopełnienia bitowego może być funkcja, która dopisuje z~prawej
-    strony wiadomości $m$ pojedynczy bit 1, a~po nim $n$ bitów 0; dodatkowo
-    często dopisywana jest długość oryginalnej wiadomości $m$.
-
-    \item Podziel $M$ na $n$ bloków, każdy o~stałej długości $c$, niezależnej
-    od $m$. Robimy to, ponieważ funkcja kompresji, opisana w~następnych
-    krokach, z~definicji może działać jedynie na blokach o~stałej długości $c$.
-
-    \item Niech $h = \mathtt{IV}$, gdzie $\mathtt{IV}$ jest z~góry określonym
-    wektorem początkowym (\en{initialization vector}), zawierającym jakaś stałą
-    wartość. $h$ będzie się zmieniało podczas działania konstrukcji i~oznaczać
-    będzie aktualnie obliczoną wartość skrótu. Długość $h$ jest przez cały czas
-    stała.
-
-    \item Dla $i = 0, 1, \ldots, n$:
-
-    \begin{myenumerate}
-
-        \item Niech $h=\mathtt{Comp}(h,M_i)$, gdzie $\mathtt{Comp}$ jest
-        funkcją kompresji, $h$ aktualnie obliczoną wartością skrótu a~$M_i$
-        stanowi $i$-ty blok wiadomości $M$.
-
-    \end{myenumerate}
-
-    \item Niech $h=\mathtt{Fin}(h)$ gdzie $\mathtt{Fin}$ jest funkcją
-    finalizującą. Jest to opcjonalny krok, który ma zagwarantować dodatkowe
-    bezpieczeństwo poprzez np. zapewnienie lepszego efektu lawinowego.
-
-\end{myenumerate}
-
-\begin{figure}[H]
-    \includegraphics[width=12cm]{img/merkle_damgard.eps}
-    \caption{Schemat działania konstrukcji Merkle-Damg\r{a}rda. Oznaczenia:
-    $m$~-- wiadomość wejściowa, $\mathtt{Pad}$~-- funkcja dopełnienia bitowego,
-    $M_0, M_1, M_2, \ldots, M_n$~-- kolejne bloki wiadomości długości $c$,
-    $\mathtt{IV}$~-- wektor początkowy, $\mathtt{Comp}$~-- funkcja kompresji,
-    $\mathtt{Fin}$~-- funkcja finalizująca.}
-    \label{fig:merkle_damgard}
-\end{figure}
-
-
-
-\subsubsection{\texttt{MD5}}
-\texttt{MD5} jest pierwszą z~dwóch funkcji, na których się skupimy w~tej pracy.
-Jej wykorzystanie jest bardzo szerokie: znajduje zastosowanie w~systemach
-bezpieczeństwa oraz systemach weryfikacji integralności danych (pomimo faktu,
-że już w~latach 90-tych wyraźnie odradzano jej wykorzystanie z~powodu
-poważnych wątpliwości co do jej faktycznego bezpieczeństwa, które z~czasem
-okazały się uzasadnione~\cite{ps3_attack}).
-
-Oparta o~konstrukcję Merkle-Damg\r{a}rda, funkcja przekształca wiadomości
-o~dowolnej liczbie bitów na skróty o~stałej długości 128~bitów. Jej
-schemat~\cite{md5_definition} został przedstawiony poniżej (wszystkie operacje
-są dokonywane w~porządku bitowym \en{little endian}; znaczenie tego terminu
-oraz operatorów wprowadzonych w~tej sekcji zostało opisane
-w~dodatku~\ref{app:bitwise_operations}).
-
-\begin{myenumerate}
-
-    \item Faza dopełnienia bitowego
-
-    \begin{myenumerate}
-
-        \item Dopisz bit $1$ na końcu wiadomości $m$.
-
-        \item Dopisz tyle bitów $0$ na końcu wiadomości $m$, ile potrzeba, aby
-        długość $m$ była mniejsza o~64~bity od wielokrotności 512. Innymi
-        słowy, dopisz $512 \cdot \ceil{\frac{|m|+64}{512}}-64-(|m| \mod{512})$
-        bitów $0$, gdzie $|m|$ oznacza długość wiadomości $m$.
-        \footnote{Dopełniamy wiadomość $m$ w~taki skomplikowany sposób dlatego,
-        że za chwilę będziemy dopisywać do niej nową wartość $x$ (o~długości
-        64~bitów). Gdybyśmy po prostu zawinęli $m$ do 512~bitów, a~następnie
-        nadpisali ostatnie 64~bity bitami $x$, mogłoby się zdarzyć, że
-        nadpisalibyśmy bity oryginalnej $m$, co jest niepożądane~-- dlatego
-        dbamy, aby długość wiadomości \emph{po dopisaniu} była podzielna przez
-        512.}
-
-        \item Dopisz na końcu wiadomości zakodowaną długość oryginalnej
-        wiadomości $m$ (wpisując tam kolejne bity $|m| \mod{2^{64}}$).
-
-        Ma to na celu zapewnienie własności sformułowanych przez Mihira
-        Bellare, który pokazał~\cite{merkle_damgard_strengthening}, że aby
-        konstrukcja Merkle-Damg\r{a}rda była bezpieczna, wystarcza, by funkcja
-        $\mathtt{Pad}$ spełniała następujące własności:
-
-        \begin{itemize}
-
-            \item $m$ jest prefiksem $\mathtt{Pad}(m)$,
-
-            \item gdy $|m_1| = |m_2|$, to $|\mathtt{Pad}(m_1)| =
-            |\mathtt{Pad}(m_2)|$,
-
-            \item gdy $|m_1| \neq |m_2|$, to $\mathtt{Pad}(m_1)_n \neq
-            \mathtt{Pad}(m_2)_n$, gdzie $X_n$ to ostatni blok $X$. (Długość
-            bloku w~tym kontekście jest taka sama, jak długość bloku używanego
-            przez całą konstrukcję Merkle-Damg\r{a}rda.)
-
-        \end{itemize}
-
-    \end{myenumerate}
-
-    \item Faza kompresji
-
-    \begin{myenumerate}
-
-        \item Na początku zostaje wprowadzony wewnętrzny stan funkcji skrótu,
-        będący wektorem 128~bitów, w~którym wyróżniamy 4~wektory oznaczone
-        kolejno: $A$, $B$, $C$~i~$D$ (każdy o~długości 32~bitów). Wektor ten
-        jest inicjowany stałym wektorem $\mathtt{IV}$ zgodnym z~poniższym
-        równaniem:
-
-        \[
-            \begin{aligned}
-                A &:= \mathtt{0x67452301} \\
-                B &:= \mathtt{0xefcdab89} \\
-                C &:= \mathtt{0x98badcfe} \\
-                D &:= \mathtt{0x10325476}
-            \end{aligned}
-        \]
-
-        \item Następnie dla każdego kolejnego 512-bitowego bloku wiadomości
-        \break $M_0, M_1, M_2, \ldots, M_n$ będziemy aktualizować stan
-        wewnętrzny $(A,B,C,D)$ wartością funkcji kompresji obliczoną na
-        podstawie poprzedniej jego wartości oraz danego bloku wiadomości $M_k$.
-        Funkcja kompresji przebiega w~następujący sposób:
-
-        \begin{itemize}
-
-            \item Podziel blok wiadomości $M_k$ na $16$ fragmentów $W_{0 \leq j
-            \leq 15}$, każdy o~długości 32~bitów.
-
-            \pagebreak
-            \item Wykonaj 4~rundy:
-
-            \begin{itemize}
-
-                \item Wybierz funkcję rundy~$F$ zgodnie
-                z~tabelą~\ref{tbl:md5_round_function}.
-
-                \item Wykonaj 16~operacji przekształcających stan $(A,B,C,D)$
-                na podstawie jego poprzedniej wartości, funkcji rundy~$F$ oraz
-                wektorów~$W$. Konstrukcja pojedynczej operacji została
-                przedstawiona na rysunku~\ref{fig:md5_operation}.
-
-            \end{itemize}
-
-        \end{itemize}
-
-    \end{myenumerate}
-
-    \item Po wykonaniu wszystkich 64~operacji (4~rundy $\times$ 16~operacji),
-    stan wewnętrzny $(A,B,C,D)$ jest zwracany jako wyjściowy skrót z~funkcji.
-
-\end{myenumerate}
-
-\begin{table}[htb]
-    \caption{Funkcja $F$ użyta w~kolejnych rundach \texttt{MD5}.}
-    \label{tbl:md5_round_function}
-    \begin{tabular}{|l|l|}
-        \hline
-        Runda & Funkcja rundy \\
-        \hline
-        Runda 1 &
-        $F(B,C,D) = (B \land C) \lor (\lnot B \land D)$ \\
-
-        Runda 2 &
-        $F(B,C,D) = (B \land D) \lor (C \land \lnot D)$ \\
-
-        Runda 3 &
-        $F(B,C,D) = B \oplus C \oplus D$ \\
-
-        Runda 4 &
-        $F(B,C,D) = C \oplus (B \lor \lnot D)$ \\
-        \hline
-    \end{tabular}
-\end{table}
-
-\begin{table}[htb]
-    \resizebox{\columnwidth}{!}{
-    \begin{tabular}{ |c|c|c|| c|c|c|| c|c|c|| c|c|c| }
-        \hline
-            \multicolumn{3}{|c||}{Runda 1} &
-            \multicolumn{3}{|c||}{Runda 2} &
-            \multicolumn{3}{|c||}{Runda 3} &
-            \multicolumn{3}{|c|}{Runda 4} \\
-        \hline
-        $i$ & $K_i$ & $S_i$ & $i$ & $K_i$ & $S_i$ & $i$ & $K_i$ & $S_i$ & $i$ & $K_i$ & $S_i$ \\
-        \hline
-        0 & $\mathtt{0xd76aa478}$ & 7 & 16 & $\mathtt{0xf61e2562}$ & 5 & 32 & $\mathtt{0xfffa3942}$ & 4 & 48 & $\mathtt{0xf4292244}$ & 6 \\
-        1 & $\mathtt{0xe8c7b756}$ & 12 & 17 & $\mathtt{0xc040b340}$ & 9 & 33 & $\mathtt{0x8771f681}$ & 11 & 49 & $\mathtt{0x432aff97}$ & 10 \\
-        2 & $\mathtt{0x242070db}$ & 17 & 18 & $\mathtt{0x265e5a51}$ & 14 & 34 & $\mathtt{0x6d9d6122}$ & 16 & 50 & $\mathtt{0xab9423a7}$ & 15 \\
-        3 & $\mathtt{0xc1bdceee}$ & 22 & 19 & $\mathtt{0xe9b6c7aa}$ & 20 & 35 & $\mathtt{0xfde5380c}$ & 23 & 51 & $\mathtt{0xfc93a039}$ & 21 \\
-        4 & $\mathtt{0xf57c0faf}$ & 7 & 20 & $\mathtt{0xd62f105d}$ & 5 & 36 & $\mathtt{0xa4beea44}$ & 4 & 52 & $\mathtt{0x655b59c3}$ & 6 \\
-        5 & $\mathtt{0x4787c62a}$ & 12 & 21 & $\mathtt{0x02441453}$ & 9 & 37 & $\mathtt{0x4bdecfa9}$ & 11 & 53 & $\mathtt{0x8f0ccc92}$ & 10 \\
-        6 & $\mathtt{0xa8304613}$ & 17 & 22 & $\mathtt{0xd8a1e681}$ & 14 & 38 & $\mathtt{0xf6bb4b60}$ & 16 & 54 & $\mathtt{0xffeff47d}$ & 15 \\
-        7 & $\mathtt{0xfd469501}$ & 22 & 23 & $\mathtt{0xe7d3fbc8}$ & 20 & 39 & $\mathtt{0xbebfbc70}$ & 23 & 55 & $\mathtt{0x85845dd1}$ & 21 \\
-        8 & $\mathtt{0x698098d8}$ & 7 & 24 & $\mathtt{0x21e1cde6}$ & 5 & 40 & $\mathtt{0x289b7ec6}$ & 4 & 56 & $\mathtt{0x6fa87e4f}$ & 6 \\
-        9 & $\mathtt{0x8b44f7af}$ & 12 & 25 & $\mathtt{0xc33707d6}$ & 9 & 41 & $\mathtt{0xeaa127fa}$ & 11 & 57 & $\mathtt{0xfe2ce6e0}$ & 10 \\
-        10 & $\mathtt{0xffff5bb1}$ & 17 & 26 & $\mathtt{0xf4d50d87}$ & 14 & 42 & $\mathtt{0xd4ef3085}$ & 16 & 58 & $\mathtt{0xa3014314}$ & 15 \\
-        11 & $\mathtt{0x895cd7be}$ & 22 & 27 & $\mathtt{0x455a14ed}$ & 20 & 43 & $\mathtt{0x04881d05}$ & 23 & 59 & $\mathtt{0x4e0811a1}$ & 21 \\
-        12 & $\mathtt{0x6b901122}$ & 7 & 28 & $\mathtt{0xa9e3e905}$ & 5 & 44 & $\mathtt{0xd9d4d039}$ & 4 & 60 & $\mathtt{0xf7537e82}$ & 6 \\
-        13 & $\mathtt{0xfd987193}$ & 12 & 29 & $\mathtt{0xfcefa3f8}$ & 9 & 45 & $\mathtt{0xe6db99e5}$ & 11 & 61 & $\mathtt{0xbd3af235}$ & 10 \\
-        14 & $\mathtt{0xa679438e}$ & 17 & 30 & $\mathtt{0x676f02d9}$ & 14 & 46 & $\mathtt{0x1fa27cf8}$ & 16 & 62 & $\mathtt{0x2ad7d2bb}$ & 15 \\
-        15 & $\mathtt{0x49b40821}$ & 22 & 31 & $\mathtt{0x8d2a4c8a}$ & 20 & 47 & $\mathtt{0xc4ac5665}$ & 23 & 63 & $\mathtt{0xeb86d391}$ & 21 \\
-        \hline
-    \end{tabular}
-    }
-    \caption{Stałe $K_i$ oraz $S_i$ użyte w~kolejnych operacjach
-    podczas działania funkcji kompresji \texttt{MD5}.}
-    \label{tbl:md5_operation_const}
-\end{table}
-
-\begin{figure}[H]
-    \includegraphics[width=7.5cm]{img/md5_operation.eps}
-    \captionsetup{singlelinecheck=off}
-    \caption[blablabla]{
-    Jedna operacja \texttt{MD5}. Oznaczenia:
-    \begin{itemize}
-        \item $A$, $B$, $C$~i~$D$~-- wektory stanu wewnętrznego,
-        \item $F$~-- funkcja rundy,
-        \item $W_j$~-- $j$-ty 32-bitowy fragment pochodzący od 512-bitowego
-        bloku wiadomości,
-        \item $K_i$~-- 32-bitowa stała,
-        \item $S_i$~-- stała oznaczająca liczbę bitów w~przesunięciu cyklicznym,
-        \item $i$~-- numer operacji w~kontekście funkcji kompresji ($i \in (0,
-        1, \ldots, 63)$),
-        \item $j$~-- numer operacji w~danej rundzie ($j \in (0, 1, \ldots,
-        15)$).
-    \end{itemize}
-    Każda kolejna operacja używa innego zestawu stałych $K_i$ oraz $S_i$, które
-    zostały opisane w~tabeli~\ref{tbl:md5_operation_const}.}
-    \label{fig:md5_operation}
-\end{figure}
-
-
-
-\pagebreak
-\subsubsection{\texttt{SHA-1}}
-Funkcja \texttt{SHA-1}, podobnie jak funkcja \texttt{MD5}, oparta jest
-o~konstrukcję Merkle-Damg\r{a}rda. Została skonstruowana przez \enn{National
-Security Agency}; jej nazwa wywodzi się od \en{Secure Hash Algorithm}
-(bezpieczna funkcja haszująca). \texttt{SHA-1} jest jedną z~serii funkcji
-\texttt{SHA} i~choć po niej przyszły kolejne, bezpieczniejsze funkcje, to
-w~obecnej chwili jest najpopularniejszą funkcją z~serii \texttt{SHA}.
-\texttt{SHA-1} zwraca skróty o~długości 160~bitów. Konstrukcja
-funkcji~\cite{sha1_definition} została przedstawiona poniżej.
-
-\begin{myenumerate}
-
-    \item Faza dopełnienia bitowego: wygląda tak samo, jak faza dopełnienia
-    bitowego funkcji \texttt{MD5}.
-
-    \item Faza kompresji
-
-    \begin{myenumerate}
-
-        \item Wprowadzamy wewnętrzny stan, będący wektorem 160~bitów, w~którym
-        wyróżniamy 5~wektorów oznaczonych kolejno: $A$, $B$, $C$, $D$ i~$E$
-        (każdy o~długości 32~bitów). Wektor ten jest inicjowany wartościami na
-        podstawie stałego wektora $\mathtt{IV}$:
-
-        \[
-            \begin{aligned}
-                A &:= \mathtt{0x67452301} \\
-                B &:= \mathtt{0xefcdab89} \\
-                C &:= \mathtt{0x98badcfe} \\
-                D &:= \mathtt{0x10325476} \\
-                E &:= \mathtt{0xc3d2e1f0}
-            \end{aligned}
-        \]
-
-        \item Dla każdego kolejnego 512-bitowego bloku wiadomości \break $M_0,
-        M_1, M_2, \ldots, M_n$ aktualizujemy stan wewnętrzny funkcją kompresji,
-        która przebiega w~następujący sposób:
-
-        \begin{itemize}
-
-            \item Podziel blok wiadomości $M_k$ na $16$ fragmentów $W_{0 \leq i
-            \leq 15}$, każdy o~długości 32~bitów.
-
-            \item Skonstruuj dodatkowe wektory $W_{16 \leq i \leq 79}$ zgodnie
-            ze~wzorem:
-
-            $$
-                W_i = (W_{i-3} \oplus W_{i-8} \oplus W_{i-14} \oplus W_{i-16})
-                \llless 1
-            $$
-
-            \item Wykonaj 4~rundy:
-
-            \begin{itemize}
-
-                \item Wybierz funkcję rundy~$F$ oraz stałą rundy~$K$ zgodnie
-                z~tabelą~\ref{tbl:sha1_round_function}.
-
-                \item Wykonaj 20~operacji przekształcających stan $(A,B,C,D,E)$
-                na podstawie jego poprzedniej wartości, funkcji rundy~$F$,
-                stałej rundy~$K$ oraz wektorów~$W$. Konstrukcja pojedynczej
-                operacji została przedstawiona na
-                rysunku~\ref{fig:sha1_operation}.
-
-            \end{itemize}
-
-        \end{itemize}
-
-    \end{myenumerate}
-
-    \item Po wykonaniu wszystkich 80~operacji (4~rundy $\times$ 20~operacji),
-    stan wewnętrzny $(A,B,C,D,E)$ jest zwracany jako wyjściowy skrót z~funkcji.
-
-\end{myenumerate}
-
-\begin{table}[H]
-    \caption{Funkcja $F$ oraz stała $K$ użyta w~kolejnych rundach
-    \texttt{SHA-1}.}
-    \label{tbl:sha1_round_function}
-    \begin{tabular}{|l|l|l|}
-        \hline
-        Runda & Funkcja rundy & Stała K \\
-        \hline
-        Runda 1 &
-        $F(B,C,D) = (B \land C) \lor (\lnot B \land D)$ &
-        $K = \mathtt{0x5a827999}$ \\
-
-        Runda 2 &
-        $F(B,C,D) = B \oplus C \oplus D$ &
-        $K = \mathtt{0x6ed9eba1}$ \\
-
-        Runda 3 &
-        $F(B,C,D) = (B \land C) \lor (B \land D) \lor (C \land D)$ &
-        $K = \mathtt{0x8f1bbcdc}$ \\
-
-        Runda 4 &
-        $F(B,C,D) = B \oplus C \oplus D$ &
-        $K = \mathtt{0xca62c1d6}$ \\
-        \hline
-    \end{tabular}
-\end{table}
-
-\begin{figure}[H]
-    \includegraphics[width=8.5cm]{img/sha1_operation.eps}
-    \captionsetup{singlelinecheck=off}
-    \caption[blablabla]{
-    Jedna operacja \texttt{SHA-1}. Oznaczenia:
-    \begin{itemize}
-        \item $A$, $B$, $C$, $D$~i~$E$~-- wektory stanu wewnętrznego,
-        \item $F$~-- funkcja rundy,
-        \item $K$~-- 32-bitowa stała rundy,
-        \item $W_i$~-- $i$-ty 32-bitowy fragment pochodzący od rozszerzenia
-        512-bitowego bloku wiadomości,
-        \item $i$~-- numer operacji w~kontekście funkcji kompresji ($i \in (0,
-        1, \ldots, 79)$).
-    \end{itemize}}
-    \label{fig:sha1_operation}
-\end{figure}
+Ponadto należy pamiętać o~tym, że także i~w~tym przypadku atakujący może
+uskutecznić swoje działania stosując obliczenia równoległe: gdy takie ataki
+przeprowadzone zostaną z~wielu komputerów jednocześnie (\enn{Distributed Denial
+of Service}), jeszcze bardziej zwiększy to skalę przeciążenia.
